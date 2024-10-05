@@ -1,0 +1,35 @@
+{
+	"name": "@monorepo/tools",
+	"version": "1.0.0",
+	"description": "Tools package",
+	"keywords": [],
+	"author": "Ícaro Ribeiro",
+	"license": "ISC",
+	"type": "module",
+	"scripts": {
+		"build": "vite build"
+	},
+	"exports": {
+		"./tsconfig/base.json": "./src/tsconfig/base.json",
+		"./eslint": {
+			"types": "./src/eslint/index.ts",
+			"default": "./dist/eslint.js"
+		}
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.9.1",
+		"@types/eslint-config-prettier": "^6.11.3",
+		"@types/eslint__js": "^8.42.3",
+		"@types/node": "^22.5.2",
+		"@typescript-eslint/utils": "^8.5.0",
+		"@vitest/coverage-v8": "^2.1.1",
+		"eslint": "^9.9.1",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-react-hooks": "^5.1.0-rc.0",
+		"eslint-plugin-react-refresh": "^0.4.9",
+		"eslint-plugin-simple-import-sort": "^12.1.1",
+		"globals": "^15.9.0",
+		"typescript-eslint": "^8.2.0",
+		"vite": "^5.4.3"
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+
+	"compilerOptions": {
+		"module": "ESNext",
+		"skipLibCheck": true,
+
+		"moduleResolution": "Bundler",
+		"noEmit": true,
+
+		"strict": true
+	}
+}

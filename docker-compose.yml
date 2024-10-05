@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  client:
+    container_name: client-container
+    build:
+      context: .
+      dockerfile: ./apps/client/Dockerfile.multi-stage
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - client:/opt/client
+  
+  server:
+    container_name: server-container
+    build:
+      context: .
+      dockerfile: ./apps/server/Dockerfile.multi-stage
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://pguser:pgsecret@database:5432/pgdb?search_path=public
+    restart: always
+    ports:
+      - 5000:5000
+    depends_on:
+      - database
+    volumes:
+      - server:/opt/server
+  
+  database:
+    image: postgres
+    container_name: database-container
+    environment:
+      - POSTGRES_DB=pgdb
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgsecret
+    restart: always
+    ports:
+      - "5433:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+
+volumes:
+  client:
+  server:
+  database:
