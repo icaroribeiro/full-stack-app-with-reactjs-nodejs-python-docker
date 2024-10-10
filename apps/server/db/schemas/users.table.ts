@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
-const userTable = pgTable('user', {
+const usersTable = pgTable('users', {
   id: uuid('id')
     .default(sql`uuid_generate_v4()`)
     .primaryKey()
@@ -15,4 +15,4 @@ const userTable = pgTable('user', {
     .$onUpdate(() => new Date()),
 })
 
-export { userTable }
+export { usersTable }

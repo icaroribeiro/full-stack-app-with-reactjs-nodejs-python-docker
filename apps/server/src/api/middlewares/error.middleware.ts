@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY } from 'http-status'
 import { ValidateError } from 'tsoa'
 
-import { AppError } from '../../app-error'
+import { ServerError } from '../server-error'
 import { ErrorResponse } from '../shared'
 
 function errorMiddleware(
@@ -12,7 +12,7 @@ function errorMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  if (error instanceof AppError) {
+  if (error instanceof ServerError) {
     const response: ErrorResponse = {
       message: error.message,
       details: { context: error.context, cause: error.cause },

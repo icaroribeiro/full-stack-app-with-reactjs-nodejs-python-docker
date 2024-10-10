@@ -2,20 +2,21 @@ import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 import postgres from 'postgres'
 
-import { AppError } from '../app-error'
-import { config } from '../config/config'
+import { ServerError } from '../api/server-error'
 
 class DB {
-  public connect(): PostgresJsDatabase<Record<string, never>> {
+  public connect(
+    databaseURL: string,
+  ): PostgresJsDatabase<Record<string, never>> {
     try {
-      const client = postgres(config.getDatabaseURL())
+      const client = postgres(databaseURL)
       const db = drizzle(client)
       console.log('Database connected successfully!')
       return db
     } catch (error) {
       const message = 'Database connection failed!'
       console.error(message, error)
-      throw new AppError(message, INTERNAL_SERVER_ERROR)
+      throw new ServerError(message, INTERNAL_SERVER_ERROR)
     }
   }
 }

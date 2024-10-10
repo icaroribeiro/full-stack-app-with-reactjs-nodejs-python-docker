@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 
-import { AppError } from '../../../app-error'
+import { ServerError } from '../../server-error'
 import { User, UserList } from './user.models'
 import { IUserRepository } from './user.repository'
 
@@ -20,7 +20,7 @@ class UserService implements IUserService {
       return await this.userRepository.createUser(user)
     } catch (error) {
       const message = 'An error occurred when creating a new user into database'
-      throw new AppError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
         context: user,
         cause: error,
       })
@@ -32,7 +32,7 @@ class UserService implements IUserService {
       return await this.userRepository.readUserList()
     } catch (error) {
       const message = 'An error occurred when reading user list from database'
-      throw new AppError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
         context: undefined,
         cause: error,
       })
@@ -44,7 +44,7 @@ class UserService implements IUserService {
       return await this.userRepository.readUser(userId)
     } catch (error) {
       const message = 'An error occurred when reading a user from database'
-      throw new AppError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
         context: userId,
         cause: error,
       })
@@ -56,7 +56,7 @@ class UserService implements IUserService {
       return await this.userRepository.updateUser(userId, user)
     } catch (error) {
       const message = 'An error occurred when updating a user in database'
-      throw new AppError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
         context: { userId: userId, user: user },
         cause: error,
       })
@@ -68,7 +68,7 @@ class UserService implements IUserService {
       return await this.userRepository.deleteUser(userId)
     } catch (error) {
       const message = 'An error occurred when deleting a user from database'
-      throw new AppError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
         context: userId,
         cause: error,
       })

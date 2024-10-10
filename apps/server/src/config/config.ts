@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 
-import { AppError } from '../app-error'
+import { ServerError } from '../api/server-error'
 
 class Config {
   public getPort(): string {
@@ -30,7 +30,7 @@ class Config {
   private getEnvVar(name: string): string {
     if (!process.env[name]) {
       const message = `${name} environment variable isn't set`
-      throw new AppError(message, INTERNAL_SERVER_ERROR)
+      throw new ServerError(message, INTERNAL_SERVER_ERROR)
     }
     return process.env[name]
   }

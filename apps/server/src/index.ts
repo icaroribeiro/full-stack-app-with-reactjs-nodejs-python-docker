@@ -1,24 +1,23 @@
 import 'reflect-metadata'
 
-import { Application } from 'express'
 import { createServer, Server as HttpServer } from 'http'
 
-import App from './app/app'
+import { Server } from './api/server'
 import { config } from './app/config/config'
 
 const run = (): void => {
   try {
-    const app: Application = new App().innerApp
-    const server: HttpServer = createServer(app)
+    const server: Server = new Server()
+    const http: HttpServer = createServer(server.app)
     const port = parseInt(config.getPort())
-    server.listen(port, () => {
+    http.listen(port, () => {
       console.log('Server started successfully!')
     })
-    server.on('close', () => {
+    http.on('close', () => {
       console.log('Server closed successfully!')
     })
   } catch (err) {
-    console.error('Server start failed!', err)
+    console.error('Server run failed!', err)
   }
 }
 

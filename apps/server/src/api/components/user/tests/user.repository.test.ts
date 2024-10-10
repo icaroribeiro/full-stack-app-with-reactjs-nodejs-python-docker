@@ -1,17 +1,23 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { UserFactory } from '../../../../factories/helpers/user.factory'
-import { RepositoryFactory } from '../../../../factories/repository.factory'
+import { RepositoryTestFactory } from '../../../../factories/repository.factory'
 import { User } from '../user.models'
 import { UserRepository } from '../user.repository'
 
 describe('UserRepository', async () => {
-  const factory: RepositoryFactory = await RepositoryFactory.build()
-  const db = factory.db
+  const factory: RepositoryTestFactory = new RepositoryTestFactory()
   const userFactory = new UserFactory()
 
+  let db: PostgresJsDatabase<Record<string, never>>
   beforeAll(async () => {
     await factory.prepareAll()
+    db = factory.db
+  }, factory.beforeAllTimeout)
+
+  afterEach(async () => {
+    await factory.closeEach()
   })
 
   afterAll(async () => {
@@ -34,6 +40,7 @@ describe('UserRepository', async () => {
       expect(result.id).not.toBeUndefined()
       expect(result.name).toEqual(expectedResult.name)
       expect(result.email).toEqual(expectedResult.email)
+      await expect(factory.getTableRowCount('users')).resolves.toEqual(1)
     })
   })
 })

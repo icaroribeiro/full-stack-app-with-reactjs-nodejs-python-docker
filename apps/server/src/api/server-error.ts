@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 
-class AppError extends Error {
+class ServerError extends Error {
   public readonly httpCode: number
   public readonly context?: unknown
   public readonly isOperational: boolean
@@ -19,4 +19,4 @@ class AppError extends Error {
   }
 }
 
-export { AppError }
+export { ServerError }

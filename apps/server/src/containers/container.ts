@@ -11,10 +11,11 @@ import {
   UserRepository,
   UserService,
 } from '../api/components/user'
+import { config } from '../config/config'
 import { db } from '../db/db'
 
 container.register<PostgresJsDatabase<Record<string, never>>>('db', {
-  useValue: db.connect(),
+  useValue: db.connect(config.getDatabaseURL()),
 })
 
 container.register<IUserRepository>('UserRepository', {

@@ -2,6 +2,7 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
+import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import path from 'path'
@@ -11,41 +12,83 @@ import { fileURLToPath } from 'url'
 import { config } from '../config/config'
 
 const currentPath = fileURLToPath(import.meta.url)
-const appPath = path.resolve(currentPath, '..', '..', '..', '..')
+const appPath = path.resolve(currentPath, '..', '..', '..')
 
-class RepositoryFactory {
-  private container: StartedPostgreSqlContainer
-  private client: postgres.Sql
-  public readonly db: PostgresJsDatabase<Record<string, never>>
+interface ITestFactory {
+  prepareAll(): Promise<void>
+  closeEach(): Promise<void>
+  closeAll(): Promise<void>
+}
 
-  public constructor(
-    container: StartedPostgreSqlContainer,
-    client: postgres.Sql,
-    db: PostgresJsDatabase<Record<string, never>>,
-  ) {
-    this.container = container
-    this.client = client
-    this.db = db
+abstract class AbsTestFactory implements ITestFactory {
+  private container?: StartedPostgreSqlContainer = undefined
+  private client?: postgres.Sql = undefined
+  private _db?: PostgresJsDatabase<Record<string, never>>
+  public beforeAllTimeout = 30000
+
+  abstract prepareAll(): Promise<void>
+  abstract closeEach(): Promise<void>
+  abstract closeAll(): Promise<void>
+
+  public async getTableRowCount(name: string): Promise<number> {
+    if (this._db !== undefined) {
+      const query = sql.raw(`
+        SELECT count(*) 
+        FROM ${name};
+      `)
+      const result = await this._db.execute(query)
+      return result.length ? parseInt(result[0].count as string) : 0
+    }
+    return 0
   }
 
-  public static async build(): Promise<RepositoryFactory> {
+  public get db(): PostgresJsDatabase<Record<string, never>> {
+    if (this._db === undefined) {
+      const message = 'Test Database is undefined!'
+      throw new Error(message)
+    }
+    return this._db
+  }
+
+  protected async setup(): Promise<void> {
     const container = await this.setupDatabaseContainer()
     const { client, db } = await this.connectDatabase(
       container.getConnectionUri(),
     )
-    return new RepositoryFactory(container, client, db)
+    await this.migrateDatabase(container.getConnectionUri())
+    this.container = container
+    this.client = client
+    this._db = db
   }
 
-  public async prepareAll(): Promise<void> {
-    await this.migrateDatabase(this.container.getConnectionUri())
+  protected async release(): Promise<void> {
+    if (this._db !== undefined) {
+      const query = sql<string>`
+				SELECT table_name
+				FROM information_schema.tables
+					WHERE table_schema = 'public'
+						AND table_type = 'BASE TABLE';
+			`
+      const tables = await this._db.execute(query)
+      for (const table of tables) {
+        const query = sql.raw(`
+          TRUNCATE TABLE ${table.table_name} CASCADE;
+        `)
+        await this._db.execute(query)
+      }
+    }
   }
 
-  public async closeAll(): Promise<void> {
-    await this.client.end()
-    await this.container.stop()
+  protected async teardown(): Promise<void> {
+    if (this.client !== undefined) {
+      await this.client.end()
+    }
+    if (this.container !== undefined) {
+      await this.container.stop()
+    }
   }
 
-  private static async setupDatabaseContainer(): Promise<StartedPostgreSqlContainer> {
+  private async setupDatabaseContainer(): Promise<StartedPostgreSqlContainer> {
     try {
       const databaseName = config.getDatabaseName()
       const databaseUser = config.getDatabaseUser()
@@ -66,7 +109,7 @@ class RepositoryFactory {
     }
   }
 
-  private static async connectDatabase(databaseURL: string): Promise<{
+  private async connectDatabase(databaseURL: string): Promise<{
     client: postgres.Sql
     db: PostgresJsDatabase<Record<string, never>>
   }> {
@@ -107,4 +150,4 @@ class RepositoryFactory {
   }
 }
 
-export { RepositoryFactory }
+export { AbsTestFactory }
