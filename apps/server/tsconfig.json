@@ -13,6 +13,6 @@
       "@db/schemas": ["./db/schemas"]
     }
   },
-  "include": ["src/**/*.ts", "db/**/*.ts", "tests/**/*.ts", "vite.config.ts"],
+  "include": ["src/**/*.ts", "db/**/*.ts", "vite.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

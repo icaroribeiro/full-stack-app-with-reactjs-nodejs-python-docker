@@ -8,8 +8,21 @@ import { RegisterRoutes } from './routes/routes'
 class Server {
   private readonly _app: Application = express()
 
-  public constructor() {
+  constructor() {
+    this.registerMiddleware()
+    this.registerRoutes()
+    this.registerErrorHandler()
+  }
+
+  public get app(): express.Application {
+    return this._app
+  }
+
+  private registerMiddleware() {
     this._app.use(json())
+  }
+
+  private registerRoutes() {
     const swaggerUiOpts = {
       swaggerUrl: '/api-docs/swagger.json',
     }
@@ -22,11 +35,10 @@ class Server {
       swaggerUi.setup(undefined, swaggerUiOpts),
     )
     RegisterRoutes(this._app)
-    this._app.use(errorMiddleware)
   }
 
-  public get app(): express.Application {
-    return this._app
+  private registerErrorHandler() {
+    this._app.use(errorMiddleware)
   }
 }
 

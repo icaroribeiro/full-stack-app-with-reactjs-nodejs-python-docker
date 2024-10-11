@@ -44,67 +44,83 @@ abstract class AbsTestFactory implements ITestFactory {
 
   public get db(): PostgresJsDatabase<Record<string, never>> {
     if (this._db === undefined) {
-      const message = 'Test Database is undefined!'
+      const message = 'Database is undefined!'
       throw new Error(message)
     }
     return this._db
   }
 
-  protected async setup(): Promise<void> {
-    const container = await this.setupDatabaseContainer()
-    const { client, db } = await this.connectDatabase(
-      container.getConnectionUri(),
-    )
-    await this.migrateDatabase(container.getConnectionUri())
-    this.container = container
-    this.client = client
-    this._db = db
+  protected async initializeDatabase(): Promise<void> {
+    try {
+      const container = await this.setupDatabaseContainer()
+      const databaseURL = container.getConnectionUri()
+      process.env['DATABASE_URL'] = databaseURL
+      const { client, db } = await this.connectDatabase(databaseURL)
+      await this.migrateDatabase(databaseURL)
+      this.container = container
+      this.client = client
+      this._db = db
+    } catch (error) {
+      const message = 'Database initialization failed!'
+      console.error(message, error)
+      throw error
+    }
   }
 
-  protected async release(): Promise<void> {
-    if (this._db !== undefined) {
-      const query = sql<string>`
+  protected async clearDatabase(): Promise<void> {
+    try {
+      if (this._db !== undefined) {
+        const query = sql<string>`
 				SELECT table_name
 				FROM information_schema.tables
 					WHERE table_schema = 'public'
 						AND table_type = 'BASE TABLE';
 			`
-      const tables = await this._db.execute(query)
-      for (const table of tables) {
-        const query = sql.raw(`
+        const tables = await this._db.execute(query)
+        for (const table of tables) {
+          const query = sql.raw(`
           TRUNCATE TABLE ${table.table_name} CASCADE;
         `)
-        await this._db.execute(query)
+          await this._db.execute(query)
+        }
       }
+    } catch (error) {
+      const message = 'Database cleaning failed!'
+      console.error(message, error)
+      throw error
     }
   }
 
-  protected async teardown(): Promise<void> {
-    if (this.client !== undefined) {
-      await this.client.end()
-    }
-    if (this.container !== undefined) {
-      await this.container.stop()
+  protected async disableDatabase(): Promise<void> {
+    try {
+      if (this.client !== undefined) {
+        await this.client.end()
+      }
+      if (this.container !== undefined) {
+        await this.container.stop()
+      }
+    } catch (error) {
+      const message = 'Database closure failed!'
+      console.error(message, error)
+      throw error
     }
   }
 
   private async setupDatabaseContainer(): Promise<StartedPostgreSqlContainer> {
     try {
-      const databaseName = config.getDatabaseName()
       const databaseUser = config.getDatabaseUser()
       const databasePassword = config.getDatabasePassword()
-      const databasePort = config.getDatabasePort()
+      const databaseName = config.getDatabaseName()
       const container = await new PostgreSqlContainer()
-        .withDatabase(databaseName)
         .withUsername(databaseUser)
         .withPassword(databasePassword)
-        .withExposedPorts(parseInt(databasePort))
+        .withDatabase(databaseName)
         .start()
-      console.log('Test Database Container setted up successfully!') // `postgres://${container.getUsername()}:${container.getPassword()}@` +
+      // console.log('Database container setted up successfully!')
       return container
     } catch (error) {
       console.error(error)
-      const message = 'Test Database Container setup failed!'
+      const message = 'Database container setup failed!'
       throw new Error(message)
     }
   }
@@ -116,11 +132,11 @@ abstract class AbsTestFactory implements ITestFactory {
     try {
       const client = postgres(databaseURL)
       const db = drizzle(client)
-      console.log('Test Database connected successfully!')
+      // console.log('Database connected successfully!')
       return { client, db }
     } catch (error) {
       console.error(error)
-      const message = 'Test Database connection failed!'
+      const message = 'Database connection failed!'
       throw new Error(message)
     }
   }
@@ -129,7 +145,7 @@ abstract class AbsTestFactory implements ITestFactory {
     let migrationClient
     try {
       migrationClient = postgres(databaseURL, { max: 1 })
-      console.log('Migration client created successfully!')
+      // console.log('Migration client created successfully!')
     } catch (error) {
       console.error(error)
       const message = 'Migration client creation failed!'
@@ -140,7 +156,7 @@ abstract class AbsTestFactory implements ITestFactory {
       await migrate(drizzle(migrationClient), {
         migrationsFolder: migrationsFolder,
       })
-      console.log('Migrations completed successfully!')
+      // console.log('Migrations completed successfully!')
       await migrationClient.end()
     } catch (error) {
       console.error(error)
