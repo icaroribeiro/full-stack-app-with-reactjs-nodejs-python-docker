@@ -22,15 +22,15 @@ class HttpTestFactory extends AbsTestFactory {
 
   public async closeEach(): Promise<void> {
     await this.clearDatabase()
+  }
+
+  public async closeAll(): Promise<void> {
+    await this.disableDatabase()
     try {
       this.http.close()
     } catch (err) {
       console.error('Server closure failed!', err)
     }
-  }
-
-  public async closeAll(): Promise<void> {
-    await this.disableDatabase()
   }
 }
 

@@ -5,7 +5,7 @@ import { inject, injectable } from 'tsyringe'
 import { ErrorResponse } from '../../shared'
 import { HealthCheckMapper } from './health-check.mapper'
 import { IHealthCheckService } from './health-check.service'
-import { HealthCheckDTO } from './healthcheck.models'
+import { HealthCheckDTO } from './health-check.models'
 
 @injectable()
 @Route('health')

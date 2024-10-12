@@ -2,7 +2,7 @@ import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 import postgres from 'postgres'
 
-import { ServerError } from '../api/server-error'
+import { ServerError } from '../api/server.error'
 
 class DB {
   public connect(

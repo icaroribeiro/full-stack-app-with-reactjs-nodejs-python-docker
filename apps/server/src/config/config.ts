@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 
-import { ServerError } from '../api/server-error'
+import { ServerError } from '../api/server.error'
 
 class Config {
   public getPort(): string {

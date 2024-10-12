@@ -1,2 +1,2 @@
-export * from './app-container'
-export { iocContainer } from './ioc-container'
+export * from './app.container'
+export { iocContainer } from './ioc.container'
