@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { UserFactory } from '../../../../factories/helpers/user.factory'
-import { UserMapper } from '../user.mapper'
-import { User, UserDTO } from '../user.models'
+import { UserFactory } from '../../../../factories/helpers/user-factory'
+import { UserMapper } from '../user-mapper'
+import { User, UserDTO } from '../user-models'
 describe('UserMapper', async () => {
   const userFactory = new UserFactory()
 

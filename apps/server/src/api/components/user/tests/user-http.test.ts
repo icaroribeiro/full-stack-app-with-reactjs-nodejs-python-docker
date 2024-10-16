@@ -1,5 +1,4 @@
 import * as schemas from '@db/schemas'
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { CREATED, NOT_FOUND, OK } from 'http-status'
 import {
   afterAll,
@@ -12,19 +11,20 @@ import {
 } from 'vitest'
 
 import { config } from '../../../../config/config'
-import { UserFactory } from '../../../../factories/helpers/user.factory'
-import { HttpTestFactory } from '../../../../factories/http.factory'
-import { UserMapper } from '../user.mapper'
-import { User, UserList } from '../user.models'
+import { UserFactory } from '../../../../factories/helpers/user-factory'
+import { HttpTestFactory } from '../../../../factories/http-factory'
+import { DBService } from '../../../../services'
+import { UserMapper } from '../user-mapper'
+import { User, UserList } from '../user-models'
 
 describe('User HTTP component', () => {
   const factory: HttpTestFactory = new HttpTestFactory()
   const userFactory = new UserFactory()
 
-  let db: PostgresJsDatabase<Record<string, never>>
+  let dbService: DBService
   beforeAll(async () => {
     await factory.prepareAll()
-    db = factory.db
+    dbService = factory.dbService
   }, factory.beforeAllTimeout)
 
   afterEach(async () => {
@@ -87,7 +87,7 @@ describe('User HTTP component', () => {
       const mockedUserList: UserList = userFactory.buildMany(count)
       for (const mockedUser of mockedUserList) {
         const rawUserData = UserMapper.toPersistence(mockedUser)
-        const insertedUser = await db
+        const insertedUser = await dbService.db
           .insert(schemas.usersTable)
           .values(rawUserData)
           .returning()
@@ -118,7 +118,7 @@ describe('User HTTP component', () => {
     it('should succeed and return a user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()
@@ -167,7 +167,7 @@ describe('User HTTP component', () => {
     it('should succeed and return an updated user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()
@@ -232,7 +232,7 @@ describe('User HTTP component', () => {
     it('should succeed and return a deleted user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()

@@ -20,6 +20,9 @@ importers:
 
   apps/client:
     dependencies:
+      effect:
+        specifier: ^3.9.2
+        version: 3.9.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -63,6 +66,9 @@ importers:
       drizzle-orm:
         specifier: ^0.33.0
         version: 0.33.0(@types/react@18.3.11)(postgres@3.4.4)(react@18.3.1)
+      effect:
+        specifier: ^3.9.2
+        version: 3.9.2
       express:
         specifier: ^4.19.2
         version: 4.21.0
@@ -1677,6 +1683,9 @@ packages:
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+
+  effect@3.9.2:
+    resolution: {integrity: sha512-1sx/v1HTWHTodXfzWxAFg+SCF+ACgpJVruaAMIh/NmDVvrUsf0x9PzpXvkgJUbQ1fMdmKYK//FqxeHSQ+Zxv/Q==}
 
   electron-to-chromium@1.5.33:
     resolution: {integrity: sha512-+cYTcFB1QqD4j4LegwLfpCNxifb6dDFUAwk6RsLusCwIaZI6or2f+q8rs5tTB2YC53HhOlIbEaqHMAAC8IOIwA==}
@@ -4477,6 +4486,8 @@ snapshots:
   eastasianwidth@0.2.0: {}
 
   ee-first@1.1.1: {}
+
+  effect@3.9.2: {}
 
   electron-to-chromium@1.5.33: {}
 

@@ -1,20 +1,20 @@
 import * as schemas from '@db/schemas'
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { UserFactory } from '../../../../factories/helpers/user.factory'
-import { RepositoryTestFactory } from '../../../../factories/repository.factory'
-import { UserMapper } from '../user.mapper'
-import { User, UserList } from '../user.models'
-import { UserRepository } from '../user.repository'
+import { UserFactory } from '../../../../factories/helpers/user-factory'
+import { RepositoryTestFactory } from '../../../../factories/repository-factory'
+import { DBService } from '../../../../services'
+import { UserMapper } from '../user-mapper'
+import { User, UserList } from '../user-models'
+import { UserRepository } from '../user-repository'
 describe('UserRepository', async () => {
   const factory: RepositoryTestFactory = new RepositoryTestFactory()
   const userFactory = new UserFactory()
 
-  let db: PostgresJsDatabase<Record<string, never>>
+  let dbService: DBService
   beforeAll(async () => {
     await factory.prepareAll()
-    db = factory.db
+    dbService = factory.dbService
   }, factory.beforeAllTimeout)
 
   afterEach(async () => {
@@ -27,7 +27,7 @@ describe('UserRepository', async () => {
 
   describe('.createUser', () => {
     it('defines a function', () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       expect(typeof userRepository.createUser).toBe('function')
     })
 
@@ -35,7 +35,7 @@ describe('UserRepository', async () => {
       const mockedUser: User = userFactory.build()
       const expectedResult = mockedUser
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.createUser(mockedUser)
 
       const rowCount = 1
@@ -48,12 +48,12 @@ describe('UserRepository', async () => {
 
   describe('.readUserList', () => {
     it('defines a function', () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       expect(typeof userRepository.readUserList).toBe('function')
     })
 
     it('should succeed and return an empty list', async () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.readUserList()
 
       const rowCount = 0
@@ -66,7 +66,7 @@ describe('UserRepository', async () => {
       const mockedUserList: UserList = userFactory.buildMany(count)
       for (const mockedUser of mockedUserList) {
         const rawUserData = UserMapper.toPersistence(mockedUser)
-        const insertedUser = await db
+        const insertedUser = await dbService.db
           .insert(schemas.usersTable)
           .values(rawUserData)
           .returning()
@@ -74,7 +74,7 @@ describe('UserRepository', async () => {
       }
       const expectedResult = mockedUserList
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.readUserList()
 
       const rowCount = 3
@@ -85,14 +85,14 @@ describe('UserRepository', async () => {
 
   describe('.readUser', () => {
     it('defines a function', () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       expect(typeof userRepository.readUser).toBe('function')
     })
 
     it('should succeed and return undefined', async () => {
       const mockedUser: User = userFactory.build()
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.readUser(mockedUser.id as string)
 
       const rowCount = 0
@@ -103,14 +103,14 @@ describe('UserRepository', async () => {
     it('should succeed and return a user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()
       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
       const expectedResult = mockedUser
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.readUser(mockedUser.id as string)
 
       const rowCount = 1
@@ -123,7 +123,7 @@ describe('UserRepository', async () => {
 
   describe('.updateUser', () => {
     it('defines a function', () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       expect(typeof userRepository.updateUser).toBe('function')
     })
 
@@ -131,7 +131,7 @@ describe('UserRepository', async () => {
       const mockedUser: User = userFactory.build()
       const mockedUpdatedUser: User = userFactory.build()
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.updateUser(
         mockedUser.id as string,
         mockedUpdatedUser,
@@ -145,7 +145,7 @@ describe('UserRepository', async () => {
     it('should succeed and return an updated user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()
@@ -154,7 +154,7 @@ describe('UserRepository', async () => {
       mockedUpdatedUser.id = mockedUser.id
       const expectedResult = mockedUpdatedUser
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.updateUser(
         mockedUser.id as string,
         mockedUpdatedUser,
@@ -170,14 +170,14 @@ describe('UserRepository', async () => {
 
   describe('.deleteUser', () => {
     it('defines a function', () => {
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       expect(typeof userRepository.deleteUser).toBe('function')
     })
 
     it('should succeed and return undefined', async () => {
       const mockedUser: User = userFactory.build()
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.deleteUser(mockedUser.id as string)
 
       const rowCount = 0
@@ -188,14 +188,14 @@ describe('UserRepository', async () => {
     it('should succeed and return a deleted user', async () => {
       const mockedUser: User = userFactory.build()
       const rawUserData = UserMapper.toPersistence(mockedUser)
-      const insertedUser = await db
+      const insertedUser = await dbService.db
         .insert(schemas.usersTable)
         .values(rawUserData)
         .returning()
       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
       const expectedResult = mockedUser
 
-      const userRepository = new UserRepository(db)
+      const userRepository = new UserRepository(dbService)
       const result = await userRepository.deleteUser(mockedUser.id as string)
 
       const rowCount = 0

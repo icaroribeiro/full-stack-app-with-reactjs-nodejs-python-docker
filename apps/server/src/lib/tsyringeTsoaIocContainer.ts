@@ -6,5 +6,3 @@ export const iocContainer: IocContainer = {
     return container.resolve<T>(controller as never)
   },
 }
-
-export default iocContainer

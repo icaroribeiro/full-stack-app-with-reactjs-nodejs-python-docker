@@ -7,22 +7,14 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"UserDTO": {
+			"HealthCheckDTO": {
 				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
+					"healthy": {
+						"type": "boolean"
 					}
 				},
 				"required": [
-					"email",
-					"name",
-					"id"
+					"healthy"
 				],
 				"type": "object"
 			},
@@ -42,22 +34,30 @@
 				],
 				"type": "object"
 			},
+			"UserDTO": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
 			"UserListDTO": {
 				"items": {
 					"$ref": "#/components/schemas/UserDTO"
 				},
 				"type": "array"
-			},
-			"HealthCheckDTO": {
-				"properties": {
-					"healthy": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"healthy"
-				],
-				"type": "object"
 			}
 		},
 		"securitySchemes": {}
@@ -76,6 +76,48 @@
 		}
 	},
 	"paths": {
+		"/health": {
+			"get": {
+				"operationId": "GetHealth",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HealthCheckDTO"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
+				"tags": [
+					"health-check"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/users": {
 			"post": {
 				"operationId": "AddUser",
@@ -260,48 +302,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/health": {
-			"get": {
-				"operationId": "GetHealth",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/HealthCheckDTO"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
-				"tags": [
-					"health-check"
-				],
-				"security": [],
-				"parameters": []
 			}
 		}
 	},

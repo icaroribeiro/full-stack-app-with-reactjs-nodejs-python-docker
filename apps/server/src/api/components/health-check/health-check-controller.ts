@@ -3,9 +3,9 @@ import { Controller, Get, Response, Route, Tags } from 'tsoa'
 import { inject, injectable } from 'tsyringe'
 
 import { ErrorResponse } from '../../shared'
-import { HealthCheckMapper } from './health-check.mapper'
-import { IHealthCheckService } from './health-check.service'
-import { HealthCheckDTO } from './health-check.models'
+import { HealthCheckMapper } from './health-check-mapper'
+import { HealthCheckDTO } from './health-check-models'
+import { IHealthCheckService } from './health-check-service'
 
 @injectable()
 @Route('health')

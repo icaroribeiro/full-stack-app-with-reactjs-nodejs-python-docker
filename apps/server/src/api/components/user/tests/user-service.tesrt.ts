@@ -2,11 +2,11 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { db } from '../../../../db/db'
-import { UserFactory } from '../../../../factories/helpers/user.factory'
-import { ServerError } from '../../../server.error'
-import { User, UserList } from '../user.models'
-import { UserRepository } from '../user.repository'
-import { UserService } from '../user.service'
+import { UserFactory } from '../../../../factories/helpers/user-factory'
+import { ServerError } from '../../../server-error'
+import { User, UserList } from '../user-models'
+import { UserRepository } from '../user-repository'
+import { UserService } from '../user-service'
 
 vi.mock('../../db/db', (importOriginal) => {
   const original = importOriginal<typeof import('../../../../db/db')>()

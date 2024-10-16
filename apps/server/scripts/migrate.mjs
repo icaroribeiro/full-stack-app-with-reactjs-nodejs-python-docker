@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
 
-const run = async () => {
+const migrateDatabase = async () => {
   const args = process.argv.slice(2)
   const dirArg = args.find((arg) => arg.startsWith('--dir='))
   const dirname = dirArg ? dirArg.split('=')[1] : ''
@@ -31,4 +31,4 @@ const run = async () => {
   }
 }
 
-run()
+migrateDatabase()

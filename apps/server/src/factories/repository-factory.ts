@@ -1,4 +1,4 @@
-import { AbsTestFactory } from './abs.factory'
+import { AbsTestFactory } from './abs-factory'
 
 class RepositoryTestFactory extends AbsTestFactory {
   public async prepareAll(): Promise<void> {

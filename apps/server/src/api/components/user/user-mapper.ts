@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { User, UserDTO } from './user.models'
+import { User, UserDTO } from './user-models'
 
 class UserMapper {
   public static toPersistence(user: User): any {

@@ -2,8 +2,8 @@ import { createServer, Server as HttpServer } from 'http'
 
 import { Server } from '../api/server'
 import { config } from '../config/config'
-import { AppContainer } from '../containers'
-import { AbsTestFactory } from './abs.factory'
+import { ContainerService } from '../services/container-service'
+import { AbsTestFactory } from './abs-factory'
 
 class HttpTestFactory extends AbsTestFactory {
   private readonly server: Server = new Server()
@@ -12,7 +12,7 @@ class HttpTestFactory extends AbsTestFactory {
   public async prepareAll(): Promise<void> {
     await this.initializeDatabase()
     try {
-      new AppContainer()
+      new ContainerService()
       const port = parseInt(config.getPort())
       this.http.listen(port)
     } catch (err) {

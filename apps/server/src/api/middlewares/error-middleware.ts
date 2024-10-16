@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY } from 'http-status'
 import { ValidateError } from 'tsoa'
 
-import { ServerError } from '../server.error'
+import { ServerError } from '../server-error'
 import { ErrorResponse } from '../shared'
 
 function errorMiddleware(

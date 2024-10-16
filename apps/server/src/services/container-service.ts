@@ -1,4 +1,3 @@
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { container, DependencyContainer } from 'tsyringe'
 
 import {
@@ -12,9 +11,9 @@ import {
   UserService,
 } from '../api/components/user'
 import { config } from '../config/config'
-import { db } from '../db/db'
+import { DBService, IDBService } from '../services/db-service'
 
-class AppContainer {
+class ContainerService {
   private readonly _container: DependencyContainer = container
 
   constructor() {
@@ -23,20 +22,22 @@ class AppContainer {
     this.registerServiceContainer()
   }
 
-  get container(): DependencyContainer {
+  public get container(): DependencyContainer {
     return this._container
   }
 
   private registerDatabaseContainer() {
-    this._container.register<PostgresJsDatabase<Record<string, never>>>('db', {
-      useValue: db.connect(config.getDatabaseURL()),
+    const dbService = new DBService()
+    dbService.connectDatabase(config.getDatabaseURL())
+    this._container.register<IDBService>('DBService', {
+      useValue: dbService,
     })
   }
 
   private registerRepositoryContainer() {
     this._container.register<IUserRepository>('UserRepository', {
       useValue: new UserRepository(
-        container.resolve<PostgresJsDatabase<Record<string, never>>>('db'),
+        this._container.resolve<DBService>('DBService'),
       ),
     })
   }
@@ -44,9 +45,7 @@ class AppContainer {
   private registerServiceContainer() {
     this._container.register<IHealthCheckService>('HealthCheckService', {
       useValue: new HealthCheckService(
-        this._container.resolve<PostgresJsDatabase<Record<string, never>>>(
-          'db',
-        ),
+        this._container.resolve<DBService>('DBService'),
       ),
     })
     this._container.register<IUserService>('UserService', {
@@ -57,4 +56,4 @@ class AppContainer {
   }
 }
 
-export { AppContainer }
+export { ContainerService }

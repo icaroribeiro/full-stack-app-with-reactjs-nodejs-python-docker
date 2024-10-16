@@ -1,23 +1,12 @@
-import { sql } from 'drizzle-orm'
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { db } from '../../../../db/db'
-import { ServerError } from '../../../server.error'
-import { HealthCheckService } from '../health-check.service'
-
-vi.mock('../../db/db', (importOriginal) => {
-  const original = importOriginal<typeof import('../../../../db/db')>()
-  return {
-    ...original,
-    db: vi.fn(),
-  }
-})
+import { DBService } from '../../../../services'
+import { ServerError } from '../../../server-error'
+import { HealthCheckService } from '../health-check-service'
 
 describe('HealthCheckService', () => {
-  const mockedDB = vi.mocked(
-    db.connect('postgresql://pgtestuser:pgtestsecret@localhost:1234/pgtestdb'),
-  )
+  const mockedDBService = new DBService()
 
   afterEach(() => {
     vi.clearAllMocks()
@@ -25,20 +14,20 @@ describe('HealthCheckService', () => {
 
   describe('.checkHealth', () => {
     it('defines a function', () => {
-      const healthCheckService = new HealthCheckService(mockedDB)
+      const healthCheckService = new HealthCheckService(mockedDBService)
       expect(typeof healthCheckService.checkHealth).toBe('function')
     })
 
     it('should succeed and return true', () => {
-      const mockedExecute = vi.fn().mockResolvedValue(Promise.resolve())
-      mockedDB.execute = mockedExecute
+      const mockedIsDatabaseAlive = vi.fn().mockReturnValue(true)
+      mockedDBService.isDatabaseAlive = mockedIsDatabaseAlive
       const expectedResult = true
 
-      const healthCheckService = new HealthCheckService(mockedDB)
+      const healthCheckService = new HealthCheckService(mockedDBService)
       const result = healthCheckService.checkHealth()
 
       expect(result).toEqual(expectedResult)
-      expect(mockedExecute).toHaveBeenCalledWith(sql`SELECT 1`)
+      expect(mockedIsDatabaseAlive).toHaveBeenCalledOnce()
     })
 
     it("should fail and throw exception when health can't be checked", () => {
@@ -48,15 +37,15 @@ describe('HealthCheckService', () => {
         context: 'unknown',
         cause: error,
       })
-      const mockedExecute = vi.fn().mockImplementation(() => {
+      const mockedIsDatabaseAlive = vi.fn().mockImplementation(() => {
         throw new Error('failed')
       })
-      mockedDB.execute = mockedExecute
+      mockedDBService.isDatabaseAlive = mockedIsDatabaseAlive
 
-      const healthCheckService = new HealthCheckService(mockedDB)
+      const healthCheckService = new HealthCheckService(mockedDBService)
 
       expect(() => healthCheckService.checkHealth()).toThrowError(serverError)
-      expect(mockedExecute).toHaveBeenCalledWith(sql`SELECT 1`)
+      expect(mockedIsDatabaseAlive).toHaveBeenCalledOnce()
     })
   })
 })

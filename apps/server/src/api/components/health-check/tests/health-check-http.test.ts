@@ -2,7 +2,7 @@ import { OK } from 'http-status'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { config } from '../../../../config/config'
-import { HttpTestFactory } from '../../../../factories/http.factory'
+import { HttpTestFactory } from '../../../../factories/http-factory'
 
 describe('Health Check HTTP component', () => {
   const factory: HttpTestFactory = new HttpTestFactory()

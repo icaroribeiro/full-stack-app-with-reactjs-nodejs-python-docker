@@ -18,9 +18,9 @@ import { inject, injectable } from 'tsyringe'
 import { validationMiddleware } from '../../middlewares'
 import { ErrorResponse } from '../../shared'
 import { userValidator } from '../../validators'
-import { UserMapper } from './user.mapper'
-import { UserDTO, UserListDTO } from './user.models'
-import { IUserService } from './user.service'
+import { UserMapper } from './user-mapper'
+import { UserDTO, UserListDTO } from './user-models'
+import { IUserService } from './user-service'
 
 @injectable()
 @Route('users')

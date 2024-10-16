@@ -4,11 +4,11 @@ import { createServer, Server as HttpServer } from 'http'
 
 import { Server } from './api/server'
 import { config } from './config/config'
-import { AppContainer } from './containers'
+import { ContainerService } from './services'
 
-const run = (): void => {
+const startServer = (): void => {
   try {
-    new AppContainer()
+    new ContainerService()
     const server: Server = new Server()
     const http: HttpServer = createServer(server.app)
     const port = parseInt(config.getPort())
@@ -18,9 +18,9 @@ const run = (): void => {
     http.on('close', () => {
       console.log('Server closed successfully!')
     })
-  } catch (err) {
-    console.error('Server starting failed!', err)
+  } catch (error) {
+    console.error('Server starting failed!', error)
   }
 }
 
-run()
+startServer()
