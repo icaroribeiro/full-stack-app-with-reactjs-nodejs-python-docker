@@ -16,7 +16,7 @@ import {
 import { inject, injectable } from 'tsyringe'
 
 import { validationMiddleware } from '../../middlewares'
-import { ErrorResponse } from '../../shared'
+import { APIErrorResponse } from '../../shared'
 import { userValidator } from '../../validators'
 import { UserMapper } from './user-mapper'
 import { UserDTO, UserListDTO } from './user-models'
@@ -39,7 +39,7 @@ class UserController extends Controller {
     name: 'name',
     email: 'email@email.com',
   })
-  @Response<ErrorResponse>('500', 'Internal Server Error', {
+  @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
     details: { context: undefined, cause: undefined },
     isOperational: false,

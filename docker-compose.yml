@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   client:
     container_name: client-container
@@ -33,7 +31,7 @@ services:
       - server:/opt/server
   
   database:
-    image: postgres:17.0-alpine3.20
+    image: postgres:latest
     container_name: database-container
     environment:
       - POSTGRES_DB=pgdb

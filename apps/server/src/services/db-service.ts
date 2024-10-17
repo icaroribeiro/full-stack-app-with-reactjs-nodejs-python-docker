@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
-// import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 import postgres from 'postgres'
 
@@ -9,74 +8,123 @@ import { ServerError } from '../api/server-error'
 
 interface IDBService {
   connectDatabase(databaseURL: string): void
-  isDatabaseAlive(): boolean
-  migrateDatabase(databaseURL: string, migrationsFolder: string): Promise<void>
+  checkDatabaseIsAlive(): boolean
+  migrateDatabase(migrationsFolder: string): Promise<void>
+  getDatabaseTableRowCount(name: string): Promise<number>
+  clearDatabaseTables(): Promise<void>
 }
 
 class DBService implements IDBService {
-  private _client?: postgres.Sql
+  private _dbClient?: postgres.Sql
+  private _dbMigrationClient?: postgres.Sql
   private _db?: PostgresJsDatabase<Record<string, never>>
 
-  constructor() {}
+  constructor() {
+    this._dbClient = undefined
+    this._db = undefined
+    this._dbMigrationClient = undefined
+  }
 
-  public get client(): postgres.Sql {
-    if (this._client !== undefined) {
-      return this._client
+  public get dbClient(): postgres.Sql {
+    if (this._dbClient !== undefined) {
+      return this._dbClient
     }
-    throw new Error('client is undefined!')
+    const message = 'Database client is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
   }
 
   public get db(): PostgresJsDatabase<Record<string, never>> {
     if (this._db !== undefined) {
       return this._db
     }
-    throw new Error('db is undefined!')
+    const message = 'DB is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
   }
 
   public connectDatabase(databaseURL: string): void {
     try {
-      this._client = postgres(databaseURL)
-      this._db = drizzle(this._client)
-      if (this._client !== undefined && this._db !== undefined) {
-        console.log('Database connected successfully!')
-        return
-      }
+      this._dbClient = postgres(databaseURL)
+      console.log('Database client created successfully!')
+      this._dbMigrationClient = postgres(databaseURL, { max: 1 })
+      console.log('Database migration client created successfully!')
+      this._db = drizzle(this._dbClient)
+      console.log('Database connected successfully!')
     } catch (error) {
       const message = 'Database connection failed!'
       console.error(message, error)
-      throw new ServerError(message, INTERNAL_SERVER_ERROR)
+      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
+        context: databaseURL,
+        cause: error,
+      })
     }
   }
 
-  public isDatabaseAlive(): boolean {
+  public checkDatabaseIsAlive(): boolean {
     if (this._db !== undefined) {
       this._db.execute(sql`SELECT 1`)
       return true
     }
-    return false
+    const message = 'DB is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
   }
 
-  public async migrateDatabase(databaseURL: string, migrationsFolder: string) {
-    let migrationClient
-    try {
-      migrationClient = postgres(databaseURL, { max: 1 })
-      console.log('Migration client created successfully!')
-    } catch (error) {
-      console.error(error)
-      const message = 'Migration client creation failed!'
-      throw new Error(message)
+  public async migrateDatabase(migrationsFolder: string): Promise<void> {
+    if (this._dbMigrationClient !== undefined) {
+      try {
+        await migrate(drizzle(this._dbMigrationClient), {
+          migrationsFolder: migrationsFolder,
+        })
+        console.log('Database migrations completed successfully!')
+        await this._dbMigrationClient.end()
+        return
+      } catch (error) {
+        const message = 'Database migrations failed!'
+        console.error(message, error)
+        throw new ServerError(message, INTERNAL_SERVER_ERROR)
+      }
     }
-    try {
-      await migrate(drizzle(migrationClient), {
-        migrationsFolder: migrationsFolder,
-      })
-      console.log('Migrations completed successfully!')
-      await migrationClient.end()
-    } catch (error) {
-      console.error(error)
-      const message = 'Migrations failed!'
-      throw new Error(message)
+    const message = 'Database migration client is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+  }
+
+  public async getDatabaseTableRowCount(name: string): Promise<number> {
+    if (this._db !== undefined) {
+      const query = sql.raw(`
+        SELECT count(*) 
+        FROM ${name};
+      `)
+      const result = await this._db.execute(query)
+      return result.length ? parseInt(result[0].count as string) : 0
     }
+    const message = 'DB is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+  }
+
+  public async clearDatabaseTables(): Promise<void> {
+    if (this._db !== undefined) {
+      const query = sql<string>`
+				SELECT table_name
+				FROM information_schema.tables
+					WHERE table_schema = 'public'
+						AND table_type = 'BASE TABLE';
+			`
+      const tables = await this._db.execute(query)
+      for (const table of tables) {
+        const query = sql.raw(`
+          TRUNCATE TABLE ${table.table_name} CASCADE;
+        `)
+        await this._db.execute(query)
+      }
+      return
+    }
+    const message = 'DB is undefined!'
+    console.error(message)
+    throw new ServerError(message, INTERNAL_SERVER_ERROR)
   }
 }
 

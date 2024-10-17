@@ -1,7 +1,7 @@
-type ErrorResponse = {
+type APIErrorResponse = {
   message: string
   details?: unknown
   isOperational: boolean
 }
 
-export { ErrorResponse }
+export { APIErrorResponse }

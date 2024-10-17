@@ -5,7 +5,7 @@ import { HealthCheckDTO } from '../health-check-models'
 
 describe('HealthCheckMapper', async () => {
   describe('.toDTO', () => {
-    it('defines a function', () => {
+    it('should define a function', () => {
       expect(typeof HealthCheckMapper.toDTO).toBe('function')
     })
 

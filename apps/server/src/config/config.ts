@@ -27,6 +27,10 @@ class Config {
     return this.getEnvVar('DATABASE_PORT')
   }
 
+  public setDataseURL(databaseURL: string): void {
+    process.env['DATABASE_URL'] = databaseURL
+  }
+
   private getEnvVar(name: string): string {
     if (!process.env[name]) {
       const message = `${name} environment variable isn't set`

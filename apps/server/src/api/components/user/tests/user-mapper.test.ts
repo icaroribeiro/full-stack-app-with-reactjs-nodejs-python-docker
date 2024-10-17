@@ -7,7 +7,7 @@ describe('UserMapper', async () => {
   const userFactory = new UserFactory()
 
   describe('.toPersistence', () => {
-    it('defines a function', () => {
+    it('should define a function', () => {
       expect(typeof UserMapper.toPersistence).toBe('function')
     })
 
@@ -22,7 +22,7 @@ describe('UserMapper', async () => {
   })
 
   describe('.toDomain', () => {
-    it('defines a function', () => {
+    it('should define a function', () => {
       expect(typeof UserMapper.toDomain).toBe('function')
     })
 
@@ -42,7 +42,7 @@ describe('UserMapper', async () => {
   })
 
   describe('.toDTO', () => {
-    it('defines a function', () => {
+    it('should define a function', () => {
       expect(typeof UserMapper.toDTO).toBe('function')
     })
 

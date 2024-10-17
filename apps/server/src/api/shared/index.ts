@@ -1,1 +1,1 @@
-export * from './error-response'
+export * from './api-error-response'

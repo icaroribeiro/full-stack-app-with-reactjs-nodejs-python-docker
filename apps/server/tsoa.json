@@ -41,7 +41,7 @@
     "entryFile": "./src/index.ts"
   },
   "routes": {
-    "iocModule": "src/lib/tsyringeTsoaIocContainer.ts",
+    "iocModule": "src/libs/tsoa/tsyringe-ioc-container.ts",
     "routesDir": "src/api/routes",
     "middleware": "express"
   },

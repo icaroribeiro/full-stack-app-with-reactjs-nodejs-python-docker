@@ -12,7 +12,7 @@ class HealthCheckService implements IHealthCheckService {
 
   checkHealth(): boolean {
     try {
-      return this.dbService.isDatabaseAlive()
+      return this.dbService.checkDatabaseIsAlive()
     } catch (error) {
       const message = 'An error occurred when checking if application is alive'
       throw new ServerError(message, INTERNAL_SERVER_ERROR, {

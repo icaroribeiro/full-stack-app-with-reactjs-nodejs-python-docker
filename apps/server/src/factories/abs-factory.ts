@@ -2,7 +2,6 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
-import { sql } from 'drizzle-orm'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -19,44 +18,50 @@ interface ITestFactory {
 }
 
 abstract class AbsTestFactory implements ITestFactory {
-  private _dbContainer?: StartedPostgreSqlContainer = undefined
-  private readonly _dbService: DBService = new DBService()
-  public beforeAllTimeout = 1000000
+  private _dbContainer?: StartedPostgreSqlContainer
+  private readonly _dbService: DBService
+  public beforeAllTimeout: number
 
   abstract prepareAll(): Promise<void>
   abstract closeEach(): Promise<void>
   abstract closeAll(): Promise<void>
 
-  public async getTableRowCount(name: string): Promise<number> {
-    if (this._dbService.db !== undefined) {
-      const query = sql.raw(`
-        SELECT count(*) 
-        FROM ${name};
-      `)
-      const result = await this._dbService.db.execute(query)
-      return result.length ? parseInt(result[0].count as string) : 0
-    }
-    return 0
+  constructor() {
+    this._dbContainer = undefined
+    this._dbService = new DBService()
+    this.beforeAllTimeout = 30000
   }
 
   public get dbService(): DBService {
     return this._dbService
   }
 
+  protected async setupDatabaseContainer(): Promise<void> {
+    try {
+      const databaseUser = config.getDatabaseUser()
+      const databasePassword = config.getDatabasePassword()
+      const databaseName = config.getDatabaseName()
+      const container = await new PostgreSqlContainer('postgres:latest')
+        .withUsername(databaseUser)
+        .withPassword(databasePassword)
+        .withDatabase(databaseName)
+        .start()
+      const databaseURL = container.getConnectionUri()
+      config.setDataseURL(databaseURL)
+      this._dbContainer = container
+      console.log('Database container setted up successfully!')
+    } catch (error) {
+      const message = 'Database container setup failed!'
+      console.error(message)
+      throw error
+    }
+  }
+
   protected async initializeDatabase(): Promise<void> {
     try {
-      const dbContainer = await this.setupDatabaseContainer()
-      const databaseURL = dbContainer.getConnectionUri()
-      process.env['DATABASE_URL'] = databaseURL
-      // await this.connectDatabase(databaseURL)
-      this._dbService.connectDatabase(databaseURL)
-      // console.log('connected')
-      // const migrationsFolder = path.join(appPath, 'db', 'migrations')
-      // console.log('migrationsFolder=', migrationsFolder)
-      // await this._dbService.migrateDatabase(databaseURL, migrationsFolder)
+      this._dbService.connectDatabase(config.getDatabaseURL())
       const migrationsFolder = path.join(appPath, 'db', 'migrations')
-      await this._dbService.migrateDatabase(databaseURL, migrationsFolder)
-      this._dbContainer = dbContainer
+      await this._dbService.migrateDatabase(migrationsFolder)
       console.log('Database initialized successfully!')
     } catch (error) {
       const message = 'Database initialization failed!'
@@ -65,42 +70,9 @@ abstract class AbsTestFactory implements ITestFactory {
     }
   }
 
-  private async setupDatabaseContainer(): Promise<StartedPostgreSqlContainer> {
+  protected async clearDatabaseTables(): Promise<void> {
     try {
-      const databaseUser = config.getDatabaseUser()
-      const databasePassword = config.getDatabasePassword()
-      const databaseName = config.getDatabaseName()
-      const container = await new PostgreSqlContainer()
-        .withUsername(databaseUser)
-        .withPassword(databasePassword)
-        .withDatabase(databaseName)
-        .start()
-      console.log('Database container setted up successfully!')
-      return container
-    } catch (error) {
-      const message = 'Database container setup failed!'
-      console.error(message)
-      throw error
-    }
-  }
-
-  protected async clearDatabase(): Promise<void> {
-    try {
-      if (this._dbService.db !== undefined) {
-        const query = sql<string>`
-				SELECT table_name
-				FROM information_schema.tables
-					WHERE table_schema = 'public'
-						AND table_type = 'BASE TABLE';
-			`
-        const tables = await this._dbService.db.execute(query)
-        for (const table of tables) {
-          const query = sql.raw(`
-          TRUNCATE TABLE ${table.table_name} CASCADE;
-        `)
-          await this._dbService.db.execute(query)
-        }
-      }
+      await this._dbService.clearDatabaseTables()
     } catch (error) {
       const message = 'Database cleaning failed!'
       console.error(message, error)
@@ -108,16 +80,26 @@ abstract class AbsTestFactory implements ITestFactory {
     }
   }
 
-  protected async disableDatabase(): Promise<void> {
+  protected async deactivateDatabaseContainer(): Promise<void> {
     try {
-      if (this._dbService.client !== undefined) {
-        await this._dbService.client.end()
-      }
       if (this._dbContainer !== undefined) {
         await this._dbContainer.stop()
+        return
       }
+      const message = 'Database container is undefined!'
+      throw new Error(message)
     } catch (error) {
-      const message = 'Database closure failed!'
+      const message = 'Database container deactivation failed!'
+      console.error(message, error)
+      throw error
+    }
+  }
+
+  protected async deactivateDatabase(): Promise<void> {
+    try {
+      await this._dbService.dbClient.end()
+    } catch (error) {
+      const message = 'Database deactivation failed!'
       console.error(message, error)
       throw error
     }

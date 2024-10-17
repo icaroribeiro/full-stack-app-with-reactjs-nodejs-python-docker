@@ -10,6 +10,7 @@ class HttpTestFactory extends AbsTestFactory {
   private readonly http: HttpServer = createServer(this.server.app)
 
   public async prepareAll(): Promise<void> {
+    await this.setupDatabaseContainer()
     await this.initializeDatabase()
     try {
       new ContainerService()
@@ -21,11 +22,11 @@ class HttpTestFactory extends AbsTestFactory {
   }
 
   public async closeEach(): Promise<void> {
-    await this.clearDatabase()
+    await this.clearDatabaseTables()
   }
 
   public async closeAll(): Promise<void> {
-    await this.disableDatabase()
+    await this.deactivateDatabase()
     try {
       this.http.close()
     } catch (err) {

@@ -6,7 +6,7 @@ import { TsoaRoute, fetchMiddlewares, ExpressTemplateService } from '@tsoa/runti
 import { HealthCheckController } from './../components/health-check/health-check-controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UserController } from './../components/user/user-controller';
-import { iocContainer } from './../../lib/tsyringeTsoaIocContainer';
+import { iocContainer } from './../../libs/tsoa/tsyringe-ioc-container';
 import type { IocContainer, IocContainerFactory } from '@tsoa/runtime';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
@@ -20,7 +20,7 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"healthy":{"dataType":"boolean","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ErrorResponse": {
+    "APIErrorResponse": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"isOperational":{"dataType":"boolean","required":true},"details":{"dataType":"any"},"message":{"dataType":"string","required":true}},"validators":{}},
     },

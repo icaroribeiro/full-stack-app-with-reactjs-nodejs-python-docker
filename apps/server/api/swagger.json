@@ -18,7 +18,7 @@
 				],
 				"type": "object"
 			},
-			"ErrorResponse": {
+			"APIErrorResponse": {
 				"properties": {
 					"isOperational": {
 						"type": "boolean"
@@ -95,7 +95,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse"
+									"$ref": "#/components/schemas/APIErrorResponse"
 								},
 								"examples": {
 									"Example 1": {
@@ -156,7 +156,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse"
+									"$ref": "#/components/schemas/APIErrorResponse"
 								},
 								"examples": {
 									"Example 1": {

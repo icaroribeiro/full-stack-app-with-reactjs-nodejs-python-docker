@@ -14,9 +14,10 @@ import { config } from '../config/config'
 import { DBService, IDBService } from '../services/db-service'
 
 class ContainerService {
-  private readonly _container: DependencyContainer = container
+  private readonly _container: DependencyContainer
 
   constructor() {
+    this._container = container
     this.registerDatabaseContainer()
     this.registerRepositoryContainer()
     this.registerServiceContainer()

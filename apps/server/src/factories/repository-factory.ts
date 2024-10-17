@@ -2,15 +2,16 @@ import { AbsTestFactory } from './abs-factory'
 
 class RepositoryTestFactory extends AbsTestFactory {
   public async prepareAll(): Promise<void> {
+    await this.setupDatabaseContainer()
     await this.initializeDatabase()
   }
 
   public async closeEach(): Promise<void> {
-    await this.clearDatabase()
+    await this.clearDatabaseTables()
   }
 
   public async closeAll(): Promise<void> {
-    await this.disableDatabase()
+    await this.deactivateDatabase()
   }
 }
 

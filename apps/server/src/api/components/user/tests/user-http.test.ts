@@ -57,7 +57,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 1
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(CREATED)
       expect(body).to.be.an('object')
       expect(body.name).toEqual(expectedResult.name)
@@ -76,7 +78,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Array<Record<string, unknown>>
 
       const rowCount = 0
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(OK)
       expectTypeOf(body).toBeArray()
       expect(body).toHaveLength(0)
@@ -99,7 +103,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Array<Record<string, unknown>>
 
       const rowCount = 3
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(OK)
       expectTypeOf(body).toBeArray()
       expect(body).toHaveLength(3)
@@ -129,7 +135,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 1
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(OK)
       expect(body).to.be.an('object')
       expect(body.id).not.toBeUndefined()
@@ -151,7 +159,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 0
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(NOT_FOUND)
       expect(body).to.be.an('object')
       expect(body).toEqual(expectedResult)
@@ -187,7 +197,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 1
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(OK)
       expect(body).to.be.an('object')
       expect(body).toEqual(expectedResult)
@@ -216,7 +228,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 0
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(NOT_FOUND)
       expect(body).to.be.an('object')
       expect(body).toEqual(expectedResult)
@@ -245,7 +259,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 0
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(OK)
       expect(body).to.be.an('object')
       expect(body).toEqual(expectedResult)
@@ -267,7 +283,9 @@ describe('User HTTP component', () => {
       body = (await response.json()) as Record<string, unknown>
 
       const rowCount = 0
-      await expect(factory.getTableRowCount('users')).resolves.toEqual(rowCount)
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
       expect(response.status).toBe(NOT_FOUND)
       expect(body).to.be.an('object')
       expect(body).toEqual(expectedResult)

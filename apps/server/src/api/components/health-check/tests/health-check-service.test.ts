@@ -13,21 +13,22 @@ describe('HealthCheckService', () => {
   })
 
   describe('.checkHealth', () => {
-    it('defines a function', () => {
+    it('should define a function', () => {
       const healthCheckService = new HealthCheckService(mockedDBService)
+
       expect(typeof healthCheckService.checkHealth).toBe('function')
     })
 
     it('should succeed and return true', () => {
-      const mockedIsDatabaseAlive = vi.fn().mockReturnValue(true)
-      mockedDBService.isDatabaseAlive = mockedIsDatabaseAlive
+      const mockedCheckDatabaseIsAlive = vi.fn().mockReturnValue(true)
+      mockedDBService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
       const expectedResult = true
 
       const healthCheckService = new HealthCheckService(mockedDBService)
       const result = healthCheckService.checkHealth()
 
       expect(result).toEqual(expectedResult)
-      expect(mockedIsDatabaseAlive).toHaveBeenCalledOnce()
+      expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
     })
 
     it("should fail and throw exception when health can't be checked", () => {
@@ -37,15 +38,15 @@ describe('HealthCheckService', () => {
         context: 'unknown',
         cause: error,
       })
-      const mockedIsDatabaseAlive = vi.fn().mockImplementation(() => {
+      const mockedCheckDatabaseIsAlive = vi.fn().mockImplementation(() => {
         throw new Error('failed')
       })
-      mockedDBService.isDatabaseAlive = mockedIsDatabaseAlive
+      mockedDBService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
 
       const healthCheckService = new HealthCheckService(mockedDBService)
 
       expect(() => healthCheckService.checkHealth()).toThrowError(serverError)
-      expect(mockedIsDatabaseAlive).toHaveBeenCalledOnce()
+      expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
     })
   })
 })
