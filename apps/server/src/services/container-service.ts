@@ -12,6 +12,7 @@ import {
 } from '../api/components/user'
 import { config } from '../config/config'
 import { DBService, IDBService } from '../services/db-service'
+import { IPagingService, PagingService } from './paging-service'
 
 class ContainerService {
   private readonly _container: DependencyContainer
@@ -49,9 +50,13 @@ class ContainerService {
         this._container.resolve<DBService>('DBService'),
       ),
     })
+    this._container.register<IPagingService>('PagingService', {
+      useValue: new PagingService(),
+    })
     this._container.register<IUserService>('UserService', {
       useValue: new UserService(
         this._container.resolve<UserRepository>('UserRepository'),
+        this._container.resolve<PagingService>('PagingService'),
       ),
     })
   }
