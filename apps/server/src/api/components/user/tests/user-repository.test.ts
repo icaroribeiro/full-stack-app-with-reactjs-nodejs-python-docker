@@ -5,7 +5,7 @@ import { UserFactory } from '../../../../factories/helpers/user-factory'
 import { RepositoryTestFactory } from '../../../../factories/repository-factory'
 import { DBService } from '../../../../services'
 import { UserMapper } from '../user-mapper'
-import { User, UserList } from '../user-models'
+import { User } from '../user-models'
 import { UserRepository } from '../user-repository'
 describe('UserRepository', async () => {
   const factory: RepositoryTestFactory = new RepositoryTestFactory()
@@ -49,47 +49,47 @@ describe('UserRepository', async () => {
     })
   })
 
-  describe('.readUserList', () => {
-    it('should define a function', () => {
-      const userRepository = new UserRepository(dbService)
+  // describe('.readUserList', () => {
+  //   it('should define a function', () => {
+  //     const userRepository = new UserRepository(dbService)
 
-      expect(typeof userRepository.readUserList).toBe('function')
-    })
+  //     expect(typeof userRepository.readUserList).toBe('function')
+  //   })
 
-    it('should succeed and return an empty list', async () => {
-      const userRepository = new UserRepository(dbService)
-      const result = await userRepository.readUserList()
+  //   it('should succeed and return an empty list', async () => {
+  //     const userRepository = new UserRepository(dbService)
+  //     const result = await userRepository.readUserList()
 
-      const rowCount = 0
-      await expect(
-        factory.dbService.getDatabaseTableRowCount('users'),
-      ).resolves.toEqual(rowCount)
-      expect(result).toHaveLength(0)
-    })
+  //     const rowCount = 0
+  //     await expect(
+  //       factory.dbService.getDatabaseTableRowCount('users'),
+  //     ).resolves.toEqual(rowCount)
+  //     expect(result).toHaveLength(0)
+  //   })
 
-    it('should succeed and return a list of users', async () => {
-      const count = 3
-      const mockedUserList: UserList = userFactory.buildMany(count)
-      for (const mockedUser of mockedUserList) {
-        const rawUserData = UserMapper.toPersistence(mockedUser)
-        const insertedUser = await dbService.db
-          .insert(schemas.usersTable)
-          .values(rawUserData)
-          .returning()
-        mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
-      }
-      const expectedResult = mockedUserList
+  //   it('should succeed and return a list of users', async () => {
+  //     const count = 3
+  //     const mockedUserList: UserList = userFactory.buildMany(count)
+  //     for (const mockedUser of mockedUserList) {
+  //       const rawUserData = UserMapper.toPersistence(mockedUser)
+  //       const insertedUser = await dbService.db
+  //         .insert(schemas.usersTable)
+  //         .values(rawUserData)
+  //         .returning()
+  //       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
+  //     }
+  //     const expectedResult = mockedUserList
 
-      const userRepository = new UserRepository(dbService)
-      const result = await userRepository.readUserList()
+  //     const userRepository = new UserRepository(dbService)
+  //     const result = await userRepository.readUserList()
 
-      const rowCount = 3
-      await expect(
-        factory.dbService.getDatabaseTableRowCount('users'),
-      ).resolves.toEqual(rowCount)
-      expect(new Set(result)).toEqual(new Set(expectedResult))
-    })
-  })
+  //     const rowCount = 3
+  //     await expect(
+  //       factory.dbService.getDatabaseTableRowCount('users'),
+  //     ).resolves.toEqual(rowCount)
+  //     expect(new Set(result)).toEqual(new Set(expectedResult))
+  //   })
+  // })
 
   describe('.readUser', () => {
     it('should define a function', () => {

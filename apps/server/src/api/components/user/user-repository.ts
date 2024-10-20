@@ -8,10 +8,7 @@ import { User, UserList } from './user-models'
 interface IUserRepository {
   createUser(user: User): Promise<User>
   readUserList(): Promise<UserList>
-  readUsersListWithPagination(
-    limit: number,
-    offset: number,
-  ): Promise<[UserList, number]>
+  readAndCountUsers(limit: number, offset: number): Promise<[UserList, number]>
   readUser(userId: string): Promise<User>
   updateUser(userId: string, user: User): Promise<User>
   deleteUser(userId: string): Promise<User>
@@ -34,7 +31,7 @@ class UserRepository implements IUserRepository {
     return result.map((u) => UserMapper.toDomain(u))
   }
 
-  async readUsersListWithPagination(
+  async readAndCountUsers(
     limit: number,
     offset: number,
   ): Promise<[UserList, number]> {

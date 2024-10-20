@@ -53,13 +53,7 @@
 				],
 				"type": "object"
 			},
-			"UserListDTO": {
-				"items": {
-					"$ref": "#/components/schemas/UserDTO"
-				},
-				"type": "array"
-			},
-			"APIPaginatedResponse_UserDTO_": {
+			"APIPaginatedEntityResponse_UserDTO_": {
 				"properties": {
 					"next": {
 						"type": "string"
@@ -81,7 +75,7 @@
 						"type": "number",
 						"format": "double"
 					},
-					"pageSize": {
+					"limit": {
 						"type": "number",
 						"format": "double"
 					},
@@ -94,7 +88,7 @@
 					"records",
 					"totalRecords",
 					"totalPages",
-					"pageSize",
+					"limit",
 					"page"
 				],
 				"type": "object"
@@ -227,28 +221,6 @@
 				}
 			},
 			"get": {
-				"operationId": "FetchUserList",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserListDTO"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/users/withPagination": {
-			"get": {
 				"operationId": "FetchUserListWithPagination",
 				"responses": {
 					"200": {
@@ -256,13 +228,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/APIPaginatedResponse_UserDTO_"
+									"$ref": "#/components/schemas/APIPaginatedEntityResponse_UserDTO_"
 								}
 							}
 						}
 					}
 				},
-				"description": "API endpoint used to fetch user list with pagination schema.\r\nSupply the page and page size parameters and receive the selecting user list.",
+				"description": "API endpoint used to fetch users usgn page-based pagination schema.\r\nSupply the page and limit pagination parameters and receive the selecting users.",
 				"tags": [
 					"users"
 				],
@@ -279,9 +251,9 @@
 						}
 					},
 					{
-						"description": "The size of the page. If isn't provided, it will be set to 1.",
+						"description": "The number of records per page. If isn't provided, it will be set to 1.",
 						"in": "query",
-						"name": "pageSize",
+						"name": "limit",
 						"required": false,
 						"schema": {
 							"format": "double",

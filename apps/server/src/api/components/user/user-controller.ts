@@ -19,11 +19,10 @@ import {
 import { inject, injectable } from 'tsyringe'
 
 import { validationMiddleware } from '../../middlewares'
-import { APIErrorResponse, APIPaginatedResponse } from '../../shared'
-import { userValidator } from '../../validators'
-import { pageQueryParamsValidator } from '../../validators/page-query-params-validator'
+import { APIErrorResponse, APIPaginatedEntityResponse } from '../../shared'
+import { paginationQueryParamsValidator, userValidator } from '../../validators'
 import { UserMapper } from './user-mapper'
-import { UserDTO, UserListDTO } from './user-models'
+import { UserDTO } from './user-models'
 import { IUserService } from './user-service'
 
 @injectable()
@@ -57,24 +56,24 @@ class UserController extends Controller {
     return userDTO
   }
 
-  @Get('/')
-  public async fetchUserList(): Promise<UserListDTO> {
-    const retrievedUserList = await this.userService.retrieveUserList()
-    const userListDTO = retrievedUserList.map((u) => UserMapper.toDTO(u))
-    this.setStatus(OK)
-    return userListDTO
-  }
+  // @Get('/')
+  // public async fetchUserList(): Promise<UserListDTO> {
+  //   const retrievedUserList = await this.userService.retrieveUserList()
+  //   const userListDTO = retrievedUserList.map((u) => UserMapper.toDTO(u))
+  //   this.setStatus(OK)
+  //   return userListDTO
+  // }
 
   /**
-   * API endpoint used to fetch user list with pagination schema.
-   * Supply the page and page size parameters and receive the selecting user list.
+   * API endpoint used to fetch users usgn page-based pagination schema.
+   * Supply the page and limit pagination parameters and receive the selecting users.
    * @param page The number of the page. If isn't provided, it will be set to 1.
-   * @param pageSize The size of the page. If isn't provided, it will be set to 1.
+   * @param limit The number of records per page. If isn't provided, it will be set to 1.
    */
-  @Get('/withPagination')
-  @Response<APIPaginatedResponse<UserDTO>>('200', 'OK', {
+  @Get('/')
+  @Response<APIPaginatedEntityResponse<UserDTO>>('200', 'OK', {
     page: 1,
-    pageSize: 1,
+    limit: 1,
     totalPages: 1,
     totalRecords: 1,
     records: [
@@ -85,31 +84,29 @@ class UserController extends Controller {
       },
     ],
   })
-  @Middlewares(validationMiddleware(pageQueryParamsValidator))
+  @Middlewares(validationMiddleware(paginationQueryParamsValidator))
   public async fetchUserListWithPagination(
     @Request() req: express.Request,
     @Query() page?: number,
-    @Query() pageSize?: number,
-  ): Promise<APIPaginatedResponse<UserDTO>> {
-    const parsedQuery = pageQueryParamsValidator.parse({
-      query: { page: page, pageSize: pageSize },
+    @Query() limit?: number,
+  ): Promise<APIPaginatedEntityResponse<UserDTO>> {
+    const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`
+    const parsedQuery = paginationQueryParamsValidator.parse({
+      query: { page: page, limit: limit },
     })
-    const pageParams = {
-      req: req,
+    const paginationConfig = {
+      url: url,
       page: parsedQuery.query.page,
-      pageSize: parsedQuery.query.pageSize,
+      limit: parsedQuery.query.limit,
     }
-    const retrievedUserListWithPagination =
-      await this.userService.retrieveUserListWithPagination(pageParams)
-    const userListDTO = retrievedUserListWithPagination.records.map((u) =>
-      UserMapper.toDTO(u),
-    )
-    const retrievedUserListDTOWithPagination = {
-      ...retrievedUserListWithPagination,
-      records: userListDTO,
+    const retrievedUsers =
+      await this.userService.retrieveUsers(paginationConfig)
+    const retrievedUsersDTO = {
+      ...retrievedUsers,
+      records: retrievedUsers.records.map((u) => UserMapper.toDTO(u)),
     }
     this.setStatus(OK)
-    return retrievedUserListDTOWithPagination
+    return retrievedUsersDTO
   }
 
   @Get('{userId}')
