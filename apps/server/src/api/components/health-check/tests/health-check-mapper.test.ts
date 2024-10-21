@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { HealthCheckMapper } from '../health-check-mapper'
-import { HealthCheckDTO } from '../health-check-models'
+import { HealthCheckDTO, HealthCheckMapper } from '..'
 
 describe('HealthCheckMapper', async () => {
   describe('.toDTO', () => {

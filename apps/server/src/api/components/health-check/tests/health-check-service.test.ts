@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DBService } from '../../../../services'
 import { ServerError } from '../../../server-error'
-import { HealthCheckService } from '../health-check-service'
+import { HealthCheckService } from '..'
 
 describe('HealthCheckService', () => {
   const mockedDBService = new DBService()

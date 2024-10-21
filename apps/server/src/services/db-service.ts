@@ -16,13 +16,13 @@ interface IDBService {
 
 class DBService implements IDBService {
   private _dbClient?: postgres.Sql
-  private _dbMigrationClient?: postgres.Sql
   private _db?: PostgresJsDatabase<Record<string, never>>
+  private dbMigrationClient?: postgres.Sql
 
   constructor() {
     this._dbClient = undefined
     this._db = undefined
-    this._dbMigrationClient = undefined
+    this.dbMigrationClient = undefined
   }
 
   public get dbClient(): postgres.Sql {
@@ -47,7 +47,7 @@ class DBService implements IDBService {
     try {
       this._dbClient = postgres(databaseURL)
       console.log('Database client created successfully!')
-      this._dbMigrationClient = postgres(databaseURL, { max: 1 })
+      this.dbMigrationClient = postgres(databaseURL, { max: 1 })
       console.log('Database migration client created successfully!')
       this._db = drizzle(this._dbClient)
       console.log('Database connected successfully!')
@@ -72,13 +72,13 @@ class DBService implements IDBService {
   }
 
   public async migrateDatabase(migrationsFolder: string): Promise<void> {
-    if (this._dbMigrationClient !== undefined) {
+    if (this.dbMigrationClient !== undefined) {
       try {
-        await migrate(drizzle(this._dbMigrationClient), {
+        await migrate(drizzle(this.dbMigrationClient), {
           migrationsFolder: migrationsFolder,
         })
         console.log('Database migrations completed successfully!')
-        await this._dbMigrationClient.end()
+        await this.dbMigrationClient.end()
         return
       } catch (error) {
         const message = 'Database migrations failed!'

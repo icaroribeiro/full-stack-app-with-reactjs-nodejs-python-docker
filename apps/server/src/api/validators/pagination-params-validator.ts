@@ -6,7 +6,7 @@ const minimumPage = '1'
 const minimumLimit = '1'
 const maximumLimit = '10'
 
-const paginationQueryParamsValidator = z.object({
+const paginationParamsValidator = z.object({
   query: z.object({
     page: genOptional(z.coerce.number().min(parseInt(minimumPage))).default(
       parseInt(minimumPage),
@@ -17,4 +17,4 @@ const paginationQueryParamsValidator = z.object({
   }),
 })
 
-export { paginationQueryParamsValidator }
+export { paginationParamsValidator }

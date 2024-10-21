@@ -8,7 +8,7 @@ import { User, UserList } from './user-models'
 
 interface IUserRepository {
   createUser(user: User): Promise<User>
-  readUserList(): Promise<UserList>
+  // readUsers(): Promise<UserList>
   readAndCountUsers(page: number, limit: number): Promise<[UserList, number]>
   readUser(userId: string): Promise<User>
   updateUser(userId: string, user: User): Promise<User>
@@ -27,27 +27,41 @@ class UserRepository implements IUserRepository {
     return result.map((u) => UserMapper.toDomain(u))[0]
   }
 
-  async readUserList(): Promise<UserList> {
-    const result = await this.dbService.db.select().from(schemas.usersTable)
-    return result.map((u) => UserMapper.toDomain(u))
-  }
+  // async readUsers(): Promise<UserList> {
+  //   const result = await this.dbService.db.select().from(schemas.usersTable)
+  //   return result.map((u) => UserMapper.toDomain(u))
+  // }
 
   async readAndCountUsers(
     page: number,
     limit: number,
   ): Promise<[UserList, number]> {
-    const userListQuery = this.dbService.db.select().from(schemas.usersTable)
-    const paginatedRecordsResult = await withPagination(
+    const userListQuery = this.dbService.db
+      .select({ id: schemas.usersTable.id })
+      .from(schemas.usersTable)
+
+    const paginatedRecordsSubquery = withPagination(
       userListQuery.$dynamic(),
-      desc(schemas.usersTable.createdAt),
       page,
       limit,
-    )
+      desc(schemas.usersTable.createdAt),
+    ).as('subquery')
+
+    const paginatedRecordsResult = await this.dbService.db
+      .select()
+      .from(schemas.usersTable)
+      .innerJoin(
+        paginatedRecordsSubquery,
+        eq(schemas.usersTable.id, paginatedRecordsSubquery.id),
+      )
+      .orderBy(desc(schemas.usersTable.createdAt))
+
     const totalRecordsResult = await this.dbService.db
       .select({ count: count() })
       .from(schemas.usersTable)
+
     return [
-      paginatedRecordsResult.map((u) => UserMapper.toDomain(u)),
+      paginatedRecordsResult.map((r) => UserMapper.toDomain(r.users)),
       totalRecordsResult[0].count,
     ]
   }

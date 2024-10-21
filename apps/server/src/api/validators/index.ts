@@ -1,2 +1,2 @@
-export * from './pagination-query-params-validator'
+export * from './pagination-params-validator'
 export * from './user-validator'

@@ -36,7 +36,7 @@ class UserService implements IUserService {
   //     return await this.userRepository.readUserList()
   //   } catch (error) {
   //     const message =
-  //       'An error occurred when reading list of users from database'
+  //       'An error occurred when reading users from database'
   //     throw new ServerError(message, INTERNAL_SERVER_ERROR, {
   //       context: undefined,
   //       cause: error,

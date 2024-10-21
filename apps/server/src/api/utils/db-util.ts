@@ -2,13 +2,13 @@ import { SQL } from 'drizzle-orm'
 import { PgColumn, PgSelect } from 'drizzle-orm/pg-core'
 
 function withPagination<T extends PgSelect>(
-  query: T,
-  orderByColumn: PgColumn | SQL | SQL.Aliased,
-  page = 1,
-  limit = 1,
+  qb: T,
+  page: number,
+  limit: number,
+  ...orderByColumns: (PgColumn | SQL | SQL.Aliased)[]
 ) {
-  return query
-    .orderBy(orderByColumn)
+  return qb
+    .orderBy(...orderByColumns)
     .limit(limit)
     .offset((page - 1) * limit)
 }

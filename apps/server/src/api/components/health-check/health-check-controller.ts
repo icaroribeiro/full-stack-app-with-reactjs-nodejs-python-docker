@@ -1,5 +1,13 @@
-import { OK } from 'http-status'
-import { Controller, Get, Response, Route, Tags } from 'tsoa'
+import * as httpStatus from 'http-status'
+import {
+  Controller,
+  Example,
+  Get,
+  Response,
+  Route,
+  SuccessResponse,
+  Tags,
+} from 'tsoa'
 import { inject, injectable } from 'tsyringe'
 
 import { APIErrorResponse } from '../../shared'
@@ -22,19 +30,19 @@ class HealthCheckController extends Controller {
    * API endpoint used to verify if the service has started up correctly and is ready to accept requests
    */
   @Get('/')
-  @Response<HealthCheckDTO>('200', 'OK', { healthy: true })
+  @SuccessResponse('200', 'OK')
+  @Example<HealthCheckDTO>({
+    healthy: true,
+  })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
     details: { context: undefined, cause: undefined },
     isOperational: false,
   })
-  // @Example<HealthCheckDTO>({
-  //   healthy: true,
-  // })
   getHealth(): HealthCheckDTO {
     const isHealthy = this.healthCheckService.checkHealth()
     const healthCheckDTO = HealthCheckMapper.toDTO(isHealthy)
-    this.setStatus(OK)
+    this.setStatus(httpStatus.OK)
     return healthCheckDTO
   }
 }

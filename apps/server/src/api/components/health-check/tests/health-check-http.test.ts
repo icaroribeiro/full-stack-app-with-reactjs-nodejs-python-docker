@@ -1,5 +1,13 @@
 import { OK } from 'http-status'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+} from 'vitest'
 
 import { config } from '../../../../config/config'
 import { HttpTestFactory } from '../../../../factories/http-factory'
@@ -32,8 +40,7 @@ describe('Health Check HTTP component', () => {
       body = (await response.json()) as Array<Record<string, unknown>>
 
       expect(response.status).toBe(OK)
-
-      expect(body).to.be.an('object')
+      expectTypeOf(body).toBeObject()
       expect(body).toEqual(expectedResult)
     })
   })

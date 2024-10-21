@@ -1,4 +1,4 @@
-type APIPaginatedEntityResponse<Entity> = {
+type APIPaginationResponse<Entity> = {
   page: number
   limit: number
   totalPages: number
@@ -8,4 +8,4 @@ type APIPaginatedEntityResponse<Entity> = {
   next?: string
 }
 
-export { APIPaginatedEntityResponse }
+export { APIPaginationResponse }

@@ -1,4 +1,4 @@
-import { APIPaginatedEntityResponse } from '../api/shared'
+import { APIPaginationResponse } from '../api/shared'
 
 type PaginationConfig<Entity> = {
   page: number
@@ -11,14 +11,14 @@ interface IPaginationService {
   createResponse<Entity>(
     baseURL: string,
     paginationConfig: PaginationConfig<Entity>,
-  ): APIPaginatedEntityResponse<Entity>
+  ): APIPaginationResponse<Entity>
 }
 
 class PaginationService {
   public createResponse<Entity>(
     baseURL: string,
     paginationConfig: PaginationConfig<Entity>,
-  ): APIPaginatedEntityResponse<Entity> {
+  ): APIPaginationResponse<Entity> {
     return {
       page: paginationConfig.page,
       limit: paginationConfig.limit,

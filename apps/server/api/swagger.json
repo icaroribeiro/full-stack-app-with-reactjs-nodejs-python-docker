@@ -53,7 +53,22 @@
 				],
 				"type": "object"
 			},
-			"APIPaginatedEntityResponse_UserDTO_": {
+			"UserRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name"
+				],
+				"type": "object"
+			},
+			"APIPaginationResponse_UserDTO_": {
 				"properties": {
 					"next": {
 						"type": "string"
@@ -115,11 +130,18 @@
 				"operationId": "GetHealth",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/HealthCheckDTO"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"healthy": true
+										}
+									}
 								}
 							}
 						}
@@ -156,16 +178,6 @@
 			"post": {
 				"operationId": "AddUser",
 				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserDTO"
-								}
-							}
-						}
-					},
 					"201": {
 						"description": "Created",
 						"content": {
@@ -215,26 +227,64 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"$ref": "#/components/schemas/UserRequest"
+							}
 						}
 					}
 				}
 			},
 			"get": {
-				"operationId": "FetchUserListWithPagination",
+				"operationId": "FetchUsers",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/APIPaginatedEntityResponse_UserDTO_"
+									"$ref": "#/components/schemas/APIPaginationResponse_UserDTO_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"page": 1,
+											"limit": 1,
+											"totalPages": 1,
+											"totalRecords": 1,
+											"records": [
+												{
+													"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+													"name": "name",
+													"email": "email@email.com"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {},
+											"isOperational": false
+										}
+									}
 								}
 							}
 						}
 					}
 				},
-				"description": "API endpoint used to fetch users usgn page-based pagination schema.\r\nSupply the page and limit pagination parameters and receive the selecting users.",
+				"description": "API endpoint used to get users through page-based pagination schema.",
 				"tags": [
 					"users"
 				],
@@ -268,16 +318,45 @@
 				"operationId": "FetchUser",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/UserDTO"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {},
+											"isOperational": false
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "API endpoint used to get a user by its ID.",
 				"tags": [
 					"users"
 				],
@@ -297,16 +376,45 @@
 				"operationId": "RenewUser",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/UserDTO"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {},
+											"isOperational": false
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "API endpoint used to update a user by its ID.",
 				"tags": [
 					"users"
 				],
@@ -325,7 +433,9 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"$ref": "#/components/schemas/UserRequest"
+							}
 						}
 					}
 				}
@@ -334,16 +444,45 @@
 				"operationId": "DestroyUser",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/UserDTO"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {},
+											"isOperational": false
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "API endpoint used to delete a user by its ID.",
 				"tags": [
 					"users"
 				],

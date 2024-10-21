@@ -18,7 +18,7 @@ interface ITestFactory {
 }
 
 abstract class AbsTestFactory implements ITestFactory {
-  private _dbContainer?: StartedPostgreSqlContainer
+  private dbContainer?: StartedPostgreSqlContainer
   private readonly _dbService: DBService
   public beforeAllTimeout: number
 
@@ -27,7 +27,7 @@ abstract class AbsTestFactory implements ITestFactory {
   abstract closeAll(): Promise<void>
 
   constructor() {
-    this._dbContainer = undefined
+    this.dbContainer = undefined
     this._dbService = new DBService()
     this.beforeAllTimeout = 30000
   }
@@ -48,7 +48,7 @@ abstract class AbsTestFactory implements ITestFactory {
         .start()
       const databaseURL = container.getConnectionUri()
       config.setDataseURL(databaseURL)
-      this._dbContainer = container
+      this.dbContainer = container
       console.log('Database container setted up successfully!')
     } catch (error) {
       const message = 'Database container setup failed!'
@@ -82,8 +82,8 @@ abstract class AbsTestFactory implements ITestFactory {
 
   protected async deactivateDatabaseContainer(): Promise<void> {
     try {
-      if (this._dbContainer !== undefined) {
-        await this._dbContainer.stop()
+      if (this.dbContainer !== undefined) {
+        await this.dbContainer.stop()
         return
       }
       const message = 'Database container is undefined!'

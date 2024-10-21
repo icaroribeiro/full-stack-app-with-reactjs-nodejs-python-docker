@@ -1,3 +1,8 @@
+type UserRequest = {
+  name: string
+  email: string
+}
+
 type User = {
   id?: string | undefined
   name: string
@@ -14,4 +19,4 @@ type UserDTO = {
 
 type UserListDTO = UserDTO[]
 
-export { User, UserDTO, UserList, UserListDTO }
+export { User, UserDTO, UserList, UserListDTO, UserRequest }

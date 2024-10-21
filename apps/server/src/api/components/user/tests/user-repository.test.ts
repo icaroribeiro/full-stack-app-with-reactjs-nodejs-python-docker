@@ -4,9 +4,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { UserFactory } from '../../../../factories/helpers/user-factory'
 import { RepositoryTestFactory } from '../../../../factories/repository-factory'
 import { DBService } from '../../../../services'
-import { UserMapper } from '../user-mapper'
-import { User } from '../user-models'
-import { UserRepository } from '../user-repository'
+import { User, UserList, UserMapper, UserRepository } from '..'
+
 describe('UserRepository', async () => {
   const factory: RepositoryTestFactory = new RepositoryTestFactory()
   const userFactory = new UserFactory()
@@ -49,16 +48,16 @@ describe('UserRepository', async () => {
     })
   })
 
-  // describe('.readUserList', () => {
+  // describe('.readUsers', () => {
   //   it('should define a function', () => {
   //     const userRepository = new UserRepository(dbService)
 
-  //     expect(typeof userRepository.readUserList).toBe('function')
+  //     expect(typeof userRepository.readUsers).toBe('function')
   //   })
 
   //   it('should succeed and return an empty list', async () => {
   //     const userRepository = new UserRepository(dbService)
-  //     const result = await userRepository.readUserList()
+  //     const result = await userRepository.readUsers()
 
   //     const rowCount = 0
   //     await expect(
@@ -81,7 +80,7 @@ describe('UserRepository', async () => {
   //     const expectedResult = mockedUserList
 
   //     const userRepository = new UserRepository(dbService)
-  //     const result = await userRepository.readUserList()
+  //     const result = await userRepository.readUsers()
 
   //     const rowCount = 3
   //     await expect(
@@ -90,6 +89,118 @@ describe('UserRepository', async () => {
   //     expect(new Set(result)).toEqual(new Set(expectedResult))
   //   })
   // })
+
+  describe('.readAndCountUsers', () => {
+    it('should define a function', () => {
+      const userRepository = new UserRepository(dbService)
+
+      expect(typeof userRepository.readAndCountUsers).toBe('function')
+    })
+
+    it('should succeed and return an empty list of user with total zero', async () => {
+      const page = 1
+      const limit = 1
+      const expectedPaginatedRecordsResult: UserList = []
+      const expectedTotalRecordsResult = 0
+
+      const userRepository = new UserRepository(dbService)
+      const [paginatedRecordsResult, totalRecordsResult] =
+        await userRepository.readAndCountUsers(page, limit)
+
+      const rowCount = 0
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
+      expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
+    })
+
+    it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
+      const count = 3
+      const mockedUserList: UserList = userFactory.buildMany(count)
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = UserMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.usersTable)
+          .values(rawUserData)
+          .returning()
+        mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
+      }
+      const page = 1
+      const limit = 1
+      const expectedPaginatedRecordsResult: UserList = [
+        mockedUserList[mockedUserList.length - 1],
+      ]
+      const expectedTotalRecordsResult = 3
+
+      const userRepository = new UserRepository(dbService)
+      const [paginatedRecordsResult, totalRecordsResult] =
+        await userRepository.readAndCountUsers(page, limit)
+
+      const rowCount = 3
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
+      expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
+    })
+
+    it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
+      const count = 3
+      const mockedUserList: UserList = userFactory.buildMany(count)
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = UserMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.usersTable)
+          .values(rawUserData)
+          .returning()
+        mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
+      }
+      const page = 2
+      const limit = 3
+      const expectedPaginatedRecordsResult: UserList = []
+      const expectedTotalRecordsResult = 3
+
+      const userRepository = new UserRepository(dbService)
+      const [paginatedRecordsResult, totalRecordsResult] =
+        await userRepository.readAndCountUsers(page, limit)
+
+      const rowCount = 3
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
+      expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
+    })
+
+    it('should succeed and return a list of users with non-zero total when page is not the first one and can be filled', async () => {
+      const count = 5
+      const mockedUserList: UserList = userFactory.buildMany(count)
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = UserMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.usersTable)
+          .values(rawUserData)
+          .returning()
+        mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
+      }
+      const page = 3
+      const limit = 2
+      const expectedPaginatedRecordsResult: UserList = [mockedUserList[0]]
+      const expectedTotalRecordsResult = 5
+
+      const userRepository = new UserRepository(dbService)
+      const [paginatedRecordsResult, totalRecordsResult] =
+        await userRepository.readAndCountUsers(page, limit)
+
+      const rowCount = 5
+      await expect(
+        factory.dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
+      expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
+    })
+  })
 
   describe('.readUser', () => {
     it('should define a function', () => {
