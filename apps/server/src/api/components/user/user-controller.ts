@@ -18,6 +18,7 @@ import {
 } from 'tsoa'
 import { inject, injectable } from 'tsyringe'
 
+import { IPaginationService } from '../../../services'
 import { validationMiddleware } from '../../middlewares'
 import { APIErrorResponse, APIPaginatedEntityResponse } from '../../shared'
 import { paginationQueryParamsValidator, userValidator } from '../../validators'
@@ -29,7 +30,11 @@ import { IUserService } from './user-service'
 @Route('users')
 @Tags('users')
 class UserController extends Controller {
-  constructor(@inject('UserService') private userService: IUserService) {
+  constructor(
+    @inject('UserService') private userService: IUserService,
+    @inject('PaginationService')
+    private paginationService: IPaginationService,
+  ) {
     super()
   }
 
@@ -90,23 +95,23 @@ class UserController extends Controller {
     @Query() page?: number,
     @Query() limit?: number,
   ): Promise<APIPaginatedEntityResponse<UserDTO>> {
-    const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`
+    const baseURL = `${req.protocol}://${req.get('host')}${req.originalUrl}`
     const parsedQuery = paginationQueryParamsValidator.parse({
       query: { page: page, limit: limit },
     })
+    const [retrievedUserList, totalRecords] =
+      await this.userService.retrieveAndCountUsers(
+        parsedQuery.query.page,
+        parsedQuery.query.limit,
+      )
     const paginationConfig = {
-      url: url,
       page: parsedQuery.query.page,
       limit: parsedQuery.query.limit,
-    }
-    const retrievedUsers =
-      await this.userService.retrieveUsers(paginationConfig)
-    const retrievedUsersDTO = {
-      ...retrievedUsers,
-      records: retrievedUsers.records.map((u) => UserMapper.toDTO(u)),
+      totalRecords: totalRecords,
+      records: retrievedUserList.map((u) => UserMapper.toDTO(u)),
     }
     this.setStatus(OK)
-    return retrievedUsersDTO
+    return this.paginationService.createResponse(baseURL, paginationConfig)
   }
 
   @Get('{userId}')

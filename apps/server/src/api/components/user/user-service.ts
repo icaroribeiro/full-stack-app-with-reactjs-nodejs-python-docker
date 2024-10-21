@@ -1,27 +1,23 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status'
 
-import { IPaginationService, PaginationConfig } from '../../../services'
 import { ServerError } from '../../server-error'
-import { APIPaginatedEntityResponse } from '../../shared'
-import { User } from './user-models'
+import { User, UserList } from './user-models'
 import { IUserRepository } from './user-repository'
 
 interface IUserService {
   registerUser(user: User): Promise<User>
   // retrieveUserList(): Promise<UserList>
-  retrieveUsers(
-    paginationConfig: PaginationConfig,
-  ): Promise<APIPaginatedEntityResponse<User>>
+  retrieveAndCountUsers(
+    page: number,
+    limit: number,
+  ): Promise<[UserList, number]>
   retrieveUser(userId: string): Promise<User>
   replaceUser(userId: string, user: User): Promise<User>
   removeUser(userId: string): Promise<User>
 }
 
 class UserService implements IUserService {
-  constructor(
-    private userRepository: IUserRepository,
-    private paginationService: IPaginationService,
-  ) {}
+  constructor(private userRepository: IUserRepository) {}
 
   async registerUser(user: User): Promise<User> {
     try {
@@ -48,19 +44,12 @@ class UserService implements IUserService {
   //   }
   // }
 
-  async retrieveUsers(
-    paginationConfig: PaginationConfig,
-  ): Promise<APIPaginatedEntityResponse<User>> {
+  async retrieveAndCountUsers(
+    page: number,
+    limit: number,
+  ): Promise<[UserList, number]> {
     try {
-      const limit = paginationConfig.limit
-      const offset = (paginationConfig.page - 1) * limit
-      const [records, totalRecords] =
-        await this.userRepository.readAndCountUsers(limit, offset)
-      return this.paginationService.paginateRecords<User>(
-        paginationConfig,
-        totalRecords,
-        records,
-      )
+      return await this.userRepository.readAndCountUsers(page, limit)
     } catch (error) {
       const message =
         'An error occurred when reading and counting users from database'

@@ -2,13 +2,14 @@ import * as schemas from '@db/schemas'
 import { count, desc, eq } from 'drizzle-orm'
 
 import { DBService } from '../../../services'
+import { withPagination } from '../../utils'
 import { UserMapper } from './user-mapper'
 import { User, UserList } from './user-models'
 
 interface IUserRepository {
   createUser(user: User): Promise<User>
   readUserList(): Promise<UserList>
-  readAndCountUsers(limit: number, offset: number): Promise<[UserList, number]>
+  readAndCountUsers(page: number, limit: number): Promise<[UserList, number]>
   readUser(userId: string): Promise<User>
   updateUser(userId: string, user: User): Promise<User>
   deleteUser(userId: string): Promise<User>
@@ -32,29 +33,21 @@ class UserRepository implements IUserRepository {
   }
 
   async readAndCountUsers(
+    page: number,
     limit: number,
-    offset: number,
   ): Promise<[UserList, number]> {
-    const paginatedUserListSubquery = this.dbService.db
-      .select({ id: schemas.usersTable.id })
-      .from(schemas.usersTable)
-      .orderBy(desc(schemas.usersTable.createdAt))
-      .limit(limit)
-      .offset(offset)
-      .as('subquery')
-    const recordsResult = await this.dbService.db
-      .select()
-      .from(schemas.usersTable)
-      .innerJoin(
-        paginatedUserListSubquery,
-        eq(schemas.usersTable.id, paginatedUserListSubquery.id),
-      )
-      .orderBy(desc(schemas.usersTable.createdAt))
+    const userListQuery = this.dbService.db.select().from(schemas.usersTable)
+    const paginatedRecordsResult = await withPagination(
+      userListQuery.$dynamic(),
+      desc(schemas.usersTable.createdAt),
+      page,
+      limit,
+    )
     const totalRecordsResult = await this.dbService.db
       .select({ count: count() })
       .from(schemas.usersTable)
     return [
-      recordsResult.map((r) => UserMapper.toDomain(r.users)),
+      paginatedRecordsResult.map((u) => UserMapper.toDomain(u)),
       totalRecordsResult[0].count,
     ]
   }

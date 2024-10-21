@@ -112,6 +112,58 @@ describe('UserService', () => {
   //   })
   // })
 
+  describe('.retrieveUsers', () => {
+    it('should define a function', () => {
+      const userService = new UserService(
+        mockedUserRepository,
+        mockedPaginationService,
+      )
+
+      expect(typeof userService.retrieveUsers).toBe('function')
+    })
+
+    it('should succeed and return a list of users', async () => {
+      const count = 3
+      const mockedUsers: UserList = userFactory.buildMany(count)
+      const mockedReadUserList = vi
+        .fn()
+        .mockResolvedValue(Promise.resolve(mockedUsers))
+      mockedUserRepository.readUserList = mockedReadUserList
+      const expectedResult = mockedUsers
+
+      const userService = new UserService(
+        mockedUserRepository,
+        mockedPaginationService,
+      )
+      const result = await userService.retrieveUserList()
+
+      expect(result).toEqual(expectedResult)
+      expect(mockedReadUserList).toHaveBeenCalled()
+    })
+
+    it("should fail and throw exception when list of users can't be retrieved", async () => {
+      const error = new Error('failed')
+      const message =
+        'An error occurred when reading list of users from database'
+      const serverError = new ServerError(message, INTERNAL_SERVER_ERROR, {
+        context: undefined,
+        cause: error,
+      })
+      const mockedReadUserList = vi.fn().mockRejectedValue(new Error('failed'))
+      mockedUserRepository.readUserList = mockedReadUserList
+
+      const userService = new UserService(
+        mockedUserRepository,
+        mockedPaginationService,
+      )
+
+      await expect(() => userService.retrieveUserList()).rejects.toThrowError(
+        serverError,
+      )
+      expect(mockedReadUserList).toHaveBeenCalled()
+    })
+  })
+
   describe('.retrieveUser', () => {
     it('should define a function', () => {
       const userService = new UserService(

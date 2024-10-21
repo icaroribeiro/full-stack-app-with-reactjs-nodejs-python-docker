@@ -5,7 +5,7 @@ function withPagination<T extends PgSelect>(
   query: T,
   orderByColumn: PgColumn | SQL | SQL.Aliased,
   page = 1,
-  limit = 3,
+  limit = 1,
 ) {
   return query
     .orderBy(orderByColumn)

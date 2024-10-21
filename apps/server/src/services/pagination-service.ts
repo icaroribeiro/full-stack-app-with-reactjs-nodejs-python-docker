@@ -1,72 +1,85 @@
 import { APIPaginatedEntityResponse } from '../api/shared'
 
-type PaginationConfig = {
-  url: string
+type PaginationConfig<Entity> = {
   page: number
   limit: number
+  totalRecords: number
+  records: Entity[]
 }
 
 interface IPaginationService {
-  paginateRecords<Entity>(
-    paginationConfig: PaginationConfig,
-    totalRecords: number,
-    records: Entity[],
+  createResponse<Entity>(
+    baseURL: string,
+    paginationConfig: PaginationConfig<Entity>,
   ): APIPaginatedEntityResponse<Entity>
 }
 
 class PaginationService {
-  public paginateRecords<Entity>(
-    paginationConfig: PaginationConfig,
-    totalRecords: number,
-    records: Entity[],
+  public createResponse<Entity>(
+    baseURL: string,
+    paginationConfig: PaginationConfig<Entity>,
   ): APIPaginatedEntityResponse<Entity> {
     return {
       page: paginationConfig.page,
       limit: paginationConfig.limit,
-      totalPages: this.getTotalPages(paginationConfig, totalRecords),
-      totalRecords: totalRecords,
-      records: records,
-      previous: this.getPreviousPage(paginationConfig, totalRecords),
-      next: this.getNextPage(paginationConfig, totalRecords),
+      totalPages: this.getTotalPages(
+        paginationConfig.limit,
+        paginationConfig.totalRecords,
+      ),
+      totalRecords: paginationConfig.totalRecords,
+      records: paginationConfig.records,
+      previous: this.getPreviousPage(
+        baseURL,
+        paginationConfig.page,
+        paginationConfig.limit,
+        paginationConfig.totalRecords,
+      ),
+      next: this.getNextPage(
+        baseURL,
+        paginationConfig.page,
+        paginationConfig.limit,
+        paginationConfig.totalRecords,
+      ),
     }
   }
 
-  private getTotalPages(
-    paginationConfig: PaginationConfig,
-    totalRecords: number,
-  ): number {
-    return Math.ceil(totalRecords / paginationConfig.limit)
+  private getTotalPages(limit: number, totalRecords: number): number {
+    return Math.ceil(totalRecords / limit)
   }
 
   private getPreviousPage(
-    paginationConfig: PaginationConfig,
+    baseURL: string,
+    page: number,
+    limit: number,
     totalRecords: number,
   ): string | undefined {
-    // if (paginationConfig.page == 1) {
-    //   return undefined
-    // }
-    if (paginationConfig.page * paginationConfig.limit < totalRecords) {
+    if (page == 1) {
       return undefined
     }
-    const url = paginationConfig.url
-    if (url.includes('page')) {
-      return url.replace(/(page=)[^&]+/, '$1' + `${paginationConfig.page - 1}`)
+    if (totalRecords - (page - 1) * limit <= 0) {
+      return undefined
     }
-    return url + `&page=${paginationConfig.page - 1}`
+    const formattedURL = baseURL
+    return formattedURL.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
   }
 
   private getNextPage(
-    paginationConfig: PaginationConfig,
+    baseURL: string,
+    page: number,
+    limit: number,
     totalRecords: number,
   ): string | undefined {
-    if (paginationConfig.page * paginationConfig.limit >= totalRecords) {
+    if (totalRecords - page * limit <= 0) {
       return undefined
     }
-    const url = paginationConfig.url
-    if (url.includes('page')) {
-      return url.replace(/(page=)[^&]+/, '$1' + `${paginationConfig.page + 1}`)
+    const formattedURL = baseURL
+    if (formattedURL.includes('page')) {
+      return formattedURL.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
     }
-    return url + `?page=${paginationConfig.page + 1}`
+    if (formattedURL.includes('limit')) {
+      return formattedURL + `&page=${page + 1}`
+    }
+    return formattedURL + `?page=${page + 1}&limit=1`
   }
 }
 

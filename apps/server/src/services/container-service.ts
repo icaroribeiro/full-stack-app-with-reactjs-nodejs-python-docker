@@ -50,14 +50,13 @@ class ContainerService {
         this._container.resolve<DBService>('DBService'),
       ),
     })
-    this._container.register<IPaginationService>('PaginationService', {
-      useValue: new PaginationService(),
-    })
     this._container.register<IUserService>('UserService', {
       useValue: new UserService(
         this._container.resolve<UserRepository>('UserRepository'),
-        this._container.resolve<PaginationService>('PaginationService'),
       ),
+    })
+    this._container.register<IPaginationService>('PaginationService', {
+      useValue: new PaginationService(),
     })
   }
 }
