@@ -13,11 +13,11 @@ services:
     volumes:
       - client:/opt/client
   
-  server:
-    container_name: server-container
+  server1:
+    container_name: server1-container
     build:
       context: .
-      dockerfile: ./apps/server/Dockerfile.multi-stage
+      dockerfile: ./apps/server1/Dockerfile.multi-stage
     environment:
       - PORT=5000
       - NODE_ENV=production
@@ -28,7 +28,7 @@ services:
     depends_on:
       - database
     volumes:
-      - server:/opt/server
+      - server1:/opt/server1
   
   database:
     image: postgres:latest
@@ -45,5 +45,5 @@ services:
 
 volumes:
   client:
-  server:
+  server1:
   database:

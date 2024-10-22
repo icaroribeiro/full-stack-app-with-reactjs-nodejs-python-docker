@@ -1,8 +1,46 @@
+import 'react-toastify/ReactToastify.css'
+
+import { useEffect, useState } from 'react'
+import { toast, ToastContainer } from 'react-toastify'
+
+import { healthCheckAPI } from './apis/health-check-api'
+
 function App() {
+  const [health, setHealth] = useState({ healthy: false })
+
+  const getHealth = () => {
+    healthCheckAPI
+      .get()
+      .then((data) => {
+        console.log(data)
+        setHealth(data)
+      })
+      .catch((error) => console.error(error))
+  }
+
+  const checkHealth = (health: { healthy: boolean }) => {
+    if (health?.healthy) {
+      console.log('A')
+      toast('A')
+    }
+    console.log('B')
+  }
+
+  useEffect(() => {
+    checkHealth(health)
+  }, [health])
+
   return (
     <>
       <div>
-        <h1>Test123</h1>
+        <button
+          onClick={() => {
+            getHealth()
+          }}
+        >
+          Check Health
+        </button>
+        <ToastContainer></ToastContainer>
       </div>
     </>
   )

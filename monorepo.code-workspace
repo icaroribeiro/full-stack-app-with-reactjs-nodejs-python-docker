@@ -5,8 +5,12 @@
 			"name": "client",
 		},
 		{
-			"path": "./apps/server",
-			"name": "server",
+			"path": "./apps/server1",
+			"name": "server1",
+		},
+		{
+			"path": "./apps/server2",
+			"name": "server2",
 		},
 		{
 			"path": "./packages/tools",

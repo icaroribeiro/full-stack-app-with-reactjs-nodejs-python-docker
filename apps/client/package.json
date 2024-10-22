@@ -19,8 +19,11 @@
     "build": "pnpm pre:build && pnpm make:bundle"
   },
   "dependencies": {
+    "axios": "^1.7.7",
+    "http-status": "^1.7.4",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-toastify": "^10.0.6"
   },
   "devDependencies": {
     "@monorepo/tools": "workspace:*",

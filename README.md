@@ -1,2 +1,2 @@
-# full-stack-app-with-nodejs-reactjs-docker
-Full Stack APP with Node.js, React.js and Docker
+# full-stack-app-with-reactjs-nodejs-python-docker
+Full Stack APP with React.js, Node.js, Python and Docker
