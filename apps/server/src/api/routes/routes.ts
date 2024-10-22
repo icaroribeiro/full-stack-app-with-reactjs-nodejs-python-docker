@@ -15,7 +15,7 @@ import type { Request as ExRequest, Response as ExResponse, RequestHandler, Rout
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "HealthCheckDTO": {
+    "HealthCheckResponse": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"healthy":{"dataType":"boolean","required":true}},"validators":{}},
     },
@@ -25,7 +25,7 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"isOperational":{"dataType":"boolean","required":true},"details":{"dataType":"any"},"message":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "UserDTO": {
+    "UserResponse": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"email":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
     },
@@ -35,9 +35,9 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"email":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "APIPaginationResponse_UserDTO_": {
+    "APIPaginationResponse_UserResponse_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"next":{"dataType":"string"},"previous":{"dataType":"string"},"records":{"dataType":"array","array":{"dataType":"refAlias","ref":"UserDTO"},"required":true},"totalRecords":{"dataType":"double","required":true},"totalPages":{"dataType":"double","required":true},"limit":{"dataType":"double","required":true},"page":{"dataType":"double","required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"next":{"dataType":"string"},"previous":{"dataType":"string"},"records":{"dataType":"array","array":{"dataType":"refAlias","ref":"UserResponse"},"required":true},"totalRecords":{"dataType":"double","required":true},"totalPages":{"dataType":"double","required":true},"limit":{"dataType":"double","required":true},"page":{"dataType":"double","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -128,9 +128,9 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/users',
             ...(fetchMiddlewares<RequestHandler>(UserController)),
-            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.fetchUsers)),
+            ...(fetchMiddlewares<RequestHandler>(UserController.prototype.fetchPaginatedUsers)),
 
-            async function UserController_fetchUsers(request: ExRequest, response: ExResponse, next: any) {
+            async function UserController_fetchPaginatedUsers(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     page: {"in":"query","name":"page","dataType":"double"},
@@ -151,7 +151,7 @@ export function RegisterRoutes(app: Router) {
                 }
 
               await templateService.apiHandler({
-                methodName: 'fetchUsers',
+                methodName: 'fetchPaginatedUsers',
                 controller,
                 response,
                 next,

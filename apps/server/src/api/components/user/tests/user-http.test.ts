@@ -14,7 +14,7 @@ import { config } from '../../../../config/config'
 import { UserFactory } from '../../../../factories/helpers/user-factory'
 import { HttpTestFactory } from '../../../../factories/http-factory'
 import { DBService } from '../../../../services'
-import { User, UserDTO, UserList, UserMapper } from '..'
+import { User, UserResponse, UserList, UserMapper } from '..'
 
 describe('User HTTP component', () => {
   const factory: HttpTestFactory = new HttpTestFactory()
@@ -162,7 +162,9 @@ describe('User HTTP component', () => {
         limit: 1,
         totalPages: 3,
         totalRecords: 3,
-        records: [UserMapper.toDTO(mockedUserList[mockedUserList.length - 1])],
+        records: [
+          UserMapper.toResponse(mockedUserList[mockedUserList.length - 1]),
+        ],
         next: next,
       }
 
@@ -199,7 +201,7 @@ describe('User HTTP component', () => {
         limit: 2,
         totalPages: 3,
         totalRecords: 5,
-        records: [UserMapper.toDTO(mockedUserList[0])],
+        records: [UserMapper.toResponse(mockedUserList[0])],
         previous: previous,
       }
 
@@ -283,7 +285,7 @@ describe('User HTTP component', () => {
       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
       const mockedUpdatedUser: User = userFactory.build()
       mockedUpdatedUser.id = undefined
-      const expectedResult: UserDTO = {
+      const expectedResult: UserResponse = {
         id: mockedUser.id as string,
         name: mockedUpdatedUser.name,
         email: mockedUpdatedUser.email,

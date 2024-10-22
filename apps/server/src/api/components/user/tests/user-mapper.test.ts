@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { UserFactory } from '../../../../factories/helpers/user-factory'
-import { User, UserDTO, UserMapper } from '..'
+import { User, UserResponse, UserMapper } from '..'
 
 describe('UserMapper', async () => {
   const userFactory = new UserFactory()
@@ -41,21 +41,21 @@ describe('UserMapper', async () => {
     })
   })
 
-  describe('.toDTO', () => {
+  describe('.toResponse', () => {
     it('should define a function', () => {
-      expect(typeof UserMapper.toDTO).toBe('function')
+      expect(typeof UserMapper.toResponse).toBe('function')
     })
 
     it('should succeed and return a user data transfer object', async () => {
       const mockedUser: User = userFactory.build()
-      const userDTO: UserDTO = {
+      const userResponse: UserResponse = {
         id: mockedUser.id || 'unknown',
         name: mockedUser.name,
         email: mockedUser.email,
       }
-      const expectedResult = userDTO
+      const expectedResult = userResponse
 
-      const result = UserMapper.toDTO(mockedUser)
+      const result = UserMapper.toResponse(mockedUser)
 
       expect(result).toEqual(expectedResult)
     })

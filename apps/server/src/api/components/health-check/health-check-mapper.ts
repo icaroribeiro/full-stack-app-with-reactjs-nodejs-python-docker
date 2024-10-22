@@ -1,7 +1,7 @@
-import { HealthCheckDTO } from './health-check-models'
+import { HealthCheckResponse } from './health-check-types'
 
 class HealthCheckMapper {
-  public static toDTO(isHealthy: boolean): HealthCheckDTO {
+  public static toResponse(isHealthy: boolean): HealthCheckResponse {
     return {
       healthy: isHealthy,
     }

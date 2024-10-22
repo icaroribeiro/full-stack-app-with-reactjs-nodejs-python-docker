@@ -11,12 +11,12 @@ type User = {
 
 type UserList = User[]
 
-type UserDTO = {
+type UserResponse = {
   id: string
   name: string
   email: string
 }
 
-type UserListDTO = UserDTO[]
+type UserListResponse = UserResponse[]
 
-export { User, UserDTO, UserList, UserListDTO, UserRequest }
+export { User, UserList, UserListResponse, UserRequest, UserResponse }

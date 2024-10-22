@@ -1,8 +1,8 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status'
 
 import { ServerError } from '../../server-error'
-import { User, UserList } from './user-models'
 import { IUserRepository } from './user-repository'
+import { User, UserList } from './user-types'
 
 interface IUserService {
   registerUser(user: User): Promise<User>

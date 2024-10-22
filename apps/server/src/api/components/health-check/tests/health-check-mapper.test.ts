@@ -1,21 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
-import { HealthCheckDTO, HealthCheckMapper } from '..'
+import { HealthCheckResponse, HealthCheckMapper } from '..'
 
 describe('HealthCheckMapper', async () => {
-  describe('.toDTO', () => {
+  describe('.toResponse', () => {
     it('should define a function', () => {
-      expect(typeof HealthCheckMapper.toDTO).toBe('function')
+      expect(typeof HealthCheckMapper.toResponse).toBe('function')
     })
 
     it('should succeed and return a health check data transfer object', async () => {
       const isHealthy: boolean = true
-      const healthCheckDTO: HealthCheckDTO = {
+      const healthCheckResponse: HealthCheckResponse = {
         healthy: isHealthy,
       }
-      const expectedResult = healthCheckDTO
+      const expectedResult = healthCheckResponse
 
-      const result = HealthCheckMapper.toDTO(isHealthy)
+      const result = HealthCheckMapper.toResponse(isHealthy)
 
       expect(result).toEqual(expectedResult)
     })

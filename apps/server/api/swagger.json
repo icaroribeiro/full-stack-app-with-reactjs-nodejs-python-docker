@@ -1,519 +1,489 @@
 {
-	"openapi": "3.0.0",
-	"components": {
-		"examples": {},
-		"headers": {},
-		"parameters": {},
-		"requestBodies": {},
-		"responses": {},
-		"schemas": {
-			"HealthCheckDTO": {
-				"properties": {
-					"healthy": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"healthy"
-				],
-				"type": "object"
-			},
-			"APIErrorResponse": {
-				"properties": {
-					"isOperational": {
-						"type": "boolean"
-					},
-					"details": {},
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"isOperational",
-					"message"
-				],
-				"type": "object"
-			},
-			"UserDTO": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"name",
-					"id"
-				],
-				"type": "object"
-			},
-			"UserRequest": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"name"
-				],
-				"type": "object"
-			},
-			"APIPaginationResponse_UserDTO_": {
-				"properties": {
-					"next": {
-						"type": "string"
-					},
-					"previous": {
-						"type": "string"
-					},
-					"records": {
-						"items": {
-							"$ref": "#/components/schemas/UserDTO"
-						},
-						"type": "array"
-					},
-					"totalRecords": {
-						"type": "number",
-						"format": "double"
-					},
-					"totalPages": {
-						"type": "number",
-						"format": "double"
-					},
-					"limit": {
-						"type": "number",
-						"format": "double"
-					},
-					"page": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"records",
-					"totalRecords",
-					"totalPages",
-					"limit",
-					"page"
-				],
-				"type": "object"
-			}
-		},
-		"securitySchemes": {}
-	},
-	"info": {
-		"title": "Take-Home Assignment API",
-		"version": "1.0.0",
-		"description": "A REST API developed using Node.js, TypeScript and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/monorepo-dockerized-full-stack-app-with-rollup)",
-		"license": {
-			"name": "MIT"
-		},
-		"contact": {
-			"name": "Ícaro Ribeiro",
-			"email": "icaroribeiro@hotmail.com",
-			"url": "https://www.linkedin.com/in/icaroribeiro"
-		}
-	},
-	"paths": {
-		"/health": {
-			"get": {
-				"operationId": "GetHealth",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/HealthCheckDTO"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"healthy": true
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
-				"tags": [
-					"health-check"
-				],
-				"security": [],
-				"parameters": []
-			}
-		},
-		"/users": {
-			"post": {
-				"operationId": "AddUser",
-				"responses": {
-					"201": {
-						"description": "Created",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserDTO"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-											"name": "name",
-											"email": "email@email.com"
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to create a new user.",
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserRequest"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "FetchUsers",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIPaginationResponse_UserDTO_"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"page": 1,
-											"limit": 1,
-											"totalPages": 1,
-											"totalRecords": 1,
-											"records": [
-												{
-													"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-													"name": "name",
-													"email": "email@email.com"
-												}
-											]
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to get users through page-based pagination schema.",
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "The number of the page. If isn't provided, it will be set to 1.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"description": "The number of records per page. If isn't provided, it will be set to 1.",
-						"in": "query",
-						"name": "limit",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/users/{userId}": {
-			"get": {
-				"operationId": "FetchUser",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserDTO"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-											"name": "name",
-											"email": "email@email.com"
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to get a user by its ID.",
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "RenewUser",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserDTO"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-											"name": "name",
-											"email": "email@email.com"
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to update a user by its ID.",
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserRequest"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DestroyUser",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserDTO"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-											"name": "name",
-											"email": "email@email.com"
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to delete a user by its ID.",
-				"tags": [
-					"users"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		}
-	},
-	"servers": [
-		{
-			"url": "http://localhost:5000",
-			"description": "Production environment"
-		}
-	],
-	"tags": [
-		{
-			"name": "health-check",
-			"description": "Everything about health check"
-		},
-		{
-			"name": "users",
-			"description": "Everything about users"
-		}
-	]
+  "openapi": "3.0.0",
+  "components": {
+    "examples": {},
+    "headers": {},
+    "parameters": {},
+    "requestBodies": {},
+    "responses": {},
+    "schemas": {
+      "HealthCheckResponse": {
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          }
+        },
+        "required": ["healthy"],
+        "type": "object"
+      },
+      "APIErrorResponse": {
+        "properties": {
+          "isOperational": {
+            "type": "boolean"
+          },
+          "details": {},
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["isOperational", "message"],
+        "type": "object"
+      },
+      "UserResponse": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "name", "id"],
+        "type": "object"
+      },
+      "UserRequest": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "name"],
+        "type": "object"
+      },
+      "APIPaginationResponse_UserResponse_": {
+        "properties": {
+          "next": {
+            "type": "string"
+          },
+          "previous": {
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "type": "array"
+          },
+          "totalRecords": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalPages": {
+            "type": "number",
+            "format": "double"
+          },
+          "limit": {
+            "type": "number",
+            "format": "double"
+          },
+          "page": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["records", "totalRecords", "totalPages", "limit", "page"],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {}
+  },
+  "info": {
+    "title": "Take-Home Assignment API",
+    "version": "1.0.0",
+    "description": "A REST API developed using Node.js, TypeScript and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/monorepo-dockerized-full-stack-app-with-rollup)",
+    "license": {
+      "name": "MIT"
+    },
+    "contact": {
+      "name": "Ícaro Ribeiro",
+      "email": "icaroribeiro@hotmail.com",
+      "url": "https://www.linkedin.com/in/icaroribeiro"
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "GetHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "healthy": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
+        "tags": ["health-check"],
+        "security": [],
+        "parameters": []
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "AddUser",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                      "name": "name",
+                      "email": "email@email.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to create a new user.",
+        "tags": ["users"],
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequest"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "FetchUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIPaginationResponse_UserResponse_"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "page": 1,
+                      "limit": 1,
+                      "totalPages": 1,
+                      "totalRecords": 1,
+                      "records": [
+                        {
+                          "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                          "name": "name",
+                          "email": "email@email.com"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to get users through page-based pagination schema.",
+        "tags": ["users"],
+        "security": [],
+        "parameters": [
+          {
+            "description": "The number of the page. If isn't provided, it will be set to 1.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          {
+            "description": "The number of records per page. If isn't provided, it will be set to 1.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          }
+        ]
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "operationId": "FetchUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                      "name": "name",
+                      "email": "email@email.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to get a user by its ID.",
+        "tags": ["users"],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "RenewUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                      "name": "name",
+                      "email": "email@email.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to update a user by its ID.",
+        "tags": ["users"],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequest"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DestroyUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                      "name": "name",
+                      "email": "email@email.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "message": "Internal Server Error",
+                      "details": {},
+                      "isOperational": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "API endpoint used to delete a user by its ID.",
+        "tags": ["users"],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Production environment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "health-check",
+      "description": "Everything about health check"
+    },
+    {
+      "name": "users",
+      "description": "Everything about users"
+    }
+  ]
 }

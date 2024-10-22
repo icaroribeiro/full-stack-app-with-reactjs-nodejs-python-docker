@@ -12,7 +12,7 @@ import { inject, injectable } from 'tsyringe'
 
 import { APIErrorResponse } from '../../shared'
 import { HealthCheckMapper } from './health-check-mapper'
-import { HealthCheckDTO } from './health-check-models'
+import { HealthCheckResponse } from './health-check-types'
 import { IHealthCheckService } from './health-check-service'
 
 @injectable()
@@ -31,7 +31,7 @@ class HealthCheckController extends Controller {
    */
   @Get('/')
   @SuccessResponse('200', 'OK')
-  @Example<HealthCheckDTO>({
+  @Example<HealthCheckResponse>({
     healthy: true,
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
@@ -39,11 +39,11 @@ class HealthCheckController extends Controller {
     details: { context: undefined, cause: undefined },
     isOperational: false,
   })
-  getHealth(): HealthCheckDTO {
+  getHealth(): HealthCheckResponse {
     const isHealthy = this.healthCheckService.checkHealth()
-    const healthCheckDTO = HealthCheckMapper.toDTO(isHealthy)
+    const healthCheckResponse = HealthCheckMapper.toResponse(isHealthy)
     this.setStatus(httpStatus.OK)
-    return healthCheckDTO
+    return healthCheckResponse
   }
 }
 

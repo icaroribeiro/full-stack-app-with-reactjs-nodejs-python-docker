@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { User, UserDTO } from './user-models'
+import { User, UserResponse } from './user-types'
 
 class UserMapper {
   public static toPersistence(user: User): any {
@@ -17,7 +17,7 @@ class UserMapper {
     }
   }
 
-  public static toDTO(user: User): UserDTO {
+  public static toResponse(user: User): UserResponse {
     return {
       id: user.id || 'unknown',
       name: user.name,

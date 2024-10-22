@@ -4,7 +4,7 @@ import { count, desc, eq } from 'drizzle-orm'
 import { DBService } from '../../../services'
 import { withPagination } from '../../utils'
 import { UserMapper } from './user-mapper'
-import { User, UserList } from './user-models'
+import { User, UserList } from './user-types'
 
 interface IUserRepository {
   createUser(user: User): Promise<User>

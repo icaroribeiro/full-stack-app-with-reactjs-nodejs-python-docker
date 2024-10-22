@@ -24,8 +24,8 @@ import { validationMiddleware } from '../../middlewares'
 import { APIErrorResponse, APIPaginationResponse } from '../../shared'
 import { paginationParamsValidator, userValidator } from '../../validators'
 import { UserMapper } from './user-mapper'
-import { UserDTO, UserRequest } from './user-models'
 import { IUserService } from './user-service'
+import { UserRequest, UserResponse } from './user-types'
 
 @injectable()
 @Route('users')
@@ -44,7 +44,7 @@ class UserController extends Controller {
    */
   @Post('/')
   @SuccessResponse('201', 'Created')
-  @Example<UserDTO>({
+  @Example<UserResponse>({
     id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     name: 'name',
     email: 'email@email.com',
@@ -55,20 +55,20 @@ class UserController extends Controller {
     isOperational: false,
   })
   @Middlewares(validationMiddleware(userValidator))
-  public async addUser(@Body() body: UserRequest): Promise<UserDTO> {
+  public async addUser(@Body() body: UserRequest): Promise<UserResponse> {
     const user = UserMapper.toDomain(body)
     const registeredUser = await this.userService.registerUser(user)
-    const userDTO = UserMapper.toDTO(registeredUser)
+    const userResponse = UserMapper.toResponse(registeredUser)
     this.setStatus(httpStatus.CREATED)
-    return userDTO
+    return userResponse
   }
 
   // @Get('/')
-  // public async fetchUserList(): Promise<UserListDTO> {
+  // public async fetchUserList(): Promise<UserListResponse> {
   //   const retrievedUserList = await this.userService.retrieveUserList()
-  //   const userListDTO = retrievedUserList.map((u) => UserMapper.toDTO(u))
+  //   const userListResponse = retrievedUserList.map((u) => UserMapper.toResponse(u))
   //   this.setStatus(OK)
-  //   return userListDTO
+  //   return userListResponse
   // }
 
   /**
@@ -78,7 +78,7 @@ class UserController extends Controller {
    */
   @Get('/')
   @SuccessResponse('200', 'OK')
-  @Example<APIPaginationResponse<UserDTO>>({
+  @Example<APIPaginationResponse<UserResponse>>({
     page: 1,
     limit: 1,
     totalPages: 1,
@@ -97,16 +97,16 @@ class UserController extends Controller {
     isOperational: false,
   })
   @Middlewares(validationMiddleware(paginationParamsValidator))
-  public async fetchUsers(
+  public async fetchPaginatedUsers(
     @Request() req: express.Request,
     @Query() page?: number,
     @Query() limit?: number,
-  ): Promise<APIPaginationResponse<UserDTO>> {
+  ): Promise<APIPaginationResponse<UserResponse>> {
     const baseURL = `${req.protocol}://${req.get('host')}${req.originalUrl}`
     const parsedQuery = paginationParamsValidator.parse({
       query: { page: page, limit: limit },
     })
-    const [retrievedUserList, totalRecords] =
+    const [retrievedUsers, totalRecords] =
       await this.userService.retrieveAndCountUsers(
         parsedQuery.query.page,
         parsedQuery.query.limit,
@@ -115,7 +115,7 @@ class UserController extends Controller {
       page: parsedQuery.query.page,
       limit: parsedQuery.query.limit,
       totalRecords: totalRecords,
-      records: retrievedUserList.map((u) => UserMapper.toDTO(u)),
+      records: retrievedUsers.map((u) => UserMapper.toResponse(u)),
     }
     this.setStatus(httpStatus.OK)
     return this.paginationService.createResponse(baseURL, paginationConfig)
@@ -126,7 +126,7 @@ class UserController extends Controller {
    */
   @Get('{userId}')
   @SuccessResponse('200', 'OK')
-  @Example<UserDTO>({
+  @Example<UserResponse>({
     id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     name: 'name',
     email: 'email@email.com',
@@ -136,11 +136,11 @@ class UserController extends Controller {
     details: { context: undefined, cause: undefined },
     isOperational: false,
   })
-  public async fetchUser(@Path() userId: string): Promise<UserDTO> {
+  public async fetchUser(@Path() userId: string): Promise<UserResponse> {
     const retrievedUser = await this.userService.retrieveUser(userId)
-    const userDTO = UserMapper.toDTO(retrievedUser)
+    const userResponse = UserMapper.toResponse(retrievedUser)
     this.setStatus(httpStatus.OK)
-    return userDTO
+    return userResponse
   }
 
   /**
@@ -148,7 +148,7 @@ class UserController extends Controller {
    */
   @Put('{userId}')
   @SuccessResponse('200', 'OK')
-  @Example<UserDTO>({
+  @Example<UserResponse>({
     id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     name: 'name',
     email: 'email@email.com',
@@ -162,12 +162,12 @@ class UserController extends Controller {
   public async renewUser(
     @Path() userId: string,
     @Body() body: UserRequest,
-  ): Promise<UserDTO> {
+  ): Promise<UserResponse> {
     const user = UserMapper.toDomain(body)
     const replacedUser = await this.userService.replaceUser(userId, user)
-    const userDTO = UserMapper.toDTO(replacedUser)
+    const userResponse = UserMapper.toResponse(replacedUser)
     this.setStatus(httpStatus.OK)
-    return userDTO
+    return userResponse
   }
 
   /**
@@ -175,7 +175,7 @@ class UserController extends Controller {
    */
   @Delete('{userId}')
   @SuccessResponse('200', 'OK')
-  @Example<UserDTO>({
+  @Example<UserResponse>({
     id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     name: 'name',
     email: 'email@email.com',
@@ -185,11 +185,11 @@ class UserController extends Controller {
     details: { context: undefined, cause: undefined },
     isOperational: false,
   })
-  public async destroyUser(@Path() userId: string): Promise<UserDTO> {
+  public async destroyUser(@Path() userId: string): Promise<UserResponse> {
     const deletedUser = await this.userService.removeUser(userId)
-    const userDTO = UserMapper.toDTO(deletedUser)
+    const userResponse = UserMapper.toResponse(deletedUser)
     this.setStatus(httpStatus.OK)
-    return userDTO
+    return userResponse
   }
 }
 
