@@ -1,52 +1,72 @@
-import 'react-toastify/ReactToastify.css'
-
-import { useEffect, useState } from 'react'
-import { toast, ToastContainer } from 'react-toastify'
-
-import { healthCheckAPI } from './apis/health-check-api'
+import './App.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import routes from './routes'
+import Layout from './components/Layout'
+import Page404 from './pages/Page404'
 
 function App() {
-  const [health, setHealth] = useState({ healthy: false })
+  const router = createBrowserRouter([
+    {
+      element: <Layout />,
+      errorElement: <Page404 />,
+      children: routes,
+    },
+  ])
 
-  const getHealth = () => {
-    healthCheckAPI
-      .get()
-      .then((data) => {
-        console.log(data)
-        setHealth(data)
-      })
-      .catch((error) => console.error(error))
-  }
-
-  const checkHealth = (health: { healthy: boolean }) => {
-    if (health?.healthy) {
-      console.log('A')
-      toast('A')
-    }
-    console.log('B')
-  }
-
-  useEffect(() => {
-    checkHealth(health)
-  }, [health])
-
-  return (
-    <>
-      <div>
-        <button
-          onClick={() => {
-            getHealth()
-          }}
-        >
-          Check Health
-        </button>
-        <ToastContainer></ToastContainer>
-      </div>
-    </>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
+
+// import 'react-toastify/ReactToastify.css'
+
+// import { useEffect, useState } from 'react'
+// import { toast, ToastContainer } from 'react-toastify'
+
+// import { healthCheckAPI } from './apis/health-check-api'
+
+// function App() {
+//   const [health, setHealth] = useState({ healthy: false })
+
+//   const getHealth = () => {
+//     healthCheckAPI
+//       .get()
+//       .then((data) => {
+//         console.log(data)
+//         setHealth(data)
+//       })
+//       .catch((error) => console.error(error))
+//   }
+
+//   const checkHealth = (health: { healthy: boolean }) => {
+//     if (health?.healthy) {
+//       console.log('A')
+//       toast('A')
+//     }
+//     console.log('B')
+//   }
+
+//   useEffect(() => {
+//     checkHealth(health)
+//   }, [health])
+
+//   return (
+//     <>
+//       <div>
+//         <button
+//           onClick={() => {
+//             getHealth()
+//           }}
+//         >
+//           Check Health
+//         </button>
+//         <ToastContainer></ToastContainer>
+//       </div>
+//     </>
+//   )
+// }
+
+// export default App
 
 // import { Effect } from 'effect'
 // import { useCallback, useMemo, useState } from 'react'
