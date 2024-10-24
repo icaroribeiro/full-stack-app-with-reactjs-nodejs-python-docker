@@ -7,7 +7,7 @@ import { Suspense } from 'react'
 
 function Layout() {
   return (
-    <>
+    <div>
       <Header />
       <main>
         <Suspense fallback={<Loader />}>
@@ -15,7 +15,7 @@ function Layout() {
         </Suspense>
       </main>
       <Footer />
-    </>
+    </div>
   )
 }
 
