@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { INTERNAL_SERVER_ERROR } from 'http-status'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -5,8 +6,18 @@ import { DBService } from '../../../../services'
 import { ServerError } from '../../../../server-error'
 import { HealthCheckService } from '..'
 
+vi.mock('../../../../services', () => {
+  const actual = vi.importActual<typeof import('../../../../services')>(
+    '../../../../services',
+  )
+  return {
+    ...actual,
+    DBService: vi.fn(),
+  }
+})
+
 describe('HealthCheckService', () => {
-  const mockedDBService = new DBService()
+  const mockedDBService = vi.mocked(new DBService())
 
   afterEach(() => {
     vi.clearAllMocks()
