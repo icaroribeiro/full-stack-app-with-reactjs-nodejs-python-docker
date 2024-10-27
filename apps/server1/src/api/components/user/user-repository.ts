@@ -2,7 +2,7 @@ import * as schemas from '@db/schemas'
 import { count, desc, eq } from 'drizzle-orm'
 
 import { DBService } from '../../../services'
-import { withPagination } from '../../utils'
+import { withPagination } from '../../shared'
 import { UserMapper } from './user-mapper'
 import { User, UserList } from './user-types'
 

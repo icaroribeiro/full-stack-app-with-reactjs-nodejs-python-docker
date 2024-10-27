@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "swagger:generate": "tsoa spec",
     "routes:generate": "tsoa routes",
-    "db:generate": "drizzle-kit generate --config ./db/config/config.ts",
+    "db:generate": "env-cmd -f ./.env.development drizzle-kit generate --config ./db/config/config.ts",
     "db:migrate": "env-cmd -f ./.env.development drizzle-kit migrate --config ./db/config/config.ts",
     "start:dev": "tsoa spec-and-routes && pnpm vite-node --watch --mode development ./src/index.ts",
     "pre:build": "rimraf dist && mkdir dist",

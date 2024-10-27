@@ -1,7 +1,8 @@
 .gitignore
-node_modules
+.pytest_cache
+build
 dist
-coverage
-.turbo
+.ruff_cache
+.coverage
 .env.development
 .env.test

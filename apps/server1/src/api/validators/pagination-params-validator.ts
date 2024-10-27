@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { genOptional } from '../utils/validator-util'
+import { genOptional } from './validator-util'
 
 const minimumPage = '1'
 const minimumLimit = '1'
