@@ -1,6 +1,7 @@
 # Stage 1: Configure the base image
 # --------------------------------------------------
 FROM python:3.13-bookworm AS base
+RUN pip install --upgrade pip
 RUN pip install poetry
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
@@ -13,13 +14,13 @@ FROM base AS pruner
 WORKDIR /app
 COPY /apps/server2/pyproject.toml /apps/server2/poetry.lock .
 COPY /apps/server2/README.md .
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+RUN --mount=type=cache,id=poetry,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 # Stage 3: Configure the builder image
 # --------------------------------------------------
 FROM base AS builder
 RUN apt-get update
-RUN apt-get install -y binutils
+RUN apt-get install binutils
 WORKDIR /app
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
@@ -32,11 +33,14 @@ RUN poe build
 # Stage 4: Configure the runner image
 # # --------------------------------------------------
 FROM python:3.13-slim-bookworm AS runner
+RUN pip install --upgrade pip
+RUN pip install alembic asyncpg greenlet
 WORKDIR /app
 COPY /apps/server2/alembic.ini .
-COPY /apps/server2/db ./db
-RUN pip install alembic asyncpg && alembic upgrade head
+COPY /apps/server2/db/migrations ./db/migrations
+COPY /apps/server2/db/models ./db/models
+COPY /apps/server2/scripts/startup.sh ./scripts/startup.sh
 COPY --from=builder /app/dist ./dist
-RUN chmod +x ./dist/main
+RUN chmod +x ./scripts/startup.sh
 EXPOSE ${PORT}
-CMD ["./dist/main"]
+CMD ["/bin/bash","-c","./scripts/startup.sh"]
