@@ -1,13 +1,13 @@
 [tool.poe.tasks]
-lint = "poetry run ruff check"
-lint-fix = "poetry run ruff check --fix"
-format = "poetry run ruff format"
-test = "poetry run pytest --cov src"
-db-generate = "dotenv -f .env.development run -- poetry run alembic revision --autogenerate"
-db-migrate = "dotenv -f .env.development run -- poetry run alembic upgrade head"
+lint = "ruff check"
+lint-fix = "ruff check --fix"
+format = "ruff format"
+test = "pytest --cov src"
+db-generate = "dotenv -f .env.development run -- alembic revision --autogenerate"
+db-migrate = "dotenv -f .env.development run -- alembic upgrade head"
 pypath-config = "dotenv -f .env.development set PYTHONPATH $PWD"
-_start-dev = "dotenv -f .env.development run -- poetry run python src/main.py"
+_start-dev = "dotenv -f .env.development run -- python src/main.py"
 start-dev = ["pypath-config", "_start-dev"]
 pre-build = "rm -rf dist build"
-make-bundle = "poetry run pyinstaller -F src/main.py --clean --specpath build"
+make-bundle = "pyinstaller -F src/main.py --clean"
 build = ["pre-build", "make-bundle"]

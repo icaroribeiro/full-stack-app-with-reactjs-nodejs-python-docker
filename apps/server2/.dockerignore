@@ -1,8 +1,1 @@
-.gitignore
-.pytest_cache
-build
-dist
-.ruff_cache
-.coverage
-.env.development
-.env.test
+README.md

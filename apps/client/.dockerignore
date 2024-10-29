@@ -1,6 +1,1 @@
-.gitignore
-node_modules
-dist
-.turbo
-tsconfig.tsbuildinfo
-.env.development
+README.md

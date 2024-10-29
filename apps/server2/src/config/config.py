@@ -6,8 +6,10 @@ from src.server_error import ServerError
 
 
 class Config:
-    @property
-    def port(self) -> str:
+    def get_env(self) -> str:
+        return self.__get_env_var(name="ENV")
+
+    def get_port(self) -> str:
         return self.__get_env_var(name="PORT")
 
     # @property

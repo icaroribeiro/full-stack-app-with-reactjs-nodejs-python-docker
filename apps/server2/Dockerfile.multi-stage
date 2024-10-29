@@ -1,54 +1,42 @@
 # Stage 1: Configure the base image
 # --------------------------------------------------
-FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-    
+FROM python:3.13-bookworm AS base
+RUN pip install poetry
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
 # Stage 2: Configure the pruner image
 # --------------------------------------------------
 FROM base AS pruner
-RUN apk update
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY . .
-RUN pnpm install turbo --global
-RUN turbo prune server1 --docker
+COPY /apps/server2/pyproject.toml /apps/server2/poetry.lock .
+COPY /apps/server2/README.md .
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-# Stage 3: Configure the prod-deps image
-# --------------------------------------------------
-FROM base AS prod-deps
-RUN apk update
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=pruner /app/out/json/ .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-RUN pnpm deploy --filter=server1 --prod /prod/server1
-
-# Stage 4: Configure the builder image
+# Stage 3: Configure the builder image
 # --------------------------------------------------
 FROM base AS builder
-RUN apk update
-RUN apk add --no-cache libc6-compat
+RUN apt-get update
+RUN apt-get install -y binutils
 WORKDIR /app
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=pruner /app/out/full/ .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm turbo build --filter=server1
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+COPY --from=pruner ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY /apps/server2/poe_tasks.toml .
+COPY /apps/server2/src ./src
+RUN pip install poethepoet pyinstaller
+RUN poe build
 
-# Stage 5: Configure the runner image
-# --------------------------------------------------
-FROM node:20-slim AS runner
-RUN npm install vite-node --global
+# Stage 4: Configure the runner image
+# # --------------------------------------------------
+FROM python:3.13-slim-bookworm AS runner
 WORKDIR /app
-COPY --from=prod-deps /prod/server1/node_modules ./node_modules
-COPY --from=builder /app/apps/server1/db/migrations ./db/migrations
-COPY --from=builder /app/apps/server1/scripts/migrate.mjs ./scripts/migrate.mjs
-COPY --from=builder /app/apps/server1/dist ./dist
-COPY --from=builder /app/apps/server1/scripts/startup.sh .
-RUN chmod +x ./startup.sh
+COPY /apps/server2/alembic.ini .
+COPY /apps/server2/db ./db
+RUN pip install alembic asyncpg && alembic upgrade head
+COPY --from=builder /app/dist ./dist
+RUN chmod +x ./dist/main
 EXPOSE ${PORT}
-CMD ["/bin/bash","-c","./startup.sh"]
+CMD ["./dist/main"]

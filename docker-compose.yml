@@ -37,6 +37,7 @@ services:
       dockerfile: ./apps/server2/Dockerfile.multi-stage
     environment:
       - PORT=5000
+      - ENV=production
       - DATABASE_URL=postgresql+asyncpg://pguser:pgsecret@localhost:5432/pgdb
     restart: always
     ports:
@@ -62,4 +63,5 @@ services:
 volumes:
   client:
   server1:
+  server2:
   database:

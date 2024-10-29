@@ -1,7 +1,1 @@
-.gitignore
-node_modules
-dist
-coverage
-.turbo
-.env.development
-.env.test
+README.md
