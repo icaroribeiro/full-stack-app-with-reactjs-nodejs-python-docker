@@ -24,16 +24,16 @@ COPY --from=pruner /app/out/full/ .
 RUN --mount=type=cache,id=pnpm,target=$PNPM_STORE_DIR pnpm install --frozen-lockfile
 RUN pnpm turbo build --filter=server1
 
-# Stage 4: Configure the runner image
+# Stage 4: Configure and run the runner runtime
 # --------------------------------------------------
 FROM node:20-bookworm-slim AS runner
-RUN npm install --global npm@latest
-RUN npm install drizzle-orm postgres vite-node --global
 WORKDIR /app
 COPY /apps/server1/db/migrations ./db/migrations
 COPY /apps/server1/scripts/migrate.mjs ./scripts/migrate.mjs
 COPY /apps/server1/scripts/startup.sh ./scripts/startup.sh
 COPY --from=builder /app/apps/server1/dist ./dist
+RUN npm install drizzle-orm postgres
+RUN npm install vite-node --global
 RUN chmod +x ./scripts/startup.sh
 EXPOSE ${PORT}
 CMD ["/bin/bash","-c","./scripts/startup.sh"]

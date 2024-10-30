@@ -1,7 +1,6 @@
 # Stage 1: Configure the base image
 # --------------------------------------------------
 FROM python:3.13-bookworm AS base
-RUN pip install --upgrade pip
 RUN pip install poetry
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
@@ -19,28 +18,27 @@ RUN --mount=type=cache,id=poetry,target=$POETRY_CACHE_DIR poetry install --witho
 # Stage 3: Configure the builder image
 # --------------------------------------------------
 FROM base AS builder
-RUN apt-get update
-RUN apt-get install binutils
 WORKDIR /app
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 COPY --from=pruner ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY /apps/server2/poe_tasks.toml .
 COPY /apps/server2/src ./src
+RUN apt-get update
+RUN apt-get install binutils
 RUN pip install poethepoet pyinstaller
 RUN poe build
 
-# Stage 4: Configure the runner image
+# Stage 4: Configure and run the runtime image
 # # --------------------------------------------------
-FROM python:3.13-slim-bookworm AS runner
-RUN pip install --upgrade pip
-RUN pip install alembic asyncpg greenlet
+FROM python:3.13-slim-bookworm AS runtime
 WORKDIR /app
 COPY /apps/server2/alembic.ini .
 COPY /apps/server2/db/migrations ./db/migrations
 COPY /apps/server2/db/models ./db/models
 COPY /apps/server2/scripts/startup.sh ./scripts/startup.sh
 COPY --from=builder /app/dist ./dist
+RUN pip install alembic asyncpg greenlet
 RUN chmod +x ./scripts/startup.sh
 EXPOSE ${PORT}
 CMD ["/bin/bash","-c","./scripts/startup.sh"]
