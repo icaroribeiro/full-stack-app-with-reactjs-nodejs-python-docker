@@ -1,0 +1,1 @@
+src/api/components/health-check/index.ts src/api/components/health-check/health-check-types.ts src/api/components/health-check/health-check-service.ts src/api/components/health-check/health-check-mapper.ts src/api/components/health-check/health-check-controller.ts src/api/components/health-check/tests

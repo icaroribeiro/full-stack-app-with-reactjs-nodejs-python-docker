@@ -63,7 +63,7 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       coverage: {
-        reporter: ['lcov', 'text'],
+        reporter: [['lcov', { projectRoot: appPath }], 'text'],
       },
     },
   }
