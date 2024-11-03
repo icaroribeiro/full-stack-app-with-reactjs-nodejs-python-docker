@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
-from src.api.routes.routes import health_check_router
+from src.api.components.health.health_check_controller import HealthCheckController
+from src.api.routers.routers import health_check_router
 from src.config import config
+from src.services.container_service import Container
 
 
 class Server:
@@ -23,6 +25,10 @@ class Server:
             {"name": "health-check", "description": "Everything about health check"},
             {"name": "users", "description": "Everything about users"},
         ],
+        servers=[
+            {"url": "http://localhost:5001", "description": "Development environment"},
+            {"url": "http://localhost:5000", "description": "Production environment"},
+        ],
     )
 
     def __init__(self):
@@ -33,5 +39,6 @@ class Server:
         return self.__app
 
     def register_routes(self) -> None:
+        container = Container()
+        container.wire(modules=[HealthCheckController])
         self.__app.include_router(router=health_check_router)
-        return

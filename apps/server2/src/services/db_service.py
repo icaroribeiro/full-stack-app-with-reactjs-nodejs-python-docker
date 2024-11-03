@@ -57,6 +57,9 @@ class DBService:
                 ),
             )
 
+    def check_database_is_alive(self) -> bool:
+        return False
+
     # async def close(self):
     #     if self.__engine is None:
     #         raise Exception("DatabaseSessionManager is not initialized")

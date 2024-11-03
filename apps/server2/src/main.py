@@ -6,12 +6,6 @@ from src.server import Server
 server = Server()
 app = server.app
 
-
-# @app.get("/")
-# async def main_route():
-#     return {"message": "Hey, It mfffe Goku"}
-
-
 is_production_build = True if config.get_env() == "production" else False
 
 if __name__ == "__main__":

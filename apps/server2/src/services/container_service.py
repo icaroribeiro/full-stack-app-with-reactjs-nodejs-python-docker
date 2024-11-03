@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 
 from src.api.components.health.health_check_service import HealthCheckService
-from src.services.db_service import DatabaseService
+from src.services.db_service import DBService
 
 # async def session_factory(conn_string: str):
 #     database_session_manager = DatabaseSessionManager(conn_string=conn_string)
@@ -10,12 +10,22 @@ from src.services.db_service import DatabaseService
 
 
 class Container(containers.DeclarativeContainer):
-    db_service: providers.Factory
-    health_check_service: providers.Factory
+    db_service = providers.Factory(DBService)
+    health_check_service = providers.Factory(HealthCheckService, db_service=db_service)
 
-    def __init__(self):
-        self.db_service = None
-        self.health_check_service = None
+    # def __init__(self):
+    #     self.register_database_container()
+    #     self.register_service_container()
+
+    # #     self.db_servddice = None
+    # #     self.health_check_service = None
+    # def register_database_container(self):
+    #     self.db_service = providers.Factory(DBService)
+
+    # def register_service_container(self):
+    #     self.health_check_service = providers.Factory(
+    #         HealthCheckService, db_service=self.db_service
+    #     )
 
 
 class ContainerService:
@@ -23,18 +33,10 @@ class ContainerService:
 
     def __init__(self):
         self.__container = Container()
-        self.register_database_container()
-        # self.register_repository_container()
-        self.register_service_container()
+        # self.register_database_container()
+        # # self.register_repository_container()
+        # self.register_service_container()
 
     @property
     def container(self) -> containers.DeclarativeContainer:
         return self.__container
-
-    def register_database_container(self):
-        self.__container.db_service = providers.Factory(DatabaseService)
-
-    def register_service_container(self):
-        self.__container.health_check_service = providers.Factory(
-            HealthCheckService, db_service=self.__container.db_service
-        )

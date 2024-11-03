@@ -114,7 +114,7 @@
 	"info": {
 		"title": "Take-Home Assignment API",
 		"version": "1.0.0",
-		"description": "A REST API developed using Node.js, TypeScript and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/monorepo-dockerized-full-stack-app-with-rollup)",
+		"description": "A REST API developed using Node.js, TypeScript and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/full-stack-app-with-reactjs-nodejs-python-docker)",
 		"license": {
 			"name": "MIT"
 		},
