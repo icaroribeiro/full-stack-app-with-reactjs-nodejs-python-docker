@@ -7,10 +7,16 @@ from src.server_error import ServerError
 
 class Config:
     def get_env(self) -> str:
-        return self.__get_env_var(name="ENV")
+        return self.__get_env_var("ENV")
 
     def get_port(self) -> str:
-        return self.__get_env_var(name="PORT")
+        return self.__get_env_var("PORT")
+
+    def get_openapi_url(self) -> str:
+        return self.__get_env_var("OPENAPI_URL")
+
+    def get_docs_url(self) -> str:
+        return self.__get_env_var("DOCS_URL")
 
     # @property
     # def database_driver(self) -> str:

@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import { INTERNAL_SERVER_ERROR } from 'http-status'
+import httpStatus from 'http-status'
 import postgres from 'postgres'
 
 import { ServerError } from '../server-error'
@@ -25,22 +25,13 @@ class DBService implements IDBService {
     this.dbMigrationClient = undefined
   }
 
-  public get dbClient(): postgres.Sql {
-    if (this._dbClient !== undefined) {
-      return this._dbClient
-    }
-    const message = 'Database client is undefined!'
-    console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
-  }
-
   public get db(): PostgresJsDatabase<Record<string, never>> {
     if (this._db !== undefined) {
       return this._db
     }
     const message = 'DB is undefined!'
     console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public connectDatabase(databaseURL: string): void {
@@ -54,7 +45,7 @@ class DBService implements IDBService {
     } catch (error) {
       const message = 'Database connection failed!'
       console.error(message, error)
-      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: databaseURL,
         cause: error,
       })
@@ -68,7 +59,7 @@ class DBService implements IDBService {
     }
     const message = 'DB is undefined!'
     console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async migrateDatabase(migrationsFolder: string): Promise<void> {
@@ -83,12 +74,12 @@ class DBService implements IDBService {
       } catch (error) {
         const message = 'Database migrations failed!'
         console.error(message, error)
-        throw new ServerError(message, INTERNAL_SERVER_ERROR)
+        throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
       }
     }
     const message = 'Database migration client is undefined!'
     console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async getDatabaseTableRowCount(name: string): Promise<number> {
@@ -102,7 +93,7 @@ class DBService implements IDBService {
     }
     const message = 'DB is undefined!'
     console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async clearDatabaseTables(): Promise<void> {
@@ -124,7 +115,17 @@ class DBService implements IDBService {
     }
     const message = 'DB is undefined!'
     console.error(message)
-    throw new ServerError(message, INTERNAL_SERVER_ERROR)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  public async deactivateDatabase(): Promise<void> {
+    if (this._dbClient !== undefined) {
+      await this._dbClient.end()
+      return
+    }
+    const message = 'Database client is undefined!'
+    console.error(message)
+    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 }
 

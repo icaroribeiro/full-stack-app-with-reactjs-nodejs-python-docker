@@ -97,7 +97,7 @@ abstract class AbsTestFactory implements ITestFactory {
 
   protected async deactivateDatabase(): Promise<void> {
     try {
-      await this._dbService.dbClient.end()
+      await this._dbService.deactivateDatabase()
     } catch (error) {
       const message = 'Database deactivation failed!'
       console.error(message, error)

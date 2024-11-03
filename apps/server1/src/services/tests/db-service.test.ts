@@ -56,24 +56,6 @@ describe('DBService', () => {
     await factory.closeAll()
   })
 
-  describe('.dbClient', () => {
-    it('should define a function', () => {
-      const dbService = new DBService()
-      dbService.connectDatabase(config.getDatabaseURL())
-
-      expect(typeof dbService.dbClient).toBe('function')
-    })
-
-    it('should fail and throw exception when database client is undefined', () => {
-      const message = 'Database client is undefined!'
-      const serverError = new ServerError(message, INTERNAL_SERVER_ERROR)
-
-      const dbService = new DBService()
-
-      expect(() => dbService.dbClient).toThrowError(serverError)
-    })
-  })
-
   describe('.db', () => {
     it('should define an object', () => {
       const dbService = new DBService()

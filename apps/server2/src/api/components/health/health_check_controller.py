@@ -1,50 +1,29 @@
-import httpStatus from 'http-status'
-import {
-  Controller,
-  Example,
-  Get,
-  Response,
-  Route,
-  SuccessResponse,
-  Tags,
-} from 'tsoa'
-import { inject, injectable } from 'tsyringe'
+import logging
 
-import { APIErrorResponse } from '../../shared'
-import { HealthCheckMapper } from './health-check-mapper'
-import { IHealthCheckService } from './health-check-service'
-import { HealthCheckResponse } from './health-check-types'
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends
+from src.api.components.health.health_check_mapper import HealthCheckMapper
+from src.api.components.health.health_check_service import HealthCheckService
+from src.services.container_service import ContainerService
 
-@injectable()
-@Route('health')
-@Tags('health-check')
-class HealthCheckController extends Controller {
-  constructor(
-    @inject('HealthCheckService')
-    private healthCheckService: IHealthCheckService,
-  ) {
-    super()
-  }
+logger = logging.getLogger(__name__)
 
-  /**
-   * API endpoint used to verify if the service has started up correctly and is ready to accept requests
-   */
-  @Get('/')
-  @SuccessResponse('200', 'OK')
-  @Example<HealthCheckResponse>({
-    healthy: true,
-  })
-  @Response<APIErrorResponse>('500', 'Internal Server Error', {
-    message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
-    isOperational: false,
-  })
-  getHealth(): HealthCheckResponse {
-    const isHealthy = this.healthCheckService.checkHealth()
-    const healthCheckResponse = HealthCheckMapper.toResponse(isHealthy)
-    this.setStatus(httpStatus.OK)
-    return healthCheckResponse
-  }
-}
 
-export { HealthCheckController }
+class HealthCheckController(APIRouter):
+    @inject
+    def __init__(
+        self,
+        prefix="/health",
+        tags=["health"],
+        dependencies=[
+            Depends(Provide[ContainerService().container.health_check_service])
+        ],
+    ):
+        super().__init__()
+
+        @self.get(path="/status")
+        def get_health():
+            health_check_service: HealthCheckService = self.dependencies[0]
+            is_healthy = health_check_service.check_health()
+            health_check_response = HealthCheckMapper.to_response(is_healthy)
+            return health_check_response
