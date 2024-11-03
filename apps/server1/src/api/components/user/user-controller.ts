@@ -51,7 +51,7 @@ class UserController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   @Middlewares(validationMiddleware(userValidator))
@@ -93,7 +93,7 @@ class UserController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   @Middlewares(validationMiddleware(paginationParamsValidator))
@@ -133,7 +133,7 @@ class UserController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   public async fetchUser(@Path() userId: string): Promise<UserResponse> {
@@ -155,7 +155,7 @@ class UserController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   @Middlewares(validationMiddleware(userValidator))
@@ -182,7 +182,7 @@ class UserController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   public async destroyUser(@Path() userId: string): Promise<UserResponse> {

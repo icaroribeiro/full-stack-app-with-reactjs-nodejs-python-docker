@@ -36,7 +36,7 @@ class HealthCheckController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: undefined, cause: undefined },
+    details: { context: '', cause: '' },
     isOperational: false,
   })
   getHealth(): HealthCheckResponse {

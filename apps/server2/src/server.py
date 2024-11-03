@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
-from src.api.components.health.health_check_controller import HealthCheckController
+from src.api.components.health import health_check_controller
 from src.api.routers.routers import health_check_router
 from src.config import config
-from src.services.container_service import Container
+from src.services.container_service import ContainerService
 
 
 class Server:
@@ -39,6 +39,7 @@ class Server:
         return self.__app
 
     def register_routes(self) -> None:
-        container = Container()
-        container.wire(modules=[HealthCheckController])
+        container_service = ContainerService()
+        container_service.initialize_container()
+        container_service.container.wire(modules=[health_check_controller])
         self.__app.include_router(router=health_check_router)

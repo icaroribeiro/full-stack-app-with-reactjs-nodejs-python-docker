@@ -57,8 +57,20 @@ class DBService:
                 ),
             )
 
-    def check_database_is_alive(self) -> bool:
-        return False
+    async def check_database_is_alive(self) -> bool:
+        if self.__engine is not None:
+            async with self.__engine.begin() as conn:
+                try:
+                    await conn.execute("SELECT 1")
+                    return True
+                except Exception as error:
+                    await conn.rollback()
+                    message = "Async transaction not established!"
+                    logger.error(message, error)
+                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        message = "Async engine is None!"
+        logger.error(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # async def close(self):
     #     if self.__engine is None:
