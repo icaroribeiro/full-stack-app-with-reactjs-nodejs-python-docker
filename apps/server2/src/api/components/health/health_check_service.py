@@ -20,7 +20,8 @@ class HealthCheckService(IHealthCheckService):
 
     async def check_health(self):
         try:
-            await self.db_service.clear_database_tables()
+            count = await self.db_service.get_database_table_row_count("students")
+            logger.info(count)
             return await self.db_service.check_database_is_alive()
         except Exception:
             message = "An error occurred when checking if application is alive"

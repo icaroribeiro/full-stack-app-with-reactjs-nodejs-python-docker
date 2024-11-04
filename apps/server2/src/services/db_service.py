@@ -26,6 +26,14 @@ class IDBService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
+    async def migrate_database(self) -> None:
+        raise Exception("NotImplementedException")
+
+    @abstractmethod
+    async def get_database_table_row_count(self, name: str) -> int:
+        raise Exception("NotImplementedException")
+
+    @abstractmethod
     async def clear_database_tables(self) -> None:
         raise Exception("NotImplementedException")
 
@@ -39,7 +47,6 @@ class DBService(IDBService):
 
     def __init__(self):
         self.__engine = None
-        # self.__sessionmaker = async_sessionmaker(autocommit=False, bind=self.__engine)
 
     @asynccontextmanager
     @property
@@ -93,27 +100,52 @@ class DBService(IDBService):
         logger.error(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    async def migrate_database(self) -> None:
+        return
+
+    async def get_database_table_row_count(self, name: str) -> int:
+        if self.__engine is not None:
+            async with self.__engine.connect() as conn:
+                try:
+                    query = text(f"""
+                        SELsssECT count(*)
+                        FROM {name};
+                    """)
+                    result = await conn.execute(query)
+                    _tuple = result.first()
+                    await conn.commit()
+                    return _tuple[0]
+                except Exception as error:
+                    await conn.rollback()
+                    message = (
+                        f"An error occurred when counting rows of database table {name}"
+                    )
+                    logger.error(message, error)
+                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        message = "Async engine is None!"
+        logger.error(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     async def clear_database_tables(self) -> None:
         if self.__engine is not None:
             async with self.__engine.connect() as conn:
                 try:
-                    query = text(
-                        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';"
-                    )
-                    tables2 = await conn.execute(query)
-                    for table in tables2.fetchall():
-                        print("Table=", table[0])
-                    # tables = await conn.run_sync(
-                    #     lambda sync_conn: inspect(sync_conn).get_table_names()
-                    # )
-                    for table in tables:
+                    query = text("""
+                        SELECT table_name
+                        FROM information_schema.tables
+                            WHERE table_schema = 'public'
+                                AND table_type = 'BASE TABLE';
+                    """)
+                    result = await conn.execute(query)
+                    for _tuple in result.fetchall():
+                        table = _tuple[0]
                         query = text(f"TRUNCATE TABLE {table} CASCADE;")
                         await conn.execute(query)
                     await conn.commit()
                     return
                 except Exception as error:
                     await conn.rollback()
-                    message = "Async transaction not established!"
+                    message = "An error occurred when cleaning the database tables"
                     logger.error(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"

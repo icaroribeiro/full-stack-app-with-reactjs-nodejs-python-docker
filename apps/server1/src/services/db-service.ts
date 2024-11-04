@@ -85,10 +85,10 @@ class DBService implements IDBService {
 
   public async getDatabaseTableRowCount(name: string): Promise<number> {
     if (this._db !== undefined) {
-      const query = sql.raw(`
+      const query = sql<string>`
         SELECT count(*) 
         FROM ${name};
-      `)
+      `
       const result = await this._db.execute(query)
       return result.length ? parseInt(result[0].count as string) : 0
     }
