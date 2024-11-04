@@ -6,7 +6,7 @@ from src.api.components.health.health_check_mapper import HealthCheckMapper
 from src.api.components.health.health_check_models import HealthCheckResponse
 from src.api.components.health.health_check_service import HealthCheckService
 from src.api.shared.api_error_response import APIErrorResponse
-from src.services.container_service import Container
+from src.container.container import Container
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class HealthCheckController(APIRouter):
     def __init__(
         self,
         prefix="/health",
-        dependencies=[Depends(Provide[Container.health_check_service])],
+        dependencies=[Depends(Provide[Container.health_check_service_provider])],
     ):
         super().__init__(prefix=prefix, dependencies=dependencies)
         self.setup_routes()

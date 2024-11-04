@@ -2,7 +2,7 @@ import { createServer, Server as HttpServer } from 'http'
 
 import { Server } from '../server'
 import { config } from '../config/config'
-import { ContainerService } from '../services/container-service'
+import { ContainerService } from '../container/container-service'
 import { AbsTestFactory } from './abs-factory'
 
 class HttpTestFactory extends AbsTestFactory {

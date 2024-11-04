@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { DBContainerTestFactory } from '../../factories/db-container-factory'
-import { ContainerService } from '../container-service'
+import { ContainerService } from '../../container/container-service'
 
 describe('ContainerService', () => {
   const factory: DBContainerTestFactory = new DBContainerTestFactory()

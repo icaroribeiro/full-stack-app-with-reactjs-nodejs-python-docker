@@ -12,7 +12,10 @@ import {
 } from '../api/components/user'
 import { config } from '../config/config'
 import { DBService, IDBService } from '../services/db-service'
-import { IPaginationService, PaginationService } from './pagination-service'
+import {
+  IPaginationService,
+  PaginationService,
+} from '../services/pagination-service'
 
 class ContainerService {
   private readonly _container: DependencyContainer

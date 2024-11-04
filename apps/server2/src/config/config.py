@@ -6,6 +6,9 @@ from src.server_error import ServerError
 
 
 class Config:
+    def get_log_level(self) -> str:
+        return self.__get_env_var("LOG_LEVEL")
+
     def get_env(self) -> str:
         return self.__get_env_var("ENV")
 
@@ -18,36 +21,27 @@ class Config:
     def get_docs_url(self) -> str:
         return self.__get_env_var("DOCS_URL")
 
-    # @property
-    # def database_driver(self) -> str:
-    #     return self.get(key="DATABASE_DRIVER", default_value="postgresql+asyncpg")
+    def get_database_url(self) -> str:
+        return self.__get_env_var("DATABASE_URL")
 
-    # @property
-    # def database_user(self) -> str:
-    #     return self.get(key="DATABASE_USER", default_value="root")
+    def get_database_user(self) -> str:
+        return self.__get_env_var("DATABASE_USER")
 
-    # @property
-    # def database_password(self) -> str:
-    #     return self.get(key="DATABASE_PASSWORD", default_value="root")
+    def get_database_password(self) -> str:
+        return self.__get_env_var("DATABASE_PASSWORD")
 
-    # @property
-    # def database_host(self) -> str:
-    #     return self.get(key="DATABASE_HOST", default_value="localhost")
+    def get_database_name(self) -> str:
+        return self.__get_env_var("DATABASE_NAME")
 
-    # @property
-    # def database_port(self) -> str:
-    #     return self.get(key="DATABASE_PORT", default_value="5433")
+    def get_database_port(self) -> str:
+        return self.__get_env_var("DATABASE_PORT")
 
-    # @property
-    # def database_name(self) -> str:
-    #     return self.get(key="DATABASE_NAME", default_value="db")
+    def get_allowed_origins(self) -> str:
+        return self.__get_env_var("ALLOWED_ORIGINS")
 
-    # @property
-    # def database_url(self) -> str:
-    #     return self.get(
-    #         key="DATABASE_URL",
-    #         default_value="postgresql+asyncpg://root:root@localhost:5433/db",
-    #     )
+    @staticmethod
+    def set_database_url(database_url: str) -> None:
+        os.environ["DATABASE_URL"] = database_url
 
     @staticmethod
     def __get_env_var(name: str) -> str:

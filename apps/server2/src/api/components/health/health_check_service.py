@@ -20,16 +20,17 @@ class HealthCheckService(IHealthCheckService):
 
     async def check_health(self):
         try:
+            await self.db_service.clear_database_tables()
             return await self.db_service.check_database_is_alive()
-        except Exception as error:
+        except Exception:
             message = "An error occurred when checking if application is alive"
             logger.error(message)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                type(
-                    "Detail",
-                    (object,),
-                    {"context": "unknown", "cause": error},
-                ),
+                # type(
+                #     "Detail",
+                #     (object,),
+                #     {"context": "unknown", "cause": error},
+                # ),
             )

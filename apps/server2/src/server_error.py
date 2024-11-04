@@ -1,4 +1,3 @@
-import traceback
 from typing import Optional
 
 from fastapi import HTTPException, status
@@ -27,6 +26,6 @@ class ServerError(HTTPException):
         else:
             self.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         self.is_operational = True if f"{status_code}".startswith("4") else False
-        traceback.print_stack()
-        print(repr(traceback.extract_stack()))
-        print(repr(traceback.format_stack()))
+        # traceback.print_stack()
+        # print(repr(traceback.extract_stack()))
+        # print(repr(traceback.format_stack()))

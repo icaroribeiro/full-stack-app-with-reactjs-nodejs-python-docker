@@ -12,6 +12,7 @@ interface IDBService {
   migrateDatabase(migrationsFolder: string): Promise<void>
   getDatabaseTableRowCount(name: string): Promise<number>
   clearDatabaseTables(): Promise<void>
+  deactivateDatabase(): Promise<void>
 }
 
 class DBService implements IDBService {
@@ -98,7 +99,7 @@ class DBService implements IDBService {
 
   public async clearDatabaseTables(): Promise<void> {
     if (this._db !== undefined) {
-      const query = sql<string>`
+      const query = sql`
 				SELECT table_name
 				FROM information_schema.tables
 					WHERE table_schema = 'public'
@@ -106,9 +107,9 @@ class DBService implements IDBService {
 			`
       const tables = await this._db.execute(query)
       for (const table of tables) {
-        const query = sql.raw(`
+        const query = sql<string>`
           TRUNCATE TABLE ${table.table_name} CASCADE;
-        `)
+        `
         await this._db.execute(query)
       }
       return
