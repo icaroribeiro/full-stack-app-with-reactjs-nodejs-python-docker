@@ -17,7 +17,11 @@ interface IUserService {
 }
 
 class UserService implements IUserService {
-  constructor(private userRepository: IUserRepository) {}
+  userRepository: IUserRepository
+
+  constructor(userRepository: IUserRepository) {
+    this.userRepository = userRepository
+  }
 
   async registerUser(user: User): Promise<User> {
     try {

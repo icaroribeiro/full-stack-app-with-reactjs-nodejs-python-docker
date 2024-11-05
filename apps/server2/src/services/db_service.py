@@ -1,19 +1,17 @@
-import logging
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
+from alembic import command as alembic_command
+from alembic import config as alembic_config
 from fastapi import status
-from sqlalchemy import text
+from sqlalchemy import Connection, text
 from sqlalchemy.ext.asyncio import (
-    AsyncConnection,
     AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
 
 from src.server_error import Detail, ServerError
-
-logger = logging.getLogger(__name__)
 
 
 class IDBService(ABC):
@@ -26,7 +24,7 @@ class IDBService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def migrate_database(self) -> None:
+    def migrate_database(self) -> None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
@@ -44,33 +42,55 @@ class IDBService(ABC):
 
 class DBService(IDBService):
     __engine: AsyncEngine
+    __session_maker: AsyncSession
 
     def __init__(self):
         self.__engine = None
+        self.__session_maker = None
 
-    @asynccontextmanager
+    # @asynccontextmanager
+    # @property
+    # async def conn(self) -> AsyncIterator[AsyncConnection]:
+    #     if self.__engine is not None:
+    #         async with self.__engine.begin() as conn:
+    #             try:
+    #                 yield conn
+    #             except Exception as error:
+    #                 await conn.rollback()
+    #                 message = "Async transaction not established!"
+    #                 print(message, error)
+    #                 raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     message = "Async engine is None!"
+    #     print(message)
+    #     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @property
-    async def conn(self) -> AsyncIterator[AsyncConnection]:
-        if self.__engine is not None:
-            async with self.__engine.begin() as conn:
-                try:
-                    yield conn
-                except Exception as error:
-                    await conn.rollback()
-                    message = "Async transaction not established!"
-                    logger.error(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        logger.error(message)
+    async def session(self) -> AsyncSession:
+        if self.__session_maker is not None:
+            return self.__session_maker
+            # async with self.__session_maker() as session:
+            #     try:
+            #         yield session
+            #     except Exception:
+            #         await session.rollback()
+            #         raise
+            #     finally:
+            #         await session.close()
+        message = "Session maker is None!"
+        print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def connect_database(self, databaseURL: str) -> None:
         try:
             self.__engine = create_async_engine(url=databaseURL)
-            logger.info("Async engine created successfully!")
+            print("Async engine created successfully!")
+            self.__session_maker = async_sessionmaker(
+                autocommit=False, bind=self.__engine
+            )
+            print("Session maker created successfully!")
         except Exception as error:
             message = "Database connection failed!"
-            logger.error(message, error)
+            print(message, error)
             # obj = Detail()
             # obj.context = databaseURL
             # obj.cause = error
@@ -94,21 +114,33 @@ class DBService(IDBService):
                 except Exception as error:
                     await conn.rollback()
                     message = "Async transaction not established!"
-                    logger.error(message, error)
+                    print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"
-        logger.error(message)
+        print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def migrate_database(self) -> None:
-        return
+        if self.__engine is not None:
+            async with self.__engine.connect() as conn:
+                try:
+                    await conn.run_sync(self.__run_upgrade)
+                    return
+                except Exception as error:
+                    await conn.rollback()
+                    message = "An error occurred when migrating the database"
+                    print(message, error)
+                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        message = "Async engine is None!"
+        print(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def get_database_table_row_count(self, name: str) -> int:
         if self.__engine is not None:
             async with self.__engine.connect() as conn:
                 try:
                     query = text(f"""
-                        SELsssECT count(*)
+                        SELECT count(*)
                         FROM {name};
                     """)
                     result = await conn.execute(query)
@@ -120,10 +152,10 @@ class DBService(IDBService):
                     message = (
                         f"An error occurred when counting rows of database table {name}"
                     )
-                    logger.error(message, error)
+                    print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"
-        logger.error(message)
+        print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def clear_database_tables(self) -> None:
@@ -146,15 +178,24 @@ class DBService(IDBService):
                 except Exception as error:
                     await conn.rollback()
                     message = "An error occurred when cleaning the database tables"
-                    logger.error(message, error)
+                    print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"
-        logger.error(message)
+        print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def deactivate_database(self) -> None:
         if self.__engine is not None:
             await self.__engine.dispose()
-        message = "Async engine is None!"
-        logger.error(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            self.__engine = None
+            self.__session_maker = None
+        else:
+            message = "Async engine is None!"
+            print(message)
+            raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @staticmethod
+    def __run_upgrade(conn: Connection):
+        cfg = alembic_config.Config("alembic.ini")
+        cfg.attributes["connection"] = conn
+        alembic_command.upgrade(cfg, "head")

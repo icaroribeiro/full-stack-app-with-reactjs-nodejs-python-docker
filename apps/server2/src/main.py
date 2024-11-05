@@ -1,11 +1,7 @@
-import logging
-
 import uvicorn
 
 from src.config import config
 from src.server import Server
-
-logging.basicConfig(level=config.get_log_level(), format="%(asctime)s %(message)s")
 
 server = Server()
 app = server.app

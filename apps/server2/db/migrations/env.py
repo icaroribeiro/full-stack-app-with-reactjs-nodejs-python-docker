@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from db.migrations.base import Base
 from db.models.student import StudentModel  # noqa: F401
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
@@ -87,11 +87,37 @@ async def run_async_migrations() -> None:
     await connectable.dispose()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    set_sqlalchemy_url()
-    asyncio.run(run_async_migrations())
+# def run_migrations_online() -> None:
+#     """Run migrations in 'online' mode."""
+#     set_sqlalchemy_url()
+#     asyncio.run(run_async_migrations())
 
+def run_migrations_online() -> None:
+    connectable = config.attributes.get('connection', None)
+
+    if connectable is None:
+        # only create Engine if we don't have a Connection
+        # from the outside
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section),
+            prefix='sqlalchemy.',
+            poolclass=pool.NullPool)
+
+        with connectable.connect() as connection:
+            context.configure(
+                connection=connection, target_metadata=target_metadata
+            )
+
+            with context.begin_transaction():
+                context.run_migrations()
+    else:
+        context.configure(
+            connection=connectable,
+            target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()

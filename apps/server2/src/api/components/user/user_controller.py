@@ -11,7 +11,7 @@ from src.container.container import Container
 logger = logging.getLogger(__name__)
 
 
-class HealthCheckController(APIRouter):
+class UserController(APIRouter):
     def __init__(
         self,
         prefix="/health",

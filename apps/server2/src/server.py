@@ -1,14 +1,9 @@
-import logging
-
 from fastapi import FastAPI
 
 from src.api.components.health import health_check_controller
 from src.api.routers.routers import health_check_router
 from src.config import config
 from src.container.container import Container
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 
 class Server:

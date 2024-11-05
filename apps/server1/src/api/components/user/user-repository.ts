@@ -16,7 +16,11 @@ interface IUserRepository {
 }
 
 class UserRepository implements IUserRepository {
-  constructor(private dbService: DBService) {}
+  dbService: DBService
+
+  constructor(dbService: DBService) {
+    this.dbService = dbService
+  }
 
   async createUser(user: User): Promise<User> {
     const rawUserData = UserMapper.toPersistence(user)
