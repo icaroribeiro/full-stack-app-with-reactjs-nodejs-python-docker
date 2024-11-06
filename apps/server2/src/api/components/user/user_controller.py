@@ -1,21 +1,17 @@
-import logging
-
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Response, status
-from src.api.components.health.health_check_mapper import HealthCheckMapper
-from src.api.components.health.health_check_models import HealthCheckResponse
-from src.api.components.health.health_check_service import HealthCheckService
+from src.api.components.user.user_mapper import UserMapper
+from src.api.components.user.user_models import UserRequest, UserResponse
+from src.api.components.user.user_service import UserService
 from src.api.shared.api_error_response import APIErrorResponse
 from src.container.container import Container
-
-logger = logging.getLogger(__name__)
 
 
 class UserController(APIRouter):
     def __init__(
         self,
-        prefix="/health",
-        dependencies=[Depends(Provide[Container.health_check_service_provider])],
+        prefix="/users",
+        dependencies=[Depends(Provide[Container.user_service_provider])],
     ):
         super().__init__(prefix=prefix, dependencies=dependencies)
         self.setup_routes()
@@ -24,18 +20,19 @@ class UserController(APIRouter):
         @APIRouter.api_route(
             self,
             path="",
-            methods=["GET"],
-            tags=["health-check"],
-            description="API endpoint used to verify if "
-            + "the service has started up correctly and is ready to accept requests",
+            methods=["POST"],
+            tags=["users"],
+            description="API endpoint used to create a new user.",
             responses={
-                status.HTTP_200_OK: {
-                    "model": HealthCheckResponse,
-                    "description": "OK",
+                status.HTTP_201_CREATED: {
+                    "model": UserResponse,
+                    "description": "Created",
                     "content": {
                         "application/json": {
                             "example": {
-                                "healthy": True,
+                                "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                                "name": "name",
+                                "email": "email@email.com",
                             }
                         }
                     },
@@ -56,11 +53,13 @@ class UserController(APIRouter):
             },
         )
         @inject
-        async def get_health(
+        async def add_user(
+            body: UserRequest,
             response: Response,
-            health_check_service: HealthCheckService = self.dependencies[0],
-        ) -> HealthCheckResponse:
-            is_healthy = await health_check_service.check_health()
-            health_check_response = HealthCheckMapper.to_response(is_healthy)
-            response.status_code = status.HTTP_200_OK
-            return health_check_response
+            user_service: UserService = self.dependencies[0],
+        ) -> UserResponse:
+            user = UserMapper.to_domain(body)
+            registered_user = await user_service.register_user(user)
+            user_response = UserMapper.to_response(registered_user)
+            response.status_code = status.HTTP_201_CREATED
+            return user_response

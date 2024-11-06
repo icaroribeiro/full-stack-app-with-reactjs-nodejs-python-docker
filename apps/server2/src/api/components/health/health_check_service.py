@@ -17,6 +17,7 @@ class HealthCheckService(IHealthCheckService):
 
     async def check_health(self):
         try:
+            await self.db_service.migrate_database()
             return await self.db_service.check_database_is_alive()
         except Exception:
             message = "An error occurred when checking if application is alive"

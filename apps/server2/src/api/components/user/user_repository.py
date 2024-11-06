@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
 
+from db.models.user import UserModel
+from sqlalchemy import insert
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import User
 from src.services.db_service import DBService
@@ -32,11 +33,12 @@ class UserRepository(IUserRepository):
     def __init__(self, db_service: DBService):
         self.db_service = db_service
 
-    @asynccontextmanager
     async def create_user(self, user: User) -> User:
         raw_user_data = UserMapper.to_persistence(user)
-        async with self.db_service.session() as session:
-            session.(raw_user_data)
-        await session.commit()
-        await session.refresh(raw_user_data)
-        return UserMapper.to_domain(raw_user_data)
+        async with self.db_service.async_engine.connect() as conn:
+            query = insert(UserModel).values(raw_user_data).returning(UserModel)
+            result = await conn.execute(query)
+            persisted_user = UserMapper.to_domain(result.first()._asdict)
+            await conn.commit()
+            print("AAA")
+            return persisted_user

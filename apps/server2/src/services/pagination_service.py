@@ -1,0 +1,2 @@
+class PaginationService:
+    pass

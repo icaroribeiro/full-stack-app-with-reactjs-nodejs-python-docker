@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from collections import UserList
 
 from fastapi import status
 from src.api.components.user.user_models import User
@@ -12,23 +11,23 @@ class IUserService(ABC):
     async def register_user(self, user: User) -> User:
         raise Exception("NotImplementedException")
 
-    @abstractmethod
-    async def retrieve_and_count_users(
-        self, page: int, limit: int
-    ) -> tuple[UserList, int]:
-        raise Exception("NotImplementedException")
+    # @abstractmethod
+    # async def retrieve_and_count_users(
+    #     self, page: int, limit: int
+    # ) -> tuple[UserList, int]:
+    #     raise Exception("NotImplementedException")
 
-    @abstractmethod
-    async def retrieve_user(self, userId: str) -> User:
-        raise Exception("NotImplementedException")
+    # @abstractmethod
+    # async def retrieve_user(self, userId: str) -> User:
+    #     raise Exception("NotImplementedException")
 
-    @abstractmethod
-    async def replace_user(self, userId: str, user: User) -> User:
-        raise Exception("NotImplementedException")
+    # @abstractmethod
+    # async def replace_user(self, userId: str, user: User) -> User:
+    #     raise Exception("NotImplementedException")
 
-    @abstractmethod
-    async def remove_user(self, userId: str) -> User:
-        raise Exception("NotImplementedException")
+    # @abstractmethod
+    # async def remove_user(self, userId: str) -> User:
+    #     raise Exception("NotImplementedException")
 
 
 class UserService(IUserService):
@@ -37,10 +36,10 @@ class UserService(IUserService):
 
     async def register_user(self, user: User) -> User:
         try:
-            return await self.user_repository.check_database_is_alive()
-        except Exception:
-            message = "An error occurred when checking if application is alive"
-            print(message)
+            return await self.user_repository.create_user(user)
+        except Exception as error:
+            message = "An error occurred when creating a new user into database"
+            print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,

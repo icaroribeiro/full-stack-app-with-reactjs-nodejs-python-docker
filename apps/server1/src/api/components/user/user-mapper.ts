@@ -11,7 +11,7 @@ class UserMapper {
 
   public static toDomain(raw: any): User {
     return {
-      id: raw.id,
+      id: raw.id || undefined,
       name: raw.name,
       email: raw.email,
     }

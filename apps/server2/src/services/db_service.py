@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
 
 from alembic import command as alembic_command
 from alembic import config as alembic_config
@@ -41,18 +43,19 @@ class IDBService(ABC):
 
 
 class DBService(IDBService):
-    __engine: AsyncEngine
-    __session_maker: AsyncSession
+    __async_engine: AsyncEngine
+    __async_session: async_sessionmaker
 
     def __init__(self):
-        self.__engine = None
-        self.__session_maker = None
+        self.__async_engine = None
+        self.__async_session = None
 
-    # @asynccontextmanager
-    # @property
-    # async def conn(self) -> AsyncIterator[AsyncConnection]:
-    #     if self.__engine is not None:
-    #         async with self.__engine.begin() as conn:
+    @property
+    def async_engine(self) -> AsyncEngine:
+        if self.__async_engine is not None:
+            return self.__async_engine
+
+    #         async with self.__async_engine.begin() as conn:
     #             try:
     #                 yield conn
     #             except Exception as error:
@@ -64,10 +67,11 @@ class DBService(IDBService):
     #     print(message)
     #     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @property
-    async def session(self) -> AsyncSession:
-        if self.__session_maker is not None:
-            return self.__session_maker
+    @asynccontextmanager
+    async def async_session(self) -> AsyncIterator[AsyncSession]:
+        if self.__async_session is not None:
+            async with self.__async_session() as session:
+                yield session
             # async with self.__session_maker() as session:
             #     try:
             #         yield session
@@ -76,18 +80,18 @@ class DBService(IDBService):
             #         raise
             #     finally:
             #         await session.close()
-        message = "Session maker is None!"
+        message = "Async session is None!"
         print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def connect_database(self, databaseURL: str) -> None:
         try:
-            self.__engine = create_async_engine(url=databaseURL)
+            self.__async_engine = create_async_engine(url=databaseURL)
             print("Async engine created successfully!")
-            self.__session_maker = async_sessionmaker(
-                autocommit=False, bind=self.__engine
+            self.__async_session = async_sessionmaker(
+                bind=self.__async_engine, expire_on_commit=False
             )
-            print("Session maker created successfully!")
+            print("Async session created successfully!")
         except Exception as error:
             message = "Database connection failed!"
             print(message, error)
@@ -105,8 +109,8 @@ class DBService(IDBService):
             )
 
     async def check_database_is_alive(self) -> bool:
-        if self.__engine is not None:
-            async with self.__engine.connect() as conn:
+        if self.__async_engine is not None:
+            async with self.__async_engine.connect() as conn:
                 try:
                     await conn.execute(text("SELECT 1"))
                     await conn.commit()
@@ -121,8 +125,8 @@ class DBService(IDBService):
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def migrate_database(self) -> None:
-        if self.__engine is not None:
-            async with self.__engine.connect() as conn:
+        if self.__async_engine is not None:
+            async with self.__async_engine.connect() as conn:
                 try:
                     await conn.run_sync(self.__run_upgrade)
                     return
@@ -136,8 +140,8 @@ class DBService(IDBService):
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def get_database_table_row_count(self, name: str) -> int:
-        if self.__engine is not None:
-            async with self.__engine.connect() as conn:
+        if self.__async_engine is not None:
+            async with self.__async_engine.connect() as conn:
                 try:
                     query = text(f"""
                         SELECT count(*)
@@ -159,8 +163,8 @@ class DBService(IDBService):
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def clear_database_tables(self) -> None:
-        if self.__engine is not None:
-            async with self.__engine.connect() as conn:
+        if self.__async_engine is not None:
+            async with self.__async_engine.connect() as conn:
                 try:
                     query = text("""
                         SELECT table_name
@@ -185,9 +189,9 @@ class DBService(IDBService):
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def deactivate_database(self) -> None:
-        if self.__engine is not None:
-            await self.__engine.dispose()
-            self.__engine = None
+        if self.__async_engine is not None:
+            await self.__async_engine.dispose()
+            self.__async_engine = None
             self.__session_maker = None
         else:
             message = "Async engine is None!"

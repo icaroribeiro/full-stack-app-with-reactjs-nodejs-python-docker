@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
 from src.api.components.health import health_check_controller
-from src.api.routers.routers import health_check_router
+from src.api.components.user import user_controller
+from src.api.routers.routers import health_check_router, user_router
 from src.config import config
 from src.container.container import Container
 
@@ -32,15 +33,14 @@ class Server:
     )
 
     def __init__(self):
-        self.register_routes()
-
-    @property
-    def app(self) -> FastAPI:
-        return self.__app
-
-    def register_routes(self) -> None:
         container = Container()
         db_service = container.db_service_provider()
         db_service.connect_database(config.get_database_url())
         container.wire(modules=[health_check_controller])
+        container.wire(modules=[user_controller])
         self.__app.include_router(router=health_check_router)
+        self.__app.include_router(router=user_router)
+
+    @property
+    def app(self) -> FastAPI:
+        return self.__app

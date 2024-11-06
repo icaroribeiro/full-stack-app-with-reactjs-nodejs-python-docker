@@ -8,7 +8,9 @@ class UserMapper:
         return {"name": user.name, "email": user.email}
 
     def to_domain(raw: Any) -> User:
-        return User(id=raw.id, name=raw.name, email=raw.email)
+        return User(
+            id=raw.id if hasattr(raw, "id") else None, name=raw.name, email=raw.email
+        )
 
     @staticmethod
     def to_response(user: User) -> UserResponse:
