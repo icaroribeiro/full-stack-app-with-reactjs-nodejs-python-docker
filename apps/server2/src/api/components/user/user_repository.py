@@ -14,7 +14,8 @@ class IUserRepository(ABC):
         raise Exception("NotImplementedException")
 
     # @abstractmethod
-    # async def read_and_count_users(self, page: int, limit: int) -> tuple[UserList, int]:
+    # async def read_and_count_users(self, page: int, limit: int)
+    # -> tuple[UserList, int]:
     #     raise Exception("NotImplementedException")
 
     # @abstractmethod

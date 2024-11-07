@@ -24,8 +24,8 @@ class Config:
     def get_database_url(self) -> str:
         return self.__get_env_var("DATABASE_URL")
 
-    def get_database_user(self) -> str:
-        return self.__get_env_var("DATABASE_USER")
+    def get_database_username(self) -> str:
+        return self.__get_env_var("DATABASE_USERNAME")
 
     def get_database_password(self) -> str:
         return self.__get_env_var("DATABASE_PASSWORD")

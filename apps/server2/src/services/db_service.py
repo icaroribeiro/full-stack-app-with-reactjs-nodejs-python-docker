@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from alembic import command as alembic_command
 from alembic import config as alembic_config
@@ -8,8 +6,6 @@ from fastapi import status
 from sqlalchemy import Connection, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
 
@@ -44,54 +40,19 @@ class IDBService(ABC):
 
 class DBService(IDBService):
     __async_engine: AsyncEngine
-    __async_session: async_sessionmaker
 
     def __init__(self):
         self.__async_engine = None
-        self.__async_session = None
 
     @property
     def async_engine(self) -> AsyncEngine:
         if self.__async_engine is not None:
             return self.__async_engine
 
-    #         async with self.__async_engine.begin() as conn:
-    #             try:
-    #                 yield conn
-    #             except Exception as error:
-    #                 await conn.rollback()
-    #                 message = "Async transaction not established!"
-    #                 print(message, error)
-    #                 raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-    #     message = "Async engine is None!"
-    #     print(message)
-    #     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    @asynccontextmanager
-    async def async_session(self) -> AsyncIterator[AsyncSession]:
-        if self.__async_session is not None:
-            async with self.__async_session() as session:
-                yield session
-            # async with self.__session_maker() as session:
-            #     try:
-            #         yield session
-            #     except Exception:
-            #         await session.rollback()
-            #         raise
-            #     finally:
-            #         await session.close()
-        message = "Async session is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     def connect_database(self, databaseURL: str) -> None:
         try:
             self.__async_engine = create_async_engine(url=databaseURL)
             print("Async engine created successfully!")
-            self.__async_session = async_sessionmaker(
-                bind=self.__async_engine, expire_on_commit=False
-            )
-            print("Async session created successfully!")
         except Exception as error:
             message = "Database connection failed!"
             print(message, error)
@@ -124,11 +85,11 @@ class DBService(IDBService):
         print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    async def migrate_database(self) -> None:
+    async def migrate_database(self, alembic_file_path: str) -> None:
         if self.__async_engine is not None:
             async with self.__async_engine.connect() as conn:
                 try:
-                    await conn.run_sync(self.__run_upgrade)
+                    await conn.run_sync(self.__run_upgrade, alembic_file_path)
                     return
                 except Exception as error:
                     await conn.rollback()
@@ -192,14 +153,13 @@ class DBService(IDBService):
         if self.__async_engine is not None:
             await self.__async_engine.dispose()
             self.__async_engine = None
-            self.__session_maker = None
         else:
             message = "Async engine is None!"
             print(message)
             raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @staticmethod
-    def __run_upgrade(conn: Connection):
-        cfg = alembic_config.Config("alembic.ini")
+    def __run_upgrade(conn: Connection, alembic_file_path: str):
+        cfg = alembic_config.Config(alembic_file_path)
         cfg.attributes["connection"] = conn
         alembic_command.upgrade(cfg, "head")

@@ -36,7 +36,7 @@ abstract class AbsTestFactory implements ITestFactory {
     return this._dbService
   }
 
-  protected async setupDatabaseContainer(): Promise<void> {
+  async setupDatabaseContainer(): Promise<void> {
     try {
       const databaseUser = config.getDatabaseUser()
       const databasePassword = config.getDatabasePassword()
@@ -52,12 +52,12 @@ abstract class AbsTestFactory implements ITestFactory {
       console.log('Database container setted up successfully!')
     } catch (error) {
       const message = 'Database container setup failed!'
-      console.error(message)
+      console.error(message, error)
       throw error
     }
   }
 
-  protected async initializeDatabase(): Promise<void> {
+  async initializeDatabase(): Promise<void> {
     try {
       this._dbService.connectDatabase(config.getDatabaseURL())
       const migrationsFolder = path.join(appPath, 'db', 'migrations')
@@ -70,9 +70,10 @@ abstract class AbsTestFactory implements ITestFactory {
     }
   }
 
-  protected async clearDatabaseTables(): Promise<void> {
+  async clearDatabaseTables(): Promise<void> {
     try {
       await this._dbService.clearDatabaseTables()
+      console.log('Database cleaned successfully!')
     } catch (error) {
       const message = 'Database cleaning failed!'
       console.error(message, error)
@@ -80,10 +81,11 @@ abstract class AbsTestFactory implements ITestFactory {
     }
   }
 
-  protected async deactivateDatabaseContainer(): Promise<void> {
+  async deactivateDatabaseContainer(): Promise<void> {
     try {
       if (this.dbContainer !== undefined) {
         await this.dbContainer.stop()
+        console.log('Database container deactivated successfully!')
         return
       }
       const message = 'Database container is undefined!'
@@ -95,9 +97,10 @@ abstract class AbsTestFactory implements ITestFactory {
     }
   }
 
-  protected async deactivateDatabase(): Promise<void> {
+  async deactivateDatabase(): Promise<void> {
     try {
       await this._dbService.deactivateDatabase()
+      console.log('Database deactivated successfully!')
     } catch (error) {
       const message = 'Database deactivation failed!'
       console.error(message, error)
