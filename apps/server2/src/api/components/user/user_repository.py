@@ -4,6 +4,7 @@ from db.models.user import UserModel
 from sqlalchemy import insert
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import User
+from src.api.shared.dict_to_obj import DictToObj
 from src.services.db_service import DBService
 
 
@@ -38,7 +39,6 @@ class UserRepository(IUserRepository):
         async with self.db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
             result = await conn.execute(query)
-            persisted_user = UserMapper.to_domain(result.first()._asdict)
+            obj = DictToObj(result.first()._asdict())
             await conn.commit()
-            print("AAA")
-            return persisted_user
+            return UserMapper.to_domain(obj)
