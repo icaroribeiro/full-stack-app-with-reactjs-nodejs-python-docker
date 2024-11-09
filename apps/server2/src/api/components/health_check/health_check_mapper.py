@@ -1,4 +1,4 @@
-from src.api.components.health.health_check_models import HealthCheckResponse
+from src.api.components.health_check.health_check_models import HealthCheckResponse
 
 
 class HealthCheckMapper:

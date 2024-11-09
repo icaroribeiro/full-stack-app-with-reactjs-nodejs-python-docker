@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     create_async_engine,
 )
-
-from src.server_error import Detail, ServerError
+from src.server_error import ServerError
 
 
 class IDBService(ABC):
@@ -52,7 +51,6 @@ class DBService(IDBService):
     def connect_database(self, databaseURL: str) -> None:
         try:
             self.__async_engine = create_async_engine(url=databaseURL)
-            print("Async engine created successfully!")
         except Exception as error:
             message = "Database connection failed!"
             print(message, error)
@@ -63,7 +61,7 @@ class DBService(IDBService):
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 type(
-                    Detail,
+                    "Detail",
                     (object,),
                     {"context": databaseURL, "cause": error},
                 ),

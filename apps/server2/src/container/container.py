@@ -1,6 +1,5 @@
 from dependency_injector import containers, providers
-
-from src.api.components.health.health_check_service import HealthCheckService
+from src.api.components.health_check.health_check_service import HealthCheckService
 from src.api.components.user.user_repository import UserRepository
 from src.api.components.user.user_service import UserService
 from src.services.db_service import DBService

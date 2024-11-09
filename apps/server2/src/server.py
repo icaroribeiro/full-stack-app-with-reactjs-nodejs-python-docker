@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-
-from src.api.components.health import health_check_controller
+from src.api.components.health_check import health_check_controller
 from src.api.components.user import user_controller
 from src.api.routers.routers import health_check_router, user_router
 from src.config import config

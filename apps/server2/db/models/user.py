@@ -3,7 +3,6 @@ from sqlalchemy import Column, DateTime, Integer, String, func
 
 from db.models.default import Default
 
-
 class UserModel(Default, Base):
     __tablename__ = "users"
 

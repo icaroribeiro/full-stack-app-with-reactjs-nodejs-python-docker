@@ -1,8 +1,10 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Response, status
-from src.api.components.health.health_check_mapper import HealthCheckMapper
-from src.api.components.health.health_check_models import HealthCheckResponse
-from src.api.components.health.health_check_service import HealthCheckService
+from src.api.components.health.health_check import (
+    HealthCheckMapper,
+    HealthCheckResponse,
+)
+from src.api.components.health.health_check.service import HealthCheckService
 from src.api.shared.api_error_response import APIErrorResponse
 from src.container.container import Container
 
