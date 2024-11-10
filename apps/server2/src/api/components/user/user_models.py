@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel
 
 
@@ -10,6 +12,8 @@ class User(BaseModel):
     id: str | None = None
     name: str
     email: str
+    created_at: datetime.datetime | None = None
+    updated_at: datetime.datetime | None = None
 
 
 UserList: list[User]
@@ -19,6 +23,8 @@ class UserResponse(BaseModel):
     id: str
     name: str
     email: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 UserListResponse: list[UserResponse]

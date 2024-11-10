@@ -1,5 +1,4 @@
 import uvicorn
-
 from src.config import config
 from src.server import Server
 

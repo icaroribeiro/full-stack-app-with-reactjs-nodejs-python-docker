@@ -33,6 +33,10 @@ class IDBService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
+    async def delete_database_tables(self) -> None:
+        raise Exception("NotImplementedException")
+
+    @abstractmethod
     async def deactivate_database(self) -> None:
         raise Exception("NotImplementedException")
 
@@ -50,7 +54,9 @@ class DBService(IDBService):
 
     def connect_database(self, databaseURL: str) -> None:
         try:
-            self.__async_engine = create_async_engine(url=databaseURL)
+            self.__async_engine = create_async_engine(
+                url=databaseURL,
+            )
         except Exception as error:
             message = "Database connection failed!"
             print(message, error)
@@ -141,6 +147,32 @@ class DBService(IDBService):
                 except Exception as error:
                     await conn.rollback()
                     message = "An error occurred when cleaning the database tables"
+                    print(message, error)
+                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        message = "Async engine is None!"
+        print(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    async def delete_database_tables(self) -> None:
+        if self.__async_engine is not None:
+            async with self.__async_engine.connect() as conn:
+                try:
+                    query = text("""
+                        SELECT table_name
+                        FROM information_schema.tables
+                            WHERE table_schema = 'public'
+                                AND table_type = 'BASE TABLE';
+                    """)
+                    result = await conn.execute(query)
+                    for _tuple in result.fetchall():
+                        table = _tuple[0]
+                        query = text(f"DROP TABLE {table} CASCADE;")
+                        await conn.execute(query)
+                    await conn.commit()
+                    return
+                except Exception as error:
+                    await conn.rollback()
+                    message = "An error occurred when deleting the database tables"
                     print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"

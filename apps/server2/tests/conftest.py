@@ -1,23 +1,16 @@
-# import asyncio
-
 import asyncio
 
 import pytest
 from dotenv import load_dotenv
-from faker import Faker
 from src.config.config import config
 from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
 
 
-@pytest.fixture(scope="session")
-def fake() -> Faker:
-    return Faker("pt_BR")
-
-
 @pytest.fixture(scope="session", autouse=True)
 def load_env_vars() -> None:
     load_dotenv(".env.test")
+    # print("Environment variables loaded successfully!")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -37,10 +30,10 @@ def start_database_container(request) -> DbContainer:
 
     def stop_database_container() -> None:
         container.stop()
-        print("Database container stopped successfully!")
+        # print("Database container stopped successfully!")
 
     request.addfinalizer(stop_database_container)
-    print("Database container started successfully!")
+    # print("Database container started successfully!")
     return container
 
 
@@ -57,8 +50,10 @@ async def initialize_database(request, db_service: DBService) -> None:
 
     def finalize():
         async def deactivate_database() -> None:
+            await db_service.delete_database_tables()
+            # print("Database tables deleted successfully!")
             await db_service.deactivate_database()
-            print("Database deactivated successfully!")
+            # print("Database deactivated successfully!")
 
         asyncio.get_event_loop().run_until_complete(deactivate_database())
 
@@ -69,4 +64,4 @@ async def initialize_database(request, db_service: DBService) -> None:
 @pytest.fixture(scope="function")
 async def clear_database_tables(db_service: DBService) -> None:
     await db_service.clear_database_tables()
-    print("Database cleaned successfully!")
+    # print("Database tables cleaned successfully!")
