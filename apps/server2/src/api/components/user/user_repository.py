@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from collections import UserList
 from uuid import UUID
 
 from db.models.user import UserModel
-from sqlalchemy import delete, desc, func, insert, select, update
+from sqlalchemy import delete, desc, insert, select, update
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import User
 from src.api.shared.dict_to_obj import DictToObj
@@ -16,7 +15,9 @@ class IUserRepository(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def read_and_count_users(self, page: int, limit: int) -> tuple[UserList, int]:
+    async def read_and_count_users(
+        self, page: int, limit: int
+    ) -> tuple[list[User], int] | None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
@@ -24,7 +25,7 @@ class IUserRepository(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def update_user(self, userId: str, user: User) -> User:
+    async def update_user(self, userId: str, user: User) -> User | None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
@@ -45,36 +46,37 @@ class UserRepository(IUserRepository):
             await conn.commit()
             return UserMapper.to_domain(obj)
 
-    async def read_and_count_users(self, page: int, limit: int) -> User | None:
+    async def read_and_count_users(
+        self, page: int, limit: int
+    ) -> tuple[list[User], int]:
         async with self.db_service.async_engine.connect() as conn:
             paginated_records_subquery = (
-                select(UserModel.c.id)
+                select(UserModel.id)
                 .order_by(desc(UserModel.created_at))
                 .limit(limit)
                 .offset((page - 1) * limit)
                 .subquery()
             )
-
             result = await conn.execute(
                 (
                     select(UserModel)
                     .join(
                         paginated_records_subquery,
-                        UserModel.c.id == paginated_records_subquery.id,
+                        UserModel.id == paginated_records_subquery.c.id,
                     )
                     .order_by(desc(UserModel.created_at))
                 )
             )
-            paginated_records_result = result_1.all()
+            paginated_records_result = result.all()
+            print("paginated_records_result:", paginated_records_result)
 
-            result = await conn.execute(select(func.count(UserModel.id).label("count")))
+            # result = await conn.execute(select(func.count(UserModel.id).label("count")))
+            # obj = DictToObj(result.first()._asdict())
+            # total_records_result = obj.count
 
-            obj = DictToObj(result.first()._asdict())
-            total_records_result = obj.count
-
-            obj = DictToObj(result.first()._asdict())
-            await conn.commit()
-            return [total_records_result]
+            # obj = DictToObj(result.first()._asdict())
+            # await conn.commit()
+            return [[], 0]
 
     async def read_user(self, userId: str) -> User | None:
         async with self.db_service.async_engine.connect() as conn:

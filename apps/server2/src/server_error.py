@@ -1,11 +1,11 @@
 from typing import Optional
 
 from fastapi import HTTPException, status
-
+from pydantic import BaseModel
 from src.api.shared.unknown_type import UnknownType
 
 
-class Detail:
+class Detail(BaseModel):
     context: Optional[UnknownType] = None
     cause: Optional[UnknownType] = None
 

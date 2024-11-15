@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from fastapi import status
 from src.api.components.user.user_models import User
 from src.api.components.user.user_repository import UserRepository
-from src.server_error import ServerError
+from src.server_error import Detail, ServerError
 
 
 class IUserService(ABC):
@@ -11,23 +11,23 @@ class IUserService(ABC):
     async def register_user(self, user: User) -> User:
         raise Exception("NotImplementedException")
 
-    # @abstractmethod
-    # async def retrieve_and_count_users(
-    #     self, page: int, limit: int
-    # ) -> tuple[UserList, int]:
-    #     raise Exception("NotImplementedException")
+    @abstractmethod
+    async def retrieve_and_count_users(
+        self, page: int, limit: int
+    ) -> tuple[list[User], int]:
+        raise Exception("NotImplementedException")
 
-    # @abstractmethod
-    # async def retrieve_user(self, userId: str) -> User:
-    #     raise Exception("NotImplementedException")
+    @abstractmethod
+    async def retrieve_user(self, userId: str) -> User:
+        raise Exception("NotImplementedException")
 
-    # @abstractmethod
-    # async def replace_user(self, userId: str, user: User) -> User:
-    #     raise Exception("NotImplementedException")
+    @abstractmethod
+    async def replace_user(self, userId: str, user: User) -> User:
+        raise Exception("NotImplementedException")
 
-    # @abstractmethod
-    # async def remove_user(self, userId: str) -> User:
-    #     raise Exception("NotImplementedException")
+    @abstractmethod
+    async def remove_user(self, userId: str) -> User:
+        raise Exception("NotImplementedException")
 
 
 class UserService(IUserService):
@@ -43,9 +43,97 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                # type(
-                #     "Detail",
-                #     (object,),
-                #     {"context": "unknown", "cause": error},
-                # ),
+                Detail(context=user, cause=error),
             )
+
+    async def retrieve_and_count_users(
+        self, page: int, limit: int
+    ) -> tuple[list[User], int]:
+        retrieved_and_counted_users: tuple[list[User], int]
+        try:
+            retrieved_and_counted_users = (
+                await self.user_repository.read_and_count_users(page, limit)
+            )
+        except Exception as error:
+            message = "An error occurred when reading and counting users from database"
+            print(message, error)
+            raise ServerError(
+                message,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                Detail(context={"page": page, "limit": limit}, cause=error),
+            )
+        if retrieved_and_counted_users is None:
+            message = "Users not found"
+            print(message)
+            raise ServerError(
+                message,
+                status.HTTP_404_NOT_FOUND,
+                Detail(context={"page": page, "limit": limit}, cause=None),
+            )
+        return retrieved_and_counted_users
+
+    async def retrieve_user(self, userId: str) -> User:
+        retrieved_user: User
+        try:
+            retrieved_user = await self.user_repository.read_user(userId)
+        except Exception as error:
+            message = "An error occurred when reading a user from database"
+            print(message, error)
+            raise ServerError(
+                message,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                Detail(context=userId, cause=error),
+            )
+        if retrieved_user is None:
+            message = "User not found"
+            print(message)
+            raise ServerError(
+                message,
+                status.HTTP_404_NOT_FOUND,
+                Detail(context=userId, cause=None),
+            )
+        return retrieved_user
+
+    async def replace_user(self, userId: str, user: User) -> User:
+        replaced_user: User
+        try:
+            replaced_user = await self.user_repository.update_user(userId, user)
+        except Exception as error:
+            message = "An error occurred when updating a user in database"
+            print(message, error)
+            raise ServerError(
+                message,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                Detail(context={"userId": userId, "user": user}, cause=error),
+            )
+        if replaced_user is None:
+            message = "User not found"
+            print(message)
+            raise ServerError(
+                message,
+                status.HTTP_404_NOT_FOUND,
+                Detail(context={"userId": userId, "user": user}, cause=None),
+            )
+        return replaced_user
+
+    async def remove_user(self, userId: str) -> User:
+        removed_user: User
+        try:
+            removed_user = await self.user_repository.delete_user(userId)
+        except Exception as error:
+            message = "An error occurred when deleting a user from database"
+            print(message, error)
+            raise ServerError(
+                message,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                Detail(context=userId, cause=error),
+            )
+        if removed_user is None:
+            message = "User not found"
+            print(message)
+            raise ServerError(
+                message,
+                status.HTTP_404_NOT_FOUND,
+                Detail(context=userId, cause=None),
+            )
+        return removed_user

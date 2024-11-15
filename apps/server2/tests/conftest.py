@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 from dotenv import load_dotenv
+from faker import Faker
 from src.config.config import config
 from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
@@ -58,10 +59,15 @@ async def initialize_database(request, db_service: DBService) -> None:
         asyncio.get_event_loop().run_until_complete(deactivate_database())
 
     request.addfinalizer(finalize)
-    print("Database initialized successfully!")
+    # print("Database initialized successfully!")
 
 
 @pytest.fixture(scope="function")
 async def clear_database_tables(db_service: DBService) -> None:
     await db_service.clear_database_tables()
     # print("Database tables cleaned successfully!")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def fake() -> Faker:
+    return Faker()

@@ -16,15 +16,9 @@ class User(BaseModel):
     updated_at: datetime.datetime | None = None
 
 
-UserList: list[User]
-
-
 class UserResponse(BaseModel):
     id: str
     name: str
     email: str
     created_at: datetime.datetime
-    updated_at: datetime.datetime
-
-
-UserListResponse: list[UserResponse]
+    updated_at: datetime.datetime | None = None

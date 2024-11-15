@@ -14,4 +14,4 @@ class UserFactory(Factory):
     name = LazyAttribute(lambda _: fake.user_name())
     email = LazyAttribute(lambda _: fake.email())
     created_at = LazyAttribute(lambda _: fake.date_time())
-    updated_at = LazyAttribute(lambda _: None)
+    updated_at = LazyAttribute(lambda _: fake.date_time())

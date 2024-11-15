@@ -1,9 +1,24 @@
+from abc import ABC, abstractmethod
 from typing import Any
 
 from src.api.components.user.user_models import User, UserResponse
 
 
-class UserMapper:
+class IUserMapper(ABC):
+    @abstractmethod
+    def to_persistence(user: User) -> Any:
+        raise Exception("NotImplementedException")
+
+    @abstractmethod
+    def to_domain(raw: Any) -> User:
+        raise Exception("NotImplementedException")
+
+    @abstractmethod
+    def to_response(user: User) -> UserResponse:
+        raise Exception("NotImplementedException")
+
+
+class UserMapper(IUserMapper):
     @staticmethod
     def to_persistence(user: User) -> Any:
         return {"name": user.name, "email": user.email}

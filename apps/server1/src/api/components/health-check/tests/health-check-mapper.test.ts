@@ -9,7 +9,7 @@ describe('HealthCheckMapper', async () => {
     })
 
     it('should succeed and return a health check data transfer object', async () => {
-      const isHealthy: boolean = true
+      const isHealthy = true
       const healthCheckResponse: HealthCheckResponse = {
         healthy: isHealthy,
       }
