@@ -186,7 +186,7 @@ describe('DBService', () => {
   })
 
   describe('.getDatabaseTableRowCount', () => {
-    const userFactory = new UserFactory()
+    const userFactory = new UserFactory.build()
 
     it('should define a function', () => {
       const dbService = new DBService()
@@ -232,7 +232,7 @@ describe('DBService', () => {
   })
 
   describe('.clearDatabaseTables', () => {
-    const userFactory = new UserFactory()
+    const userFactory = new UserFactory.build()
 
     it('should define a function', () => {
       const dbService = new DBService()

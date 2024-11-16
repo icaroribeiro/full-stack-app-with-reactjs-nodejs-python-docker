@@ -8,7 +8,7 @@ import { User, UserList, UserMapper, UserRepository } from '..'
 
 describe('UserRepository', async () => {
   const factory: RepositoryTestFactory = new RepositoryTestFactory()
-  const userFactory = new UserFactory()
+  const userFactory = new UserFactory.build()
 
   let dbService: DBService
   beforeAll(async () => {

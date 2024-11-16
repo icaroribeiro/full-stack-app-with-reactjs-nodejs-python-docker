@@ -5,7 +5,7 @@ import { UserFactory } from '../../factories/helpers/user-factory'
 import { PaginationService } from '../pagination-service'
 
 describe('PaginationService', () => {
-  const userFactory = new UserFactory()
+  const userFactory = new UserFactory.build()
 
   describe('.createResponse', () => {
     it('should define a function', () => {

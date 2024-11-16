@@ -18,7 +18,7 @@ import { User, UserResponse, UserList, UserMapper } from '..'
 
 describe('User HTTP component', () => {
   const factory: HttpTestFactory = new HttpTestFactory()
-  const userFactory = new UserFactory()
+  const userFactory = new UserFactory.build()
 
   let dbService: DBService
   beforeAll(async () => {

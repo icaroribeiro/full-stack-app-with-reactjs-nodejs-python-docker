@@ -49,11 +49,8 @@ class UserService(IUserService):
     async def retrieve_and_count_users(
         self, page: int, limit: int
     ) -> tuple[list[User], int]:
-        retrieved_and_counted_users: tuple[list[User], int]
         try:
-            retrieved_and_counted_users = (
-                await self.user_repository.read_and_count_users(page, limit)
-            )
+            return await self.user_repository.read_and_count_users(page, limit)
         except Exception as error:
             message = "An error occurred when reading and counting users from database"
             print(message, error)
@@ -62,15 +59,6 @@ class UserService(IUserService):
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(context={"page": page, "limit": limit}, cause=error),
             )
-        if retrieved_and_counted_users is None:
-            message = "Users not found"
-            print(message)
-            raise ServerError(
-                message,
-                status.HTTP_404_NOT_FOUND,
-                Detail(context={"page": page, "limit": limit}, cause=None),
-            )
-        return retrieved_and_counted_users
 
     async def retrieve_user(self, userId: str) -> User:
         retrieved_user: User

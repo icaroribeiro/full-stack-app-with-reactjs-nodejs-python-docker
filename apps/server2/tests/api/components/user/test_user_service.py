@@ -41,7 +41,7 @@ class TestRegisterUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory()
+        mocked_user = UserFactory.build()
         mocked_create_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.create_user = mocked_create_user
         expected_result = mocked_user
@@ -138,33 +138,6 @@ class TestRetrieveAndCountUsers(TestUserService):
         assert error.value.message == server_error.message
         user_repository.read_and_count_users.assert_called_once_with(page, limit)
 
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_users_are_not_found(
-        self,
-        user_repository: UserRepository,
-        user_service: UserService,
-        mocker: MockerFixture,
-        fake: Faker,
-    ) -> None:
-        page = fake.pyint()
-        limit = fake.pyint()
-        message = "Users not found"
-        server_error = ServerError(
-            message,
-            status.HTTP_404_NOT_FOUND,
-            Detail(context={"page": page, "limit": limit}, cause=None),
-        )
-        mocked_read_and_count_users = mocker.AsyncMock(return_value=None)
-        user_repository.read_and_count_users = mocked_read_and_count_users
-
-        with pytest.raises(ServerError) as error:
-            await user_service.retrieve_and_count_users(page, limit)
-
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
-        assert error.value.message == server_error.message
-        user_repository.read_and_count_users.assert_called_once_with(page, limit)
-
 
 class TestRetrieveUser(TestUserService):
     def test_should_define_a_method(
@@ -180,7 +153,7 @@ class TestRetrieveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory()
+        mocked_user = UserFactory.build()
         mocked_read_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.read_user = mocked_read_user
         expected_result = mocked_user
@@ -256,7 +229,7 @@ class TestReplaceUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory()
+        mocked_user = UserFactory.build()
         mocked_update_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.update_user = mocked_update_user
         expected_result = mocked_user
@@ -334,7 +307,7 @@ class TestRemoveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory()
+        mocked_user = UserFactory.build()
         mocked_delete_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.delete_user = mocked_delete_user
         expected_result = mocked_user

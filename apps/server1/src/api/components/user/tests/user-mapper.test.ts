@@ -4,7 +4,7 @@ import { UserFactory } from '../../../../factories/helpers/user-factory'
 import { User, UserResponse, UserMapper } from '..'
 
 describe('UserMapper', async () => {
-  const userFactory = new UserFactory()
+  const userFactory = new UserFactory.build()
 
   describe('.toPersistence', () => {
     it('should define a function', () => {

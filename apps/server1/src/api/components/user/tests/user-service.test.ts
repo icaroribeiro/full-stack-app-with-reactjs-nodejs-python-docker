@@ -9,7 +9,7 @@ import { User, UserList, UserRepository, UserService } from '..'
 describe('UserService', () => {
   const mockedDBService = new DBService()
   const mockedUserRepository = new UserRepository(mockedDBService)
-  const userFactory = new UserFactory()
+  const userFactory = new UserFactory.build()
 
   afterEach(() => {
     vi.clearAllMocks()
