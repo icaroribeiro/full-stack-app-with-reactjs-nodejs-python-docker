@@ -1,7 +1,8 @@
 import uvicorn
-from src.config import config
+from src.config.config import Config
 from src.server import Server
 
+config = Config()
 server = Server()
 app = server.app
 

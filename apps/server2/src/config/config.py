@@ -48,6 +48,3 @@ class Config:
             message = f"{name} environment variable isn't set"
             raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return os.environ.get(name)
-
-
-config = Config()

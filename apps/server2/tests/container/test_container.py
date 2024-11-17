@@ -3,9 +3,8 @@ from src.api.components.health_check.health_check_service import HealthCheckServ
 from src.api.components.user.user_repository import UserRepository
 from src.api.components.user.user_service import UserService
 from src.container.container import Container
+from src.services.api_pagination_service import APIPaginationService
 from src.services.db_service import DBService
-
-from api.services.api_pagination_service import APIPaginationService
 
 
 class TestContainer:

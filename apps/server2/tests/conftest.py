@@ -3,9 +3,11 @@ import asyncio
 import pytest
 from dotenv import load_dotenv
 from faker import Faker
-from src.config.config import config
+from src.config.config import Config
 from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
+
+config = Config()
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -60,7 +60,7 @@ class APIPaginationService:
             return None
         if total_records - (page - 1) * limit <= 0:
             return None
-        return re.sub("/(page=)[^&]+/", "$1" + f"{page - 1}", base_url)
+        return re.sub(r"(page=)[^&]", rf"\g<1>{page-1}", base_url)
 
     @staticmethod
     def __get_next_page(
@@ -69,7 +69,7 @@ class APIPaginationService:
         if total_records - page * limit <= 0:
             return None
         if "page" in base_url:
-            return re.sub("/(page=)[^&]+/", "$1" + f"{page + 1}", base_url)
+            return re.sub(r"(page=)[^&]", rf"\g<1>{page+1}", base_url)
         if "limit" in base_url:
             return base_url + f"&page={page + 1}"
         return base_url + f"?page={page + 1}&limit=1"

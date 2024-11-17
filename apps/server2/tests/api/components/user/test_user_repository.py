@@ -122,7 +122,7 @@ class TestReadAndCountUsers(TestUserRepository):
         assert total_result == expected_total_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_an_empty_list_of_users_with_non_zero_total_when_page_not_the_first_and_cannot_be_filled(
+    async def test_should_succeed_and_return_an_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -156,7 +156,7 @@ class TestReadAndCountUsers(TestUserRepository):
         assert total_result == expected_total_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_list_of_users_with_non_zero_total_when_page_not_the_first_and_can_be_filled(
+    async def test_should_succeed_and_return_a_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
