@@ -61,7 +61,8 @@ class TestCheckHealth(TestHealthCheckService):
         with pytest.raises(ServerError) as error:
             await health_check_service.check_health()
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         db_service.check_database_is_alive.assert_called_once()

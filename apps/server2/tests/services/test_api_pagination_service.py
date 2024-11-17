@@ -242,7 +242,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )
-        next = f"{base_url}&page=${page + 1}"
+        next = f"{base_url}&page={page + 1}"
         expected_result = APIPaginationResponse(
             page=api_pagination_data.page,
             limit=api_pagination_data.limit,

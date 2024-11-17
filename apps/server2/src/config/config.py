@@ -45,6 +45,6 @@ class Config:
     @staticmethod
     def __get_env_var(name: str) -> str:
         if os.environ.get(name) is None:
-            message = f"{name} environment variable isn't set"
+            message = f"{name} environment variable isn't set!"
             raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return os.environ.get(name)

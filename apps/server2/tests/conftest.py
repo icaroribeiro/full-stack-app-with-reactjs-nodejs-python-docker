@@ -7,8 +7,6 @@ from src.config.config import Config
 from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
 
-config = Config()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env_vars() -> None:
@@ -17,7 +15,12 @@ def load_env_vars() -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def start_database_container(request) -> DbContainer:
+def config() -> Config:
+    return Config()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def start_database_container(request, config: Config) -> DbContainer:
     db_user = config.get_database_username()
     db_password = config.get_database_password()
     db_name = config.get_database_name()
@@ -45,8 +48,9 @@ def db_service() -> DBService:
     return DBService()
 
 
-@pytest.fixture(scope="class")
-async def initialize_database(request, db_service: DBService) -> None:
+async def initialize_database_base(
+    request, config: Config, db_service: DBService
+) -> None:
     db_service.connect_database(config.get_database_url())
     alembic_file_path = "alembic.ini"
     await db_service.migrate_database(alembic_file_path)
@@ -62,6 +66,11 @@ async def initialize_database(request, db_service: DBService) -> None:
 
     request.addfinalizer(finalize)
     # print("Database initialized successfully!")
+
+
+@pytest.fixture(scope="class")
+async def initialize_database(request, config: Config, db_service: DBService):
+    await initialize_database_base(request, config, db_service)
 
 
 @pytest.fixture(scope="function")

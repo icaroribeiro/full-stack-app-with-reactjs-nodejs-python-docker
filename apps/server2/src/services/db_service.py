@@ -8,12 +8,12 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     create_async_engine,
 )
-from src.server_error import ServerError
+from src.server_error import Detail, ServerError
 
 
 class IDBService(ABC):
     @abstractmethod
-    async def connect_database(self, databaseURL: str) -> None:
+    async def connect_database(self, database_url: str) -> None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
@@ -51,26 +51,22 @@ class DBService(IDBService):
     def async_engine(self) -> AsyncEngine:
         if self.__async_engine is not None:
             return self.__async_engine
+        message = "Async engine is None!"
+        print(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def connect_database(self, databaseURL: str) -> None:
+    def connect_database(self, database_url: str) -> None:
         try:
             self.__async_engine = create_async_engine(
-                url=databaseURL,
+                url=database_url,
             )
         except Exception as error:
             message = "Database connection failed!"
             print(message, error)
-            # obj = Detail()
-            # obj.context = databaseURL
-            # obj.cause = error
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                type(
-                    "Detail",
-                    (object,),
-                    {"context": databaseURL, "cause": error},
-                ),
+                Detail(context=database_url, cause=error),
             )
 
     async def check_database_is_alive(self) -> bool:

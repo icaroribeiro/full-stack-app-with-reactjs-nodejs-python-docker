@@ -72,9 +72,10 @@ class TestRegisterUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.register_user(mocked_user)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.create_user.assert_called_once_with(mocked_user)
 
 
@@ -133,9 +134,10 @@ class TestRetrieveAndCountUsers(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.retrieve_and_count_users(page, limit)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.read_and_count_users.assert_called_once_with(page, limit)
 
 
@@ -184,9 +186,10 @@ class TestRetrieveUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.retrieve_user(mocked_user.id)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
@@ -209,9 +212,10 @@ class TestRetrieveUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.retrieve_user(mocked_user.id)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
 
@@ -262,9 +266,10 @@ class TestReplaceUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.replace_user(mocked_user.id, mocked_user)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
     @pytest.mark.asyncio(loop_scope="session")
@@ -287,9 +292,10 @@ class TestReplaceUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.replace_user(mocked_user.id, mocked_user)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
 
@@ -338,9 +344,10 @@ class TestRemoveUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.remove_user(mocked_user.id)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.delete_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
@@ -363,7 +370,8 @@ class TestRemoveUser(TestUserService):
         with pytest.raises(ServerError) as error:
             await user_service.remove_user(mocked_user.id)
 
-        assert error.value.status_code == server_error.status_code
-        assert error.value.detail == server_error.detail
         assert error.value.message == server_error.message
+        assert error.value.detail == server_error.detail
+        assert error.value.status_code == server_error.status_code
+        assert error.value.is_operational == server_error.is_operational
         user_repository.delete_user.assert_called_once_with(mocked_user.id)
