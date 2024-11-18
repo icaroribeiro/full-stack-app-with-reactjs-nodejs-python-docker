@@ -58,11 +58,11 @@ class TestCheckHealth(TestHealthCheckService):
         mocked_check_database_is_alive = mocker.Mock(side_effect=error)
         db_service.check_database_is_alive = mocked_check_database_is_alive
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             await health_check_service.check_health()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
         db_service.check_database_is_alive.assert_called_once()

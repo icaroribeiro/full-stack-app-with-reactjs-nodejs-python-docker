@@ -10,9 +10,9 @@ from src.server_error import ServerError
 
 
 class TestConfig:
-    @pytest.fixture
-    def config(self) -> Config:
-        return Config()
+    # @pytest.fixture
+    # def config(self) -> Config:
+    #     return Config()
 
     @staticmethod
     def setup_and_teardown(name: str, input_value: str) -> Iterator[str]:
@@ -58,13 +58,13 @@ class TestGetLogLevel(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_log_level()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetEnv(TestConfig):
@@ -94,13 +94,13 @@ class TestGetEnv(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_env()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetPort(TestConfig):
@@ -130,13 +130,13 @@ class TestGetPort(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_port()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetOpenAPIURL(TestConfig):
@@ -166,13 +166,13 @@ class TestGetOpenAPIURL(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_openapi_url()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDocsURL(TestConfig):
@@ -202,13 +202,13 @@ class TestGetDocsURL(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_docs_url()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseULR(TestConfig):
@@ -238,13 +238,13 @@ class TestGetDatabaseULR(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_database_url()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseUsername(TestConfig):
@@ -274,13 +274,13 @@ class TestGetDatabaseUsername(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_database_username()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabasePassword(TestConfig):
@@ -310,13 +310,13 @@ class TestGetDatabasePassword(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_database_password()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseName(TestConfig):
@@ -346,13 +346,13 @@ class TestGetDatabaseName(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_database_name()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabasePort(TestConfig):
@@ -382,13 +382,13 @@ class TestGetDatabasePort(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_database_port()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetAllowedOrigins(TestConfig):
@@ -418,10 +418,10 @@ class TestGetAllowedOrigins(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             config.get_allowed_origins()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational

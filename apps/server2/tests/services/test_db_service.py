@@ -44,13 +44,13 @@ class TestAsyncEngine(TestDBService):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             db_service.async_engine
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestConnectDatabase(TestDBService):
@@ -78,7 +78,9 @@ class TestConnectDatabase(TestDBService):
         fake: Faker,
     ) -> None:
         database_url = fake.url("")
-        error = NoSuchModuleError("Can't load plugin: sqlalchemy.dialects:https")
+        error = NoSuchModuleError(
+            f"Could not parse SQLAlchemy URL from string '{database_url}'"
+        )
         message = "Database connection failed!"
         server_error = ServerError(
             message,
@@ -86,14 +88,14 @@ class TestConnectDatabase(TestDBService):
             Detail(context=database_url, cause=error),
         )
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             db_service.connect_database(database_url)
 
-        assert error.value.message == server_error.message
-        assert error.value.detail.context == server_error.detail.context
-        assert error.value.detail.cause.args[0] == server_error.detail.cause.args[0]
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail.context == server_error.detail.context
+        assert excinfo.value.detail.cause.args[0] == server_error.detail.cause.args[0]
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestCheckDatabaseIsAlive(TestDBService):
@@ -122,13 +124,13 @@ class TestCheckDatabaseIsAlive(TestDBService):
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             await db_service.check_database_is_alive()
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestMigrateDatabase(TestDBService):
@@ -162,13 +164,13 @@ class TestMigrateDatabase(TestDBService):
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as error:
+        with pytest.raises(ServerError) as excinfo:
             await db_service.migrate_database(alembic_file_path)
 
-        assert error.value.message == server_error.message
-        assert error.value.detail == server_error.detail
-        assert error.value.status_code == server_error.status_code
-        assert error.value.is_operational == server_error.is_operational
+        assert excinfo.value.message == server_error.message
+        assert excinfo.value.detail == server_error.detail
+        assert excinfo.value.status_code == server_error.status_code
+        assert excinfo.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseTableRowCount(TestDBService):
