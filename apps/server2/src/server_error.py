@@ -19,8 +19,6 @@ class ServerError(HTTPException):
     ):
         super().__init__(status_code, detail)
         self.message = message
-        self.context = detail.context if detail else None
-        self.cause = detail.cause if detail else None
         if status_code:
             self.status_code = status_code
         else:

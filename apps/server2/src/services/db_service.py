@@ -66,7 +66,7 @@ class DBService(IDBService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=database_url, cause=error),
+                Detail(context=database_url, cause=error.args[0]),
             )
 
     async def check_database_is_alive(self) -> bool:
@@ -177,12 +177,17 @@ class DBService(IDBService):
 
     async def deactivate_database(self) -> None:
         if self.__async_engine is not None:
-            await self.__async_engine.dispose()
-            self.__async_engine = None
-        else:
-            message = "Async engine is None!"
-            print(message)
-            raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            try:
+                await self.__async_engine.dispose()
+                self.__async_engine = None
+                return
+            except Exception as error:
+                message = "An error occurred when deactivating the database"
+                print(message, error)
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        message = "Async engine is None!"
+        print(message)
+        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @staticmethod
     def __run_upgrade(conn: Connection, alembic_file_path: str):

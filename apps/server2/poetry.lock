@@ -1140,6 +1140,21 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "pytest-dotenv"
+version = "0.5.2"
+description = "A py.test plugin that parses environment files before running tests"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytest-dotenv-0.5.2.tar.gz", hash = "sha256:2dc6c3ac6d8764c71c6d2804e902d0ff810fa19692e95fe138aefc9b1aa73732"},
+    {file = "pytest_dotenv-0.5.2-py3-none-any.whl", hash = "sha256:40a2cece120a213898afaa5407673f6bd924b1fa7eafce6bda0e8abffe2f710f"},
+]
+
+[package.dependencies]
+pytest = ">=5.0.0"
+python-dotenv = ">=0.9.1"
+
+[[package]]
 name = "pytest-mock"
 version = "3.14.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
@@ -1180,9 +1195,6 @@ files = [
     {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
     {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
 ]
-
-[package.dependencies]
-click = {version = ">=5.0", optional = true, markers = "extra == \"cli\""}
 
 [package.extras]
 cli = ["click (>=5.0)"]
@@ -1669,4 +1681,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12.7,<3.14"
-content-hash = "80ba3e261d2007b71f93c757c98b5785e9c06582f4fb2eb6e0ce502ab5cdfc31"
+content-hash = "dbdce37b12719ec02fea2d304f0f7a59fd5821449730227f7da3c91d52cb50af"

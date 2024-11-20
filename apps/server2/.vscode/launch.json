@@ -11,8 +11,8 @@
 			"module": "pytest",
 			"console": "integratedTerminal",
 			"args": [
-				"-v",
-				"-s",
+				// "-v",
+				// "-s",
 				"${workspaceFolder}/${relativeFileDirname}/${fileBasename}"
 			]
 		}

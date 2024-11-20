@@ -24,5 +24,5 @@ class HealthCheckService(IHealthCheckService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context="unknown", cause=error),
+                Detail(context="unknown", cause=error.args[0]),
             )

@@ -1,5 +1,6 @@
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import UserRequest, UserResponse
 from src.api.components.user.user_service import UserService
@@ -55,11 +56,13 @@ class UserController(APIRouter):
         @inject
         async def add_user(
             body: UserRequest,
-            response: Response,
             user_service: UserService = self.dependencies[0],
-        ) -> UserResponse:
+        ) -> JSONResponse:
             user = UserMapper.to_domain(body)
             registered_user = await user_service.register_user(user)
             user_response = UserMapper.to_response(registered_user)
-            response.status_code = status.HTTP_201_CREATED
-            return user_response
+            response = JSONResponse(
+                content=user_response.model_dump(),
+                status_code=status.HTTP_201_CREATED,
+            )
+            return response

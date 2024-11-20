@@ -2,7 +2,7 @@
 lint = "ruff check"
 fix-lint = "ruff check --fix"
 format = "ruff format"
-test = "pytest -v -s --cov src"
+test = "poetry run pytest -v -s --cov src"
 generate-db = "dotenv -f .env.development run -- alembic revision --autogenerate"
 migrate-db = "dotenv -f .env.development run -- alembic upgrade head"
 config-pypath = "dotenv -f .env.development set PYTHONPATH $PWD"

@@ -1,20 +1,16 @@
 import asyncio
+from typing import AsyncGenerator
 
 import pytest
-from dotenv import load_dotenv
 from faker import Faker
+from httpx import ASGITransport, AsyncClient
 from src.config.config import Config
+from src.server import Server
 from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
 
 
-@pytest.fixture(scope="session", autouse=True)
-def load_env_vars() -> None:
-    load_dotenv(".env.test")
-    # print("Environment variables loaded successfully!")
-
-
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def config() -> Config:
     return Config()
 
@@ -79,6 +75,13 @@ async def clear_database_tables(db_service: DBService) -> None:
     # print("Database tables cleaned successfully!")
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def fake() -> Faker:
     return Faker()
+
+
+@pytest.fixture(scope="session")
+async def async_client(config: Config) -> AsyncGenerator[AsyncClient, None]:
+    server = Server(config)
+    async with AsyncClient(transport=ASGITransport(app=server.app)) as async_client:
+        yield async_client

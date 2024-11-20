@@ -1,11 +1,16 @@
 import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field, model_validator
+from typing_extensions import Self
 
 
 class UserRequest(BaseModel):
-    name: str
-    email: str
+    name: str = Field(max_length=256)
+    email: EmailStr
+
+    @model_validator(mode="after")
+    def validate(self) -> Self:
+        return self
 
 
 class User(BaseModel):

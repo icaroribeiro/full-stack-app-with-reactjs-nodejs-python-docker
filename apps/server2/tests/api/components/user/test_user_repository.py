@@ -7,7 +7,7 @@ from sqlalchemy import insert
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import User
 from src.api.components.user.user_repository import UserRepository
-from src.api.shared.dict_to_obj import DictToObj
+from src.api.utils.dict_to_obj import DictToObj
 from src.services.db_service import DBService
 from tests.factories.user_factory import UserFactory
 

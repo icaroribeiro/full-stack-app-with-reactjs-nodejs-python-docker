@@ -64,7 +64,7 @@ class TestRegisterUser(TestUserService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user, cause=error),
+            Detail(context=mocked_user, cause=error.args[0]),
         )
         mocked_create_user = mocker.Mock(side_effect=error)
         user_repository.create_user = mocked_create_user
@@ -126,7 +126,7 @@ class TestRetrieveAndCountUsers(TestUserService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context={"page": page, "limit": limit}, cause=error),
+            Detail(context={"page": page, "limit": limit}, cause=error.args[0]),
         )
         mocked_read_and_count_users = mocker.Mock(side_effect=error)
         user_repository.read_and_count_users = mocked_read_and_count_users
@@ -178,7 +178,7 @@ class TestRetrieveUser(TestUserService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user.id, cause=error),
+            Detail(context=mocked_user.id, cause=error.args[0]),
         )
         mocked_read_user = mocker.Mock(side_effect=error)
         user_repository.read_user = mocked_read_user
@@ -336,7 +336,7 @@ class TestRemoveUser(TestUserService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user.id, cause=error),
+            Detail(context=mocked_user.id, cause=error.args[0]),
         )
         mocked_delete_user = mocker.Mock(side_effect=error)
         user_repository.delete_user = mocked_delete_user

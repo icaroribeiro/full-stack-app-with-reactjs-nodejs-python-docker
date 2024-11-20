@@ -3,7 +3,7 @@ import types
 import pytest
 from src.api.components.user.user_mapper import UserMapper
 from src.api.components.user.user_models import UserResponse
-from src.api.shared.dict_to_obj import DictToObj
+from src.api.utils.dict_to_obj import DictToObj
 from tests.factories.user_factory import UserFactory
 
 

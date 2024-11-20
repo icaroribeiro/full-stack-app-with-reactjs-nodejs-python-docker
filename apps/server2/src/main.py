@@ -3,7 +3,7 @@ from src.config.config import Config
 from src.server import Server
 
 config = Config()
-server = Server()
+server = Server(config)
 app = server.app
 
 is_production_build = True if config.get_env() == "production" else False

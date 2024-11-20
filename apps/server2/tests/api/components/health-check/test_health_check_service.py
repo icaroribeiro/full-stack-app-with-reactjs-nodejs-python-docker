@@ -53,7 +53,7 @@ class TestCheckHealth(TestHealthCheckService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context="unknown", cause=error),
+            Detail(context="unknown", cause=error.args[0]),
         )
         mocked_check_database_is_alive = mocker.Mock(side_effect=error)
         db_service.check_database_is_alive = mocked_check_database_is_alive

@@ -43,7 +43,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user, cause=error),
+                Detail(context=user, cause=error.args[0]),
             )
 
     async def retrieve_and_count_users(
@@ -57,7 +57,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"page": page, "limit": limit}, cause=error),
+                Detail(context={"page": page, "limit": limit}, cause=error.args[0]),
             )
 
     async def retrieve_user(self, userId: str) -> User:
@@ -70,7 +70,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=error),
+                Detail(context=userId, cause=error.args[0]),
             )
         if retrieved_user is None:
             message = "User not found"
@@ -92,7 +92,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"userId": userId, "user": user}, cause=error),
+                Detail(context={"userId": userId, "user": user}, cause=error.args[0]),
             )
         if replaced_user is None:
             message = "User not found"
@@ -114,7 +114,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=error),
+                Detail(context=userId, cause=error.args[0]),
             )
         if removed_user is None:
             message = "User not found"
