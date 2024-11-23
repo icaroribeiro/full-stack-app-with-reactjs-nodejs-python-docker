@@ -1,8 +1,9 @@
 import pytest
 from fastapi import status
 from httpx import AsyncClient
-from src.api.components.health_check.health_check_models import HealthCheckResponse
-from src.config.config import Config
+
+from api.components.health_check.health_check_models import HealthCheckResponse
+from config.config import Config
 
 
 class TestHealthCheckHttp:

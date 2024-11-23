@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.components.health_check import health_check_controller
-from src.api.components.user import user_controller
-from src.api.routers.routers import health_check_router, user_router
-from src.api.utils.api_error_handler import APIErrorHandler
-from src.config.config import Config
-from src.container.container import Container
-from src.server_error import ServerError
+
+from api.components.health_check import health_check_controller
+from api.components.user import user_controller
+from api.routers.routers import health_check_router, user_router
+from api.utils.api_error_handler import APIErrorHandler
+from config.config import Config
+from container.container import Container
+from server_error import ServerError
 
 
 class Server:
@@ -15,6 +16,8 @@ class Server:
         title="Take-Home Assignment API",
         description="A REST API developed using Python and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/full-stack-app-with-reactjs-nodejs-python-docker)",  # noqa: E501
         version="1.0.0",
+        openapi_url="/api-docs/swagger.json",
+        docs_url="/api-docs",
         contact={
             "name": "Ícaro Ribeiro",
             "email": "icaroribeiro@hotmail.com",
@@ -39,8 +42,6 @@ class Server:
         db_service.connect_database(config.get_database_url())
         container.wire(modules=[health_check_controller])
         container.wire(modules=[user_controller])
-        self.__app.openapi_url = (config.get_openapi_url(),)
-        self.__app.docs_url = (config.get_docs_url(),)
         self.__app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],

@@ -1,9 +1,10 @@
 from dependency_injector import containers, providers
-from src.api.components.health_check.health_check_service import HealthCheckService
-from src.api.components.user.user_repository import UserRepository
-from src.api.components.user.user_service import UserService
-from src.services.api_pagination_service import APIPaginationService
-from src.services.db_service import DBService
+
+from api.components.health_check.health_check_service import HealthCheckService
+from api.components.user.user_repository import UserRepository
+from api.components.user.user_service import UserService
+from services.api_pagination_service import APIPaginationService
+from services.db_service import DBService
 
 
 class Container(containers.DeclarativeContainer):

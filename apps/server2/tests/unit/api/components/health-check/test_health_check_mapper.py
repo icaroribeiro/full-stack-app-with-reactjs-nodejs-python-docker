@@ -1,8 +1,9 @@
 import types
 
 import pytest
-from src.api.components.health_check.health_check_mapper import HealthCheckMapper
-from src.api.components.health_check.health_check_models import HealthCheckResponse
+
+from api.components.health_check.health_check_mapper import HealthCheckMapper
+from api.components.health_check.health_check_models import HealthCheckResponse
 
 
 class TestHealthCheckMapper:

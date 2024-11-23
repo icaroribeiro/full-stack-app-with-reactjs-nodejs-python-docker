@@ -3,9 +3,10 @@ import types
 import pytest
 from fastapi import status
 from pytest_mock import MockerFixture
-from src.api.components.health_check.health_check_service import HealthCheckService
-from src.server_error import Detail, ServerError
-from src.services.db_service import DBService
+
+from api.components.health_check.health_check_service import HealthCheckService
+from server_error import Detail, ServerError
+from services.db_service import DBService
 
 
 class TestHealthCheckService:
@@ -42,7 +43,7 @@ class TestCheckHealth(TestHealthCheckService):
         db_service.check_database_is_alive.assert_called_once()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_health_cannot_be_checked(
+    async def test_should_fail_and_raise_exception_when_health_cannot_be_checked(
         self,
         db_service: DBService,
         health_check_service: HealthCheckService,
@@ -53,16 +54,16 @@ class TestCheckHealth(TestHealthCheckService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context="unknown", cause=error.args[0]),
+            Detail(context="unknown", cause=str(error)),
         )
         mocked_check_database_is_alive = mocker.Mock(side_effect=error)
         db_service.check_database_is_alive = mocked_check_database_is_alive
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await health_check_service.check_health()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         db_service.check_database_is_alive.assert_called_once()

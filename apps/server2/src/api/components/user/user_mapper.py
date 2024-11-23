@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from src.api.components.user.user_models import User, UserResponse
+from api.components.user.user_models import User, UserResponse
 
 
 class IUserMapper(ABC):

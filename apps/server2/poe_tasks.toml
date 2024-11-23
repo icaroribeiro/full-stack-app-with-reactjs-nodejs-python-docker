@@ -2,12 +2,14 @@
 lint = "ruff check"
 fix-lint = "ruff check --fix"
 format = "ruff format"
-test = "poetry run pytest -v -s --cov src"
+config-pypath-test = "dotenv -f .env.test set PYTHONPATH $PWD"
+_test = "dotenv -f .env.test run -- poetry run pytest -v -s --cov src"
+test = ["config-pypath-test", "_test"]
 generate-db = "dotenv -f .env.development run -- alembic revision --autogenerate"
 migrate-db = "dotenv -f .env.development run -- alembic upgrade head"
-config-pypath = "dotenv -f .env.development set PYTHONPATH $PWD"
+config-pypath-dev = "dotenv -f .env.development set PYTHONPATH $PWD"
 _start-dev = "dotenv -f .env.development run -- poetry run python src/main.py"
-start-dev = ["config-pypath", "_start-dev"]
+start-dev = ["config-pypath-dev", "_start-dev"]
 pre-build = "rm -rf dist build"
 make-bundle = "pyinstaller -F src/main.py --clean"
 build = ["pre-build", "make-bundle"]

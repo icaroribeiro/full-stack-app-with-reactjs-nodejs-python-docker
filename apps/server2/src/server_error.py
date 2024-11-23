@@ -2,7 +2,8 @@ from typing import Optional
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel
-from src.api.shared.unknown_type import UnknownType
+
+from api.shared.unknown_type import UnknownType
 
 
 class Detail(BaseModel):

@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     create_async_engine,
 )
-from src.server_error import Detail, ServerError
+
+from server_error import Detail, ServerError
 
 
 class IDBService(ABC):
@@ -66,7 +67,7 @@ class DBService(IDBService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=database_url, cause=error.args[0]),
+                Detail(context=database_url, cause=str(error)),
             )
 
     async def check_database_is_alive(self) -> bool:

@@ -3,10 +3,11 @@ from uuid import UUID
 
 from db.models.user import UserModel
 from sqlalchemy import delete, desc, func, insert, select, update
-from src.api.components.user.user_mapper import UserMapper
-from src.api.components.user.user_models import User
-from src.api.utils.dict_to_obj import DictToObj
-from src.services.db_service import DBService
+
+from api.components.user.user_mapper import UserMapper
+from api.components.user.user_models import User
+from api.utils.dict_to_obj import DictToObj
+from services.db_service import DBService
 
 
 class IUserRepository(ABC):

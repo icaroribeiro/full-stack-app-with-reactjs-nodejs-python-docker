@@ -1,7 +1,8 @@
 import os
 
 from fastapi import status
-from src.server_error import ServerError
+
+from server_error import ServerError
 
 
 class Config:

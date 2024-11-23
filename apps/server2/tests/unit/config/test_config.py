@@ -5,8 +5,9 @@ from typing import Generator
 import pytest
 from faker import Faker
 from fastapi import status
-from src.config.config import Config
-from src.server_error import ServerError
+
+from config.config import Config
+from server_error import ServerError
 
 
 class TestConfig:
@@ -43,7 +44,7 @@ class TestGetLogLevel(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("LOG_LEVEL")
@@ -53,13 +54,13 @@ class TestGetLogLevel(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_log_level()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetEnv(TestConfig):
@@ -79,7 +80,7 @@ class TestGetEnv(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("ENV")
@@ -89,13 +90,13 @@ class TestGetEnv(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_env()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetPort(TestConfig):
@@ -115,7 +116,7 @@ class TestGetPort(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("PORT")
@@ -125,13 +126,13 @@ class TestGetPort(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_port()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetOpenAPIURL(TestConfig):
@@ -151,7 +152,7 @@ class TestGetOpenAPIURL(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("OPENAPI_URL")
@@ -161,13 +162,13 @@ class TestGetOpenAPIURL(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_openapi_url()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDocsURL(TestConfig):
@@ -187,7 +188,7 @@ class TestGetDocsURL(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DOCS_URL")
@@ -197,13 +198,13 @@ class TestGetDocsURL(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_docs_url()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseULR(TestConfig):
@@ -223,7 +224,7 @@ class TestGetDatabaseULR(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DATABASE_URL")
@@ -233,13 +234,13 @@ class TestGetDatabaseULR(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_database_url()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseUsername(TestConfig):
@@ -259,7 +260,7 @@ class TestGetDatabaseUsername(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DATABASE_USERNAME")
@@ -269,13 +270,13 @@ class TestGetDatabaseUsername(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_database_username()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabasePassword(TestConfig):
@@ -295,7 +296,7 @@ class TestGetDatabasePassword(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DATABASE_PASSWORD")
@@ -305,13 +306,13 @@ class TestGetDatabasePassword(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_database_password()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseName(TestConfig):
@@ -331,7 +332,7 @@ class TestGetDatabaseName(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DATABASE_NAME")
@@ -341,13 +342,13 @@ class TestGetDatabaseName(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_database_name()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabasePort(TestConfig):
@@ -367,7 +368,7 @@ class TestGetDatabasePort(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("DATABASE_PORT")
@@ -377,13 +378,13 @@ class TestGetDatabasePort(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_database_port()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetAllowedOrigins(TestConfig):
@@ -403,7 +404,7 @@ class TestGetAllowedOrigins(TestConfig):
 
         assert result == expected_result
 
-    def test_should_fail_and_throw_exception_when_environment_variable_is_not_set(
+    def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
         self, config: Config
     ) -> None:
         os.environ.pop("ALLOWED_ORIGINS")
@@ -413,10 +414,10 @@ class TestGetAllowedOrigins(TestConfig):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             config.get_allowed_origins()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational

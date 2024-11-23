@@ -4,10 +4,11 @@ from typing import AsyncGenerator
 import pytest
 from faker import Faker
 from httpx import ASGITransport, AsyncClient
-from src.config.config import Config
-from src.server import Server
-from src.services.db_service import DBService
 from testcontainers.postgres import DbContainer, PostgresContainer
+
+from config.config import Config
+from server import Server
+from services.db_service import DBService
 
 
 @pytest.fixture(scope="session")
@@ -39,7 +40,7 @@ def start_database_container(request, config: Config) -> DbContainer:
     return container
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="session")
 def db_service() -> DBService:
     return DBService()
 
@@ -69,15 +70,10 @@ async def initialize_database(request, config: Config, db_service: DBService):
     await initialize_database_base(request, config, db_service)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 async def clear_database_tables(db_service: DBService) -> None:
     await db_service.clear_database_tables()
     # print("Database tables cleaned successfully!")
-
-
-@pytest.fixture(scope="session")
-def fake() -> Faker:
-    return Faker()
 
 
 @pytest.fixture(scope="session")
@@ -85,3 +81,8 @@ async def async_client(config: Config) -> AsyncGenerator[AsyncClient, None]:
     server = Server(config)
     async with AsyncClient(transport=ASGITransport(app=server.app)) as async_client:
         yield async_client
+
+
+@pytest.fixture
+def fake() -> Faker:
+    return Faker()

@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
 from fastapi import status
-from src.api.components.user.user_models import User
-from src.api.components.user.user_repository import UserRepository
-from src.server_error import Detail, ServerError
+
+from api.components.user.user_models import User
+from api.components.user.user_repository import UserRepository
+from server_error import Detail, ServerError
 
 
 class IUserService(ABC):
@@ -43,7 +44,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user, cause=error.args[0]),
+                Detail(context=user, cause=str(error)),
             )
 
     async def retrieve_and_count_users(
@@ -57,7 +58,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"page": page, "limit": limit}, cause=error.args[0]),
+                Detail(context={"page": page, "limit": limit}, cause=str(error)),
             )
 
     async def retrieve_user(self, userId: str) -> User:
@@ -70,7 +71,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=error.args[0]),
+                Detail(context=userId, cause=str(error)),
             )
         if retrieved_user is None:
             message = "User not found"
@@ -92,7 +93,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"userId": userId, "user": user}, cause=error.args[0]),
+                Detail(context={"userId": userId, "user": user}, cause=str(error)),
             )
         if replaced_user is None:
             message = "User not found"
@@ -114,7 +115,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=error.args[0]),
+                Detail(context=userId, cause=str(error)),
             )
         if removed_user is None:
             message = "User not found"

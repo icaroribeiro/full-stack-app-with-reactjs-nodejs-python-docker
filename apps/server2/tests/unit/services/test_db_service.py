@@ -9,14 +9,15 @@ from sqlalchemy.exc import NoSuchModuleError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
 )
-from src.api.components.user.user_mapper import UserMapper
-from src.api.components.user.user_models import User
-from src.api.utils.dict_to_obj import DictToObj
-from src.config.config import Config
-from src.server_error import Detail, ServerError
-from src.services.db_service import DBService
 from tests.conftest import initialize_database_base
 from tests.factories.user_factory import UserFactory
+
+from api.components.user.user_mapper import UserMapper
+from api.components.user.user_models import User
+from api.utils.dict_to_obj import DictToObj
+from config.config import Config
+from server_error import Detail, ServerError
+from services.db_service import DBService
 
 
 class TestDBService:
@@ -42,7 +43,7 @@ class TestAsyncEngine(TestDBService):
         assert result is not None
         assert isinstance(result, AsyncEngine)
 
-    def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self,
         db_service: DBService,
     ) -> None:
@@ -52,13 +53,13 @@ class TestAsyncEngine(TestDBService):
             status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             db_service.async_engine
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestConnectDatabase(TestDBService):
@@ -78,7 +79,7 @@ class TestConnectDatabase(TestDBService):
         assert result is None
         assert db_service.async_engine is not None
 
-    def test_should_fail_and_throw_exception_when_database_url_is_invalid(
+    def test_should_fail_and_raise_exception_when_database_url_is_invalid(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -92,17 +93,17 @@ class TestConnectDatabase(TestDBService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=database_url, cause=error.args[0]),
+            Detail(context=database_url, cause=str(error)),
         )
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             db_service.connect_database(database_url)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail.context == server_error.detail.context
-        assert excinfo.value.detail.cause.args[0] == server_error.detail.cause.args[0]
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail.context == server_error.detail.context
+        assert exc_info.value.detail.cause == server_error.detail.cause
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestCheckDatabaseIsAlive(TestDBService):
@@ -122,20 +123,20 @@ class TestCheckDatabaseIsAlive(TestDBService):
         assert result == expected_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self,
         db_service: DBService,
     ) -> None:
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.check_database_is_alive()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestMigrateDatabase(TestDBService):
@@ -160,7 +161,7 @@ class TestMigrateDatabase(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_alembic_file_is_not_found(
+    async def test_should_fail_and_raise_exception_when_alembic_file_is_not_found(
         self,
         config: Config,
         db_service: DBService,
@@ -171,16 +172,16 @@ class TestMigrateDatabase(TestDBService):
         message = "An error occurred when migrating the database"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.migrate_database(alembic_file_path)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self,
         db_service: DBService,
     ) -> None:
@@ -188,13 +189,13 @@ class TestMigrateDatabase(TestDBService):
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.migrate_database(alembic_file_path)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestGetDatabaseTableRowCount(TestDBService):
@@ -234,7 +235,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_database_table_does_not_exist(
+    async def test_should_fail_and_raise_exception_when_database_table_does_not_exist(
         self,
         config: Config,
         db_service: DBService,
@@ -247,29 +248,29 @@ class TestGetDatabaseTableRowCount(TestDBService):
         message = f"An error occurred when counting rows of database table {name}"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.get_database_table_row_count(name)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService, fake: Faker
     ) -> None:
         name = fake.name()
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.get_database_table_row_count(name)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestClearDatabaseTable(TestDBService):
@@ -308,19 +309,19 @@ class TestClearDatabaseTable(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService
     ) -> None:
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.clear_database_tables()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestDeleteDatabaseTables(TestDBService):
@@ -353,19 +354,19 @@ class TestDeleteDatabaseTables(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService
     ) -> None:
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.delete_database_tables()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
 class TestDeactivateDatabase(TestDBService):
@@ -385,24 +386,24 @@ class TestDeactivateDatabase(TestDBService):
         assert result is None
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.async_engine()
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService
     ) -> None:
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await db_service.deactivate_database()
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational

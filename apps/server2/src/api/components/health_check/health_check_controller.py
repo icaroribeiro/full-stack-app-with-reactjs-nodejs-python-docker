@@ -1,11 +1,13 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from src.api.components.health_check.health_check_mapper import HealthCheckMapper
-from src.api.components.health_check.health_check_models import HealthCheckResponse
-from src.api.components.health_check.health_check_service import HealthCheckService
-from src.api.shared.api_error_response import APIErrorResponse
-from src.container.container import Container
+
+from api.components.health_check.health_check_mapper import HealthCheckMapper
+from api.components.health_check.health_check_models import HealthCheckResponse
+from api.components.health_check.health_check_service import HealthCheckService
+from api.shared.api_error_response import APIErrorResponse
+from container.container import Container
 
 
 class HealthCheckController(APIRouter):
@@ -59,7 +61,7 @@ class HealthCheckController(APIRouter):
             is_healthy = await health_check_service.check_health()
             health_check_response = HealthCheckMapper.to_response(is_healthy)
             response = JSONResponse(
-                content=health_check_response.model_dump(),
+                content=jsonable_encoder(health_check_response),
                 status_code=status.HTTP_200_OK,
             )
             return response

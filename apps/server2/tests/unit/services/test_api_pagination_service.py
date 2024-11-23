@@ -2,10 +2,11 @@ import re
 import types
 
 import pytest
-from src.api.components.user.user_mapper import UserMapper
-from src.api.shared.api_pagination_response import APIPaginationResponse
-from src.services.api_pagination_service import APIPaginationData, APIPaginationService
 from tests.factories.user_factory import UserFactory
+
+from api.components.user.user_mapper import UserMapper
+from api.shared.api_pagination_response import APIPaginationResponse
+from services.api_pagination_service import APIPaginationData, APIPaginationService
 
 
 class TestAPIPaginationService:

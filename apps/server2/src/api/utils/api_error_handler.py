@@ -1,8 +1,9 @@
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from src.api.shared.api_error_response import APIErrorResponse
-from src.server_error import Detail, ServerError
+
+from api.shared.api_error_response import APIErrorResponse
+from server_error import Detail, ServerError
 
 
 class APIErrorHandler:

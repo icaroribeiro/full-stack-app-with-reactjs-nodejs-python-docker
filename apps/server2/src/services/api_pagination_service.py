@@ -3,7 +3,8 @@ import re
 from abc import ABC, abstractmethod
 
 from pydantic import BaseModel
-from src.api.shared.api_pagination_response import APIPaginationResponse, T
+
+from api.shared.api_pagination_response import APIPaginationResponse, T
 
 
 class APIPaginationData(BaseModel):

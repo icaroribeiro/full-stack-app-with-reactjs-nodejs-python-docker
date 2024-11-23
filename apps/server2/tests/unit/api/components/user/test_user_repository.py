@@ -4,12 +4,13 @@ import pytest
 from db.models.user import UserModel
 from faker import Faker
 from sqlalchemy import insert
-from src.api.components.user.user_mapper import UserMapper
-from src.api.components.user.user_models import User
-from src.api.components.user.user_repository import UserRepository
-from src.api.utils.dict_to_obj import DictToObj
-from src.services.db_service import DBService
 from tests.factories.user_factory import UserFactory
+
+from api.components.user.user_mapper import UserMapper
+from api.components.user.user_models import User
+from api.components.user.user_repository import UserRepository
+from api.utils.dict_to_obj import DictToObj
+from services.db_service import DBService
 
 
 class TestUserRepository:
@@ -26,14 +27,14 @@ class TestCreateUser(TestUserRepository):
         assert isinstance(user_repository.create_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_created_user(
+    async def test_should_succeed_and_return_user_when_user_is_created(
         self,
         db_service: DBService,
         initialize_database: None,
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         expected_result = UserMapper.to_domain(mocked_user)
 
         result = await user_repository.create_user(mocked_user)
@@ -60,7 +61,7 @@ class TestReadAndCountUsers(TestUserRepository):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_an_empty_list_of_user_with_zero_total(
+    async def test_should_succeed_and_return_empty_list_of_user_with_zero_total_when_users_exist(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -86,7 +87,7 @@ class TestReadAndCountUsers(TestUserRepository):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_list_of_users_with_non_zero_total_when_first_page_can_be_filled(
+    async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_first_page_can_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -122,7 +123,7 @@ class TestReadAndCountUsers(TestUserRepository):
         assert total_result == expected_total_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_an_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
+    async def test_should_succeed_and_return_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -156,7 +157,7 @@ class TestReadAndCountUsers(TestUserRepository):
         assert total_result == expected_total_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
+    async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -201,32 +202,16 @@ class TestReadUser(TestUserRepository):
         assert isinstance(user_repository.read_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_none_when_user_is_not_found(
+    async def test_should_succeed_and_return_user_when_user_is_found(
         self,
         db_service: DBService,
         initialize_database: None,
         clear_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
-        mocked_user = UserFactory.build()
-
-        result = await user_repository.read_user(mocked_user.id)
-
-        row_count = 0
-        assert await db_service.get_database_table_row_count("users") == row_count
-        assert result is None
-
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_read_user_should_succeed_and_return_a_user(
-        self,
-        db_service: DBService,
-        initialize_database: None,
-        clear_database_tables: None,
-        user_repository: UserRepository,
-    ) -> None:
-        mocked_user = UserFactory.build()
-        domain_user: User
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
             engine_result = await conn.execute(query)
@@ -242,6 +227,22 @@ class TestReadUser(TestUserRepository):
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result == expected_result
 
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        user_repository: UserRepository,
+    ) -> None:
+        mocked_user: UserModel = UserFactory.build()
+
+        result = await user_repository.read_user(mocked_user.id)
+
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None
+
 
 class TestUpdateUser(TestUserRepository):
     def test_should_define_a_method(
@@ -254,33 +255,16 @@ class TestUpdateUser(TestUserRepository):
         assert isinstance(user_repository.update_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_none_when_user_is_not_found(
+    async def test_should_succeed_and_return_user_when_user_is_updated(
         self,
         db_service: DBService,
         initialize_database: None,
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
-        domain_user = UserMapper.to_domain(UserFactory.build())
-
-        result = await user_repository.update_user(mocked_user.id, domain_user)
-
-        row_count = 0
-        assert await db_service.get_database_table_row_count("users") == row_count
-        assert result is None
-
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_an_updated_user(
-        self,
-        db_service: DBService,
-        initialize_database: None,
-        clear_database_tables: None,
-        user_repository: UserRepository,
-    ):
-        mocked_user = UserFactory.build()
-        domain_user: User
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
             engine_result = await conn.execute(query)
@@ -302,6 +286,23 @@ class TestUpdateUser(TestUserRepository):
         assert result.created_at == expected_result.created_at
         assert result.updated_at is not None
 
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        mocked_user: UserModel = UserFactory.build()
+        domain_user = UserMapper.to_domain(UserFactory.build())
+
+        result = await user_repository.update_user(mocked_user.id, domain_user)
+
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None
+
 
 class TestDeleteUser(TestUserRepository):
     def test_should_define_a_method(
@@ -314,32 +315,16 @@ class TestDeleteUser(TestUserRepository):
         assert isinstance(user_repository.delete_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_none_when_user_is_not_found(
+    async def test_should_succeed_and_return_user_when_user_is_deleted(
         self,
         db_service: DBService,
         initialize_database: None,
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
-
-        result = await user_repository.delete_user(mocked_user.id)
-
-        row_count = 0
-        assert await db_service.get_database_table_row_count("users") == row_count
-        assert result is None
-
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_delete_user_should_succeed_and_return_a_delete_user(
-        self,
-        db_service: DBService,
-        initialize_database: None,
-        clear_database_tables: None,
-        user_repository: UserRepository,
-    ):
-        mocked_user = UserFactory.build()
-        domain_user: User
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
             engine_result = await conn.execute(query)
@@ -354,3 +339,19 @@ class TestDeleteUser(TestUserRepository):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result == expected_result
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        mocked_user: UserModel = UserFactory.build()
+
+        result = await user_repository.delete_user(mocked_user.id)
+
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None

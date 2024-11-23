@@ -1,14 +1,16 @@
 import types
 
 import pytest
+from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
 from pytest_mock import MockerFixture
-from src.api.components.user.user_repository import UserRepository
-from src.api.components.user.user_service import UserService
-from src.server_error import Detail, ServerError
-from src.services.db_service import DBService
 from tests.factories.user_factory import UserFactory
+
+from api.components.user.user_repository import UserRepository
+from api.components.user.user_service import UserService
+from server_error import Detail, ServerError
+from services.db_service import DBService
 
 
 class TestUserService:
@@ -35,13 +37,13 @@ class TestRegisterUser(TestUserService):
         assert isinstance(user_service.register_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_registered_user(
+    async def test_should_succeed_and_return_user_when_user_is_registered(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_create_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.create_user = mocked_create_user
         expected_result = mocked_user
@@ -52,30 +54,30 @@ class TestRegisterUser(TestUserService):
         user_repository.create_user.assert_called_once_with(mocked_user)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_cannot_be_registered(
+    async def test_should_fail_and_raise_exception_when_user_cannot_be_registered(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("failed")
         message = "An error occurred when creating a new user into database"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user, cause=error.args[0]),
+            Detail(context=mocked_user, cause=str(error)),
         )
         mocked_create_user = mocker.Mock(side_effect=error)
         user_repository.create_user = mocked_create_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.register_user(mocked_user)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.create_user.assert_called_once_with(mocked_user)
 
 
@@ -89,7 +91,7 @@ class TestRetrieveAndCountUsers(TestUserService):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_list_of_users_with_non_zero_total(
+    async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_users_exist(
         self,
         user_repository: UserRepository,
         user_service: UserService,
@@ -112,7 +114,7 @@ class TestRetrieveAndCountUsers(TestUserService):
         user_repository.read_and_count_users.assert_called_once_with(page, limit)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_list_of_users_and_total_cannot_be_retrieved(
+    async def test_should_fail_and_raise_exception_when_list_of_users_and_total_cannot_be_retrieved(
         self,
         user_repository: UserRepository,
         user_service: UserService,
@@ -126,18 +128,18 @@ class TestRetrieveAndCountUsers(TestUserService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context={"page": page, "limit": limit}, cause=error.args[0]),
+            Detail(context={"page": page, "limit": limit}, cause=str(error)),
         )
         mocked_read_and_count_users = mocker.Mock(side_effect=error)
         user_repository.read_and_count_users = mocked_read_and_count_users
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.retrieve_and_count_users(page, limit)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.read_and_count_users.assert_called_once_with(page, limit)
 
 
@@ -149,13 +151,13 @@ class TestRetrieveUser(TestUserService):
         assert isinstance(user_service.retrieve_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_user(
+    async def test_should_succeed_and_return_user_when_user_is_retrieved(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_read_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.read_user = mocked_read_user
         expected_result = mocked_user
@@ -166,40 +168,40 @@ class TestRetrieveUser(TestUserService):
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_is_not_retrieved(
+    async def test_should_fail_and_raise_exception_when_user_is_not_retrieved(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("failed")
         message = "An error occurred when reading a user from database"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user.id, cause=error.args[0]),
+            Detail(context=mocked_user.id, cause=str(error)),
         )
         mocked_read_user = mocker.Mock(side_effect=error)
         user_repository.read_user = mocked_read_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.retrieve_user(mocked_user.id)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_is_not_found(
+    async def test_should_fail_and_raise_exception_when_user_is_not_found(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,
@@ -209,13 +211,13 @@ class TestRetrieveUser(TestUserService):
         mocked_read_user = mocker.AsyncMock(return_value=None)
         user_repository.read_user = mocked_read_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.retrieve_user(mocked_user.id)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
 
@@ -227,13 +229,13 @@ class TestReplaceUser(TestUserService):
         assert isinstance(user_service.replace_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_replaced_user(
+    async def test_should_succeed_and_return_user_when_user_is_replaced(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_update_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.update_user = mocked_update_user
         expected_result = mocked_user
@@ -244,42 +246,43 @@ class TestReplaceUser(TestUserService):
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_is_not_replaced(
+    async def test_should_fail_and_raise_exception_when_user_is_not_replaced(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("failed")
         message = "An error occurred when updating a user in database"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             Detail(
-                context={"userId": mocked_user.id, "user": mocked_user}, cause=error
+                context={"userId": mocked_user.id, "user": mocked_user},
+                cause=str(error),
             ),
         )
         mocked_update_user = mocker.Mock(side_effect=error)
         user_repository.update_user = mocked_update_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.replace_user(mocked_user.id, mocked_user)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_is_not_found(
+    async def test_should_fail_and_raise_exception_when_user_is_not_found(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,
@@ -289,13 +292,13 @@ class TestReplaceUser(TestUserService):
         mocked_update_user = mocker.AsyncMock(return_value=None)
         user_repository.update_user = mocked_update_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.replace_user(mocked_user.id, mocked_user)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
 
@@ -307,13 +310,13 @@ class TestRemoveUser(TestUserService):
         assert isinstance(user_service.remove_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_a_removed_user(
+    async def test_should_succeed_and_return_user_when_user_is_removed(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_delete_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.delete_user = mocked_delete_user
         expected_result = mocked_user
@@ -324,40 +327,40 @@ class TestRemoveUser(TestUserService):
         user_repository.delete_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_cannot_be_removed(
+    async def test_should_fail_and_raise_exception_when_user_cannot_be_removed(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("failed")
         message = "An error occurred when deleting a user from database"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context=mocked_user.id, cause=error.args[0]),
+            Detail(context=mocked_user.id, cause=str(error)),
         )
         mocked_delete_user = mocker.Mock(side_effect=error)
         user_repository.delete_user = mocked_delete_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.remove_user(mocked_user.id)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.delete_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_throw_exception_when_user_is_not_found(
+    async def test_should_fail_and_raise_exception_when_user_is_not_found(
         self,
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,
@@ -367,11 +370,11 @@ class TestRemoveUser(TestUserService):
         mocked_delete_user = mocker.AsyncMock(return_value=None)
         user_repository.delete_user = mocked_delete_user
 
-        with pytest.raises(ServerError) as excinfo:
+        with pytest.raises(ServerError) as exc_info:
             await user_service.remove_user(mocked_user.id)
 
-        assert excinfo.value.message == server_error.message
-        assert excinfo.value.detail == server_error.detail
-        assert excinfo.value.status_code == server_error.status_code
-        assert excinfo.value.is_operational == server_error.is_operational
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.detail == server_error.detail
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
         user_repository.delete_user.assert_called_once_with(mocked_user.id)

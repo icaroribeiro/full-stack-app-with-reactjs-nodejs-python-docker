@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from src.api.shared import unknown_type
+
+from api.shared import unknown_type
 
 
 class APIErrorResponse(BaseModel):

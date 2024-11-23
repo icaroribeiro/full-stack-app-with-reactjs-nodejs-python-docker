@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 from fastapi import status
-from src.server_error import Detail, ServerError
-from src.services.db_service import DBService
+
+from server_error import Detail, ServerError
+from services.db_service import DBService
 
 
 class IHealthCheckService(ABC):
@@ -24,5 +25,5 @@ class HealthCheckService(IHealthCheckService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context="unknown", cause=error.args[0]),
+                Detail(context="unknown", cause=str(error)),
             )

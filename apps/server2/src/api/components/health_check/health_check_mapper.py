@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.api.components.health_check.health_check_models import HealthCheckResponse
+from api.components.health_check.health_check_models import HealthCheckResponse
 
 
 class IHealthCheckMapper(ABC):
