@@ -61,7 +61,7 @@ class TestReadAndCountUsers(TestUserRepository):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_empty_list_of_user_with_zero_total_when_users_exist(
+    async def test_should_succeed_and_return_empty_list_of_user_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -87,7 +87,7 @@ class TestReadAndCountUsers(TestUserRepository):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_first_page_can_be_filled(
+    async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
