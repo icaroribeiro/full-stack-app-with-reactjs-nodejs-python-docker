@@ -56,7 +56,7 @@ export default defineConfig(({ command, mode }) => {
     },
     test: {
       env: loadEnv('test', process.cwd(), ''),
-      include: ['src/**/*.test.ts'],
+      include: ['tests/**/*.test.ts'],
       poolOptions: {
         forks: {
           singleFork: true,

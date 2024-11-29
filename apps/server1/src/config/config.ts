@@ -3,6 +3,10 @@ import { INTERNAL_SERVER_ERROR } from 'http-status'
 import { ServerError } from '../server-error'
 
 class Config {
+  public getEnv(): string {
+    return this.getEnvVar('ENV')
+  }
+
   public getPort(): string {
     return this.getEnvVar('PORT')
   }
@@ -44,5 +48,4 @@ class Config {
   }
 }
 
-const config = new Config()
-export { config }
+export { Config }

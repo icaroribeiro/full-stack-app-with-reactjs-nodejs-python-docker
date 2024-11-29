@@ -3,33 +3,20 @@ import express, { Application, json, Request, Response } from 'express'
 import swaggerUi from 'swagger-ui-express'
 
 import swaggerDocument from '../api/swagger.json'
-import { errorMiddleware } from './api/middlewares'
+// import { errorMiddleware } from './api/middlewares'
 import { RegisterRoutes } from './api/routes/routes'
-import { config } from './config/config'
+import { Config } from './config/config'
+import { Container } from './container/container'
+import { DBService } from './services'
+import { APIErrorHandler } from './api/utils/api-error-handler'
 
 class Server {
   private readonly _app: Application = express()
 
-  constructor() {
-    this.registerMiddleware()
-    this.registerRoutes()
-    this.registerErrorHandler()
-  }
-
-  public get app(): express.Application {
-    return this._app
-  }
-
-  private registerMiddleware() {
-    const allowedOrigins = config.getAllowedOrigins().split(',')
-    const options: cors.CorsOptions = {
-      origin: allowedOrigins,
-    }
-    this._app.use(cors(options))
-    this._app.use(json())
-  }
-
-  private registerRoutes() {
+  constructor(config: Config) {
+    const container = new Container()
+    const dbService = container.container.resolve<DBService>('DBService')
+    dbService.connectDatabase(config.getDatabaseURL())
     const swaggerUiOpts = {
       swaggerUrl: '/api-docs/swagger.json',
     }
@@ -41,11 +28,21 @@ class Server {
       swaggerUi.serveFiles(undefined, swaggerUiOpts),
       swaggerUi.setup(undefined, swaggerUiOpts),
     )
+    const allowedOrigins = config.getAllowedOrigins().split(',')
+    const options: cors.CorsOptions = {
+      origin: allowedOrigins,
+    }
+    this._app.use(cors(options))
+    this._app.use(json())
     RegisterRoutes(this._app)
+    const apiErrorHandler = new APIErrorHandler()
+    this._app.use(apiErrorHandler.handleRequestValidationError)
+    this._app.use(apiErrorHandler.handleServerError)
+    this._app.use(apiErrorHandler.handleCommonError)
   }
 
-  private registerErrorHandler() {
-    this._app.use(errorMiddleware)
+  public get app(): express.Application {
+    return this._app
   }
 }
 

@@ -1,6 +1,6 @@
 type APIErrorResponse = {
   message: string
-  details?: unknown
+  detail?: unknown
   isOperational: boolean
 }
 

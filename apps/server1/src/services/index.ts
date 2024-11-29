@@ -1,2 +1,2 @@
 export * from './db-service'
-export * from './pagination-service'
+export * from './api-pagination-service'

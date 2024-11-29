@@ -55,7 +55,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -68,7 +68,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }
@@ -123,7 +123,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }
@@ -186,7 +186,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -199,7 +199,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }
@@ -249,7 +249,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -262,7 +262,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -275,7 +275,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }
@@ -327,7 +327,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -340,7 +340,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }

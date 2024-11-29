@@ -22,15 +22,15 @@ describe('PaginationService', () => {
       const totalRecords = 0
       const count = 0
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
         records: records,
       }
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -41,7 +41,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -55,15 +55,15 @@ describe('PaginationService', () => {
       const totalRecords = 1
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
         records: records,
       }
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -74,7 +74,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -88,15 +88,15 @@ describe('PaginationService', () => {
       const totalRecords = 1
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
         records: records,
       }
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -107,7 +107,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -121,7 +121,7 @@ describe('PaginationService', () => {
       const totalRecords = 2
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
@@ -130,8 +130,8 @@ describe('PaginationService', () => {
       let previous = baseURL
       previous = previous.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -142,7 +142,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -156,7 +156,7 @@ describe('PaginationService', () => {
       const totalRecords = 3
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
@@ -165,8 +165,8 @@ describe('PaginationService', () => {
       let previous = baseURL
       previous = previous.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -177,7 +177,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -191,7 +191,7 @@ describe('PaginationService', () => {
       const totalRecords = 2
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
@@ -200,8 +200,8 @@ describe('PaginationService', () => {
       let next = baseURL
       next = next.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -212,7 +212,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -226,7 +226,7 @@ describe('PaginationService', () => {
       const totalRecords = 4
       const count = 2
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
@@ -234,8 +234,8 @@ describe('PaginationService', () => {
       }
       const next = baseURL + `&page=${page + 1}`
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -246,7 +246,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)
@@ -260,7 +260,7 @@ describe('PaginationService', () => {
       const totalRecords = 2
       const count = 1
       const records: UserList = userFactory.buildMany(count)
-      const paginationConfig = {
+      const apiPaginationData = {
         page: page,
         limit: limit,
         totalRecords: totalRecords,
@@ -268,8 +268,8 @@ describe('PaginationService', () => {
       }
       const next = baseURL + `?page=${page + 1}&limit=${limit}`
       const expectedResult = {
-        page: paginationConfig.page,
-        limit: paginationConfig.limit,
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
@@ -280,7 +280,7 @@ describe('PaginationService', () => {
       const paginationService = new PaginationService()
       const result = paginationService.createResponse<User>(
         baseURL,
-        paginationConfig,
+        apiPaginationData,
       )
 
       expect(result).toEqual(expectedResult)

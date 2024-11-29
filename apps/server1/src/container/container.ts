@@ -10,44 +10,25 @@ import {
   UserRepository,
   UserService,
 } from '../api/components/user'
-import { config } from '../config/config'
 import { DBService, IDBService } from '../services/db-service'
 import {
   IPaginationService,
   PaginationService,
-} from '../services/pagination-service'
+} from '../services/api-pagination-service'
 
-class ContainerService {
+class Container {
   private readonly _container: DependencyContainer
 
   constructor() {
     this._container = container
-    this.registerDatabaseContainer()
-    this.registerRepositoryContainer()
-    this.registerServiceContainer()
-  }
-
-  public get container(): DependencyContainer {
-    return this._container
-  }
-
-  private registerDatabaseContainer() {
-    const dbService = new DBService()
-    dbService.connectDatabase(config.getDatabaseURL())
     this._container.register<IDBService>('DBService', {
-      useValue: dbService,
+      useValue: new DBService(),
     })
-  }
-
-  private registerRepositoryContainer() {
     this._container.register<IUserRepository>('UserRepository', {
       useValue: new UserRepository(
         this._container.resolve<DBService>('DBService'),
       ),
     })
-  }
-
-  private registerServiceContainer() {
     this._container.register<IHealthCheckService>('HealthCheckService', {
       useValue: new HealthCheckService(
         this._container.resolve<DBService>('DBService'),
@@ -62,6 +43,10 @@ class ContainerService {
       useValue: new PaginationService(),
     })
   }
+
+  public get container(): DependencyContainer {
+    return this._container
+  }
 }
 
-export { ContainerService }
+export { Container }

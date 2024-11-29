@@ -53,6 +53,7 @@ class Server:
         exception_handlers = {
             RequestValidationError: api_error_handler.handle_request_validation_error,
             ServerError: api_error_handler.handle_server_error,
+            Exception: api_error_handler.handle_common_error,
         }
         self.__app.exception_handlers = exception_handlers
         self.__app.include_router(router=health_check_router)

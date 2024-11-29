@@ -1,22 +1,22 @@
+import { HttpErrorBase } from '@curveball/http-errors'
 import httpStatus from 'http-status'
 
-class ServerError extends Error {
-  public readonly httpCode: number
-  public readonly context?: unknown
+type Detail = {
+  context?: unknown
+  cause?: unknown
+}
+class ServerError extends HttpErrorBase {
+  public readonly newDetail?: Detail
+  public readonly statusCode: number
   public readonly isOperational: boolean
 
-  constructor(
-    message: string,
-    httpCode?: number,
-    details?: { context?: unknown; cause?: unknown },
-  ) {
-    super(message, details)
-    this.name = this.constructor.name
-    this.context = details?.context
-    this.httpCode = httpCode ? httpCode : httpStatus.INTERNAL_SERVER_ERROR
-    this.isOperational = `${httpCode}`.startsWith('4') ? true : false
-    Error.captureStackTrace(this, this.constructor)
+  constructor(message: string, statusCode?: number, detail?: Detail) {
+    super(message)
+    this.newDetail = detail
+    this.statusCode = statusCode ? statusCode : httpStatus.INTERNAL_SERVER_ERROR
+    this.isOperational = `${statusCode}`.startsWith('4') ? true : false
+    // Error.captureStackTrace(this, this.constructor)
   }
 }
 
-export { ServerError }
+export { Detail, ServerError }

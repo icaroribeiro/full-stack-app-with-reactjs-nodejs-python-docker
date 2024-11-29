@@ -4,8 +4,8 @@ type APIPaginationResponse<Entity> = {
   totalPages: number
   totalRecords: number
   records: Entity[]
-  previous?: string
-  next?: string
+  previous: string | null
+  next: string | null
 }
 
 export { APIPaginationResponse }

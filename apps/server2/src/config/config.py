@@ -15,12 +15,6 @@ class Config:
     def get_port(self) -> str:
         return self.__get_env_var("PORT")
 
-    def get_openapi_url(self) -> str:
-        return self.__get_env_var("OPENAPI_URL")
-
-    def get_docs_url(self) -> str:
-        return self.__get_env_var("DOCS_URL")
-
     def get_database_url(self) -> str:
         return self.__get_env_var("DATABASE_URL")
 

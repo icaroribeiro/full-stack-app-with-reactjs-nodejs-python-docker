@@ -111,14 +111,14 @@ class UserController extends Controller {
         parsedQuery.query.page,
         parsedQuery.query.limit,
       )
-    const paginationConfig = {
+    const apiPaginationData = {
       page: parsedQuery.query.page,
       limit: parsedQuery.query.limit,
       totalRecords: totalRecords,
       records: retrievedUsers.map((u) => UserMapper.toResponse(u)),
     }
     this.setStatus(httpStatus.OK)
-    return this.paginationService.createResponse(baseURL, paginationConfig)
+    return this.paginationService.createResponse(baseURL, apiPaginationData)
   }
 
   /**

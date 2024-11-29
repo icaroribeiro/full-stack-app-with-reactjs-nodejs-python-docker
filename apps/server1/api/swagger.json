@@ -7,33 +7,6 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"HealthCheckResponse": {
-				"properties": {
-					"healthy": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"healthy"
-				],
-				"type": "object"
-			},
-			"APIErrorResponse": {
-				"properties": {
-					"isOperational": {
-						"type": "boolean"
-					},
-					"details": {},
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"isOperational",
-					"message"
-				],
-				"type": "object"
-			},
 			"UserResponse": {
 				"properties": {
 					"email": {
@@ -50,6 +23,22 @@
 					"email",
 					"name",
 					"id"
+				],
+				"type": "object"
+			},
+			"APIErrorResponse": {
+				"properties": {
+					"isOperational": {
+						"type": "boolean"
+					},
+					"details": {},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"isOperational",
+					"message"
 				],
 				"type": "object"
 			},
@@ -107,6 +96,17 @@
 					"page"
 				],
 				"type": "object"
+			},
+			"HealthCheckResponse": {
+				"properties": {
+					"healthy": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"healthy"
+				],
+				"type": "object"
 			}
 		},
 		"securitySchemes": {}
@@ -125,55 +125,6 @@
 		}
 	},
 	"paths": {
-		"/health": {
-			"get": {
-				"operationId": "GetHealth",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/HealthCheckResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"healthy": true
-										}
-									}
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/APIErrorResponse"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"message": "Internal Server Error",
-											"details": {},
-											"isOperational": false
-										}
-									}
-								}
-							}
-						}
-					}
-				},
-				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
-				"tags": [
-					"health-check"
-				],
-				"security": [],
-				"parameters": []
-			}
-		},
 		"/users": {
 			"post": {
 				"operationId": "AddUser",
@@ -208,7 +159,10 @@
 									"Example 1": {
 										"value": {
 											"message": "Internal Server Error",
-											"details": {},
+											"details": {
+												"context": "",
+												"cause": ""
+											},
 											"isOperational": false
 										}
 									}
@@ -275,7 +229,10 @@
 									"Example 1": {
 										"value": {
 											"message": "Internal Server Error",
-											"details": {},
+											"details": {
+												"context": "",
+												"cause": ""
+											},
 											"isOperational": false
 										}
 									}
@@ -347,7 +304,10 @@
 									"Example 1": {
 										"value": {
 											"message": "Internal Server Error",
-											"details": {},
+											"details": {
+												"context": "",
+												"cause": ""
+											},
 											"isOperational": false
 										}
 									}
@@ -405,7 +365,10 @@
 									"Example 1": {
 										"value": {
 											"message": "Internal Server Error",
-											"details": {},
+											"details": {
+												"context": "",
+												"cause": ""
+											},
 											"isOperational": false
 										}
 									}
@@ -473,7 +436,10 @@
 									"Example 1": {
 										"value": {
 											"message": "Internal Server Error",
-											"details": {},
+											"details": {
+												"context": "",
+												"cause": ""
+											},
 											"isOperational": false
 										}
 									}
@@ -498,9 +464,65 @@
 					}
 				]
 			}
+		},
+		"/health": {
+			"get": {
+				"operationId": "GetHealth",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HealthCheckResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"healthy": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"details": {
+												"context": "",
+												"cause": ""
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
+				"tags": [
+					"health-check"
+				],
+				"security": [],
+				"parameters": []
+			}
 		}
 	},
 	"servers": [
+		{
+			"url": "http://localhost:5001",
+			"description": "Development environment"
+		},
 		{
 			"url": "http://localhost:5000",
 			"description": "Production environment"

@@ -13,7 +13,7 @@ class APIErrorHandler:
         return JSONResponse(
             content=APIErrorResponse(
                 message="Validation failed",
-                details=Detail(context=error.body, cause=error.errors()),
+                detail=Detail(context=error.body, cause=error.errors()),
                 is_operational=True,
             ).model_dump(),
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -23,8 +23,18 @@ class APIErrorHandler:
         return JSONResponse(
             content=APIErrorResponse(
                 message=error.message,
-                details=error.detail,
+                detail=error.detail,
                 is_operational=error.is_operational,
+            ).model_dump(),
+            status_code=error.status_code,
+        )
+
+    def handle_common_error(self, request: Request, error: Exception) -> JSONResponse:
+        return JSONResponse(
+            content=APIErrorResponse(
+                message=error.args[0],
+                detail=Detail(context=None, cause=error),
+                is_operational=False,
             ).model_dump(),
             status_code=error.status_code,
         )

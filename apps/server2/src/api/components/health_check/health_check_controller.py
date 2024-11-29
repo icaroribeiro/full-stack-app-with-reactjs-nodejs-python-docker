@@ -46,7 +46,7 @@ class HealthCheckController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "details": {"context": "", "cause": ""},
+                                "detail": {"context": "", "cause": ""},
                                 "isOperational": False,
                             }
                         }
