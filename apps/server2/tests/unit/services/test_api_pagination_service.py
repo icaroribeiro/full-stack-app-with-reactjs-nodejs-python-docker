@@ -19,16 +19,13 @@ class TestAPIPaginationService:
         return APIPaginationService()
 
 
-class TestCreateAPIPaginationResponse(TestAPIPaginationService):
+class TestCreateResponse(TestAPIPaginationService):
     def test_should_define_a_method(
         self,
         api_pagination_service: APIPaginationService,
     ) -> None:
         assert (
-            isinstance(
-                api_pagination_service.create_api_pagination_response, types.MethodType
-            )
-            is True
+            isinstance(api_pagination_service.create_response, types.MethodType) is True
         )
 
     def test_should_succeed_and_return_a_response_when_there_are_no_records(
@@ -54,9 +51,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=None,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -84,9 +79,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=None,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -114,9 +107,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=None,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -149,9 +140,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=None,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -184,9 +173,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=None,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -219,9 +206,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=next,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -254,9 +239,7 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=next,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result
 
@@ -288,8 +271,6 @@ class TestCreateAPIPaginationResponse(TestAPIPaginationService):
             next=next,
         )
 
-        result = api_pagination_service.create_api_pagination_response(
-            base_url, api_pagination_data
-        )
+        result = api_pagination_service.create_response(base_url, api_pagination_data)
 
         assert result == expected_result

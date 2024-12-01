@@ -144,10 +144,8 @@ class UserController(APIRouter):
             api_pagination_data = APIPaginationData(
                 page=page, limit=limit, total_records=count, records=returned_users
             )
-            api_pagination_response = (
-                api_pagination_service.create_api_pagination_response(
-                    base_url, api_pagination_data
-                )
+            api_pagination_response = api_pagination_service.create_response(
+                base_url, api_pagination_data
             )
             response.status_code = status.HTTP_200_OK
             return api_pagination_response

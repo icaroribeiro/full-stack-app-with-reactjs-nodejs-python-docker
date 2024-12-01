@@ -41,7 +41,7 @@ class TestAsyncEngine(TestDBService):
         result = db_service.async_engine
 
         assert result is not None
-        assert isinstance(result, AsyncEngine)
+        assert isinstance(result, AsyncEngine) is True
 
     def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self,
@@ -89,7 +89,7 @@ class TestConnectDatabase(TestDBService):
         error = NoSuchModuleError(
             f"Could not parse SQLAlchemy URL from string '{database_url}'"
         )
-        message = "Database connection failed!"
+        message = "An error occurred when connecting to database!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,

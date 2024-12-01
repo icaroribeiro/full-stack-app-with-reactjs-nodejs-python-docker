@@ -1,66 +1,34 @@
-// import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import 'reflect-metadata'
+import { describe, expect, it } from 'vitest'
 
-// import { DBContainerTestFactory } from '../../factories/db-container-factory'
-// import { ContainerService } from '../../container/container-service'
+import { Container } from '../../../src/container/container'
 
-// describe('ContainerService', () => {
-//   const factory: DBContainerTestFactory = new DBContainerTestFactory()
+describe('Container', () => {
+  describe('contructor', () => {
+    it('should succeed when checking injection of dependencies', () => {
+      const listOfTokens: string[] = [
+        'DBService',
+        'UserRepository',
+        'HealthCheckService',
+        'UserService',
+        'APIPaginationService',
+      ]
+      const expectedResult = true
 
-//   beforeAll(async () => {
-//     await factory.prepareAll()
-//   }, factory.beforeAllTimeout)
+      const container = new Container()
+      const result = container.container
 
-//   afterEach(async () => {
-//     await factory.closeEach()
-//   })
+      for (const token of listOfTokens) {
+        expect(result.isRegistered(token)).toEqual(expectedResult)
+      }
+    })
+  })
 
-//   afterAll(async () => {
-//     await factory.closeAll()
-//   })
+  describe('.container', () => {
+    it('should define an object', () => {
+      const container = new Container()
 
-//   describe('contructor', () => {
-//     it('should succeed and register database container', () => {
-//       const listOfTokens: string[] = ['DBService']
-//       const expectedResult = true
-
-//       const containerService = new ContainerService()
-//       const result = containerService.container
-
-//       for (const token of listOfTokens) {
-//         expect(result.isRegistered(token)).toEqual(expectedResult)
-//       }
-//     })
-
-//     it('should succeed and register repository container', () => {
-//       const listOfTokens: string[] = ['UserRepository']
-//       const expectedResult = true
-
-//       const containerService = new ContainerService()
-//       const result = containerService.container
-
-//       for (const token of listOfTokens) {
-//         expect(result.isRegistered(token)).toEqual(expectedResult)
-//       }
-//     })
-
-//     it('should succeed and register service container', () => {
-//       const listOfTokens: string[] = ['HealthCheckService', 'UserService']
-//       const expectedResult = true
-
-//       const containerService = new ContainerService()
-//       const result = containerService.container
-
-//       for (const token of listOfTokens) {
-//         expect(result.isRegistered(token)).toEqual(expectedResult)
-//       }
-//     })
-//   })
-
-//   describe('.container', () => {
-//     it('should define an object', () => {
-//       const containerService = new ContainerService()
-
-//       expect(typeof containerService.container).toBe('object')
-//     })
-//   })
-// })
+      expect(typeof container.container).toBe('object')
+    })
+  })
+})

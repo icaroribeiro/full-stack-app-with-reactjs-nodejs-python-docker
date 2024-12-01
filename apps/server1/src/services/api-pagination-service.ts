@@ -8,14 +8,14 @@ type APIPaginationData<Entity> = {
 }
 
 interface IAPIPaginationService {
-  createAPIPaginationResponse<Entity>(
+  createResponse<Entity>(
     baseURL: string,
     apiPaginationData: APIPaginationData<Entity>,
   ): APIPaginationResponse<Entity>
 }
 
 class APIPaginationService {
-  public createAPIPaginationResponse<Entity>(
+  public createResponse<Entity>(
     baseURL: string,
     apiPaginationData: APIPaginationData<Entity>,
   ): APIPaginationResponse<Entity> {
@@ -59,8 +59,7 @@ class APIPaginationService {
     if (totalRecords - (page - 1) * limit <= 0) {
       return null
     }
-    const url = baseURL
-    return url.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
+    return baseURL.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
   }
 
   private getNextPage(
@@ -72,14 +71,13 @@ class APIPaginationService {
     if (totalRecords - page * limit <= 0) {
       return null
     }
-    const url = baseURL
-    if (url.includes('page')) {
-      return url.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
+    if (baseURL.includes('page')) {
+      return baseURL.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
     }
-    if (url.includes('limit')) {
-      return url + `&page=${page + 1}`
+    if (baseURL.includes('limit')) {
+      return baseURL + `&page=${page + 1}`
     }
-    return url + `?page=${page + 1}&limit=1`
+    return baseURL + `?page=${page + 1}&limit=1`
   }
 }
 

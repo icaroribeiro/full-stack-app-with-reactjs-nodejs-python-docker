@@ -28,9 +28,13 @@ class TestConfig:
 
 
 class TestGetLogLevel(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "LOG_LEVEL"
+
     @pytest.fixture(autouse=True)
-    def log_level(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("LOG_LEVEL", faker.pystr())
+    def log_level(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_log_level, types.MethodType) is True
@@ -45,10 +49,10 @@ class TestGetLogLevel(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("LOG_LEVEL")
-        message = "LOG_LEVEL environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -64,9 +68,13 @@ class TestGetLogLevel(TestConfig):
 
 
 class TestGetEnv(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "ENV"
+
     @pytest.fixture(autouse=True)
-    def env(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("ENV", faker.pystr())
+    def env(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_env, types.MethodType) is True
@@ -81,10 +89,10 @@ class TestGetEnv(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("ENV")
-        message = "ENV environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -100,9 +108,13 @@ class TestGetEnv(TestConfig):
 
 
 class TestGetPort(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "PORT"
+
     @pytest.fixture(autouse=True)
-    def port(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("PORT", faker.pystr())
+    def port(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_port, types.MethodType) is True
@@ -117,10 +129,10 @@ class TestGetPort(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("PORT")
-        message = "PORT environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -136,9 +148,13 @@ class TestGetPort(TestConfig):
 
 
 class TestGetDatabaseULR(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_URL"
+
     @pytest.fixture(autouse=True)
-    def database_url(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("DATABASE_URL", faker.pystr())
+    def database_url(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_database_url, types.MethodType) is True
@@ -153,10 +169,10 @@ class TestGetDatabaseULR(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("DATABASE_URL")
-        message = "DATABASE_URL environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -172,9 +188,15 @@ class TestGetDatabaseULR(TestConfig):
 
 
 class TestGetDatabaseUsername(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_USERNAME"
+
     @pytest.fixture(autouse=True)
-    def database_username(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("DATABASE_USERNAME", faker.pystr())
+    def database_username(
+        self, var_name: str, faker: Faker
+    ) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_database_username, types.MethodType) is True
@@ -189,10 +211,10 @@ class TestGetDatabaseUsername(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("DATABASE_USERNAME")
-        message = "DATABASE_USERNAME environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -208,6 +230,10 @@ class TestGetDatabaseUsername(TestConfig):
 
 
 class TestGetDatabasePassword(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_PASSWORD"
+
     @pytest.fixture(autouse=True)
     def database_password(self, faker: Faker) -> Generator[str, None, None]:
         yield from self.setup_and_teardown("DATABASE_PASSWORD", faker.pystr())
@@ -225,10 +251,10 @@ class TestGetDatabasePassword(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("DATABASE_PASSWORD")
-        message = "DATABASE_PASSWORD environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -244,9 +270,13 @@ class TestGetDatabasePassword(TestConfig):
 
 
 class TestGetDatabaseName(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_NAME"
+
     @pytest.fixture(autouse=True)
-    def database_name(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("DATABASE_NAME", faker.pystr())
+    def database_name(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_database_name, types.MethodType) is True
@@ -261,10 +291,10 @@ class TestGetDatabaseName(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("DATABASE_NAME")
-        message = "DATABASE_NAME environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -280,9 +310,13 @@ class TestGetDatabaseName(TestConfig):
 
 
 class TestGetDatabasePort(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_PORT"
+
     @pytest.fixture(autouse=True)
-    def database_port(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("DATABASE_PORT", faker.pystr())
+    def database_port(self, var_name: str, faker: Faker) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_database_port, types.MethodType) is True
@@ -297,10 +331,10 @@ class TestGetDatabasePort(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("DATABASE_PORT")
-        message = "DATABASE_PORT environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -316,9 +350,15 @@ class TestGetDatabasePort(TestConfig):
 
 
 class TestGetAllowedOrigins(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "ALLOWED_ORIGINS"
+
     @pytest.fixture(autouse=True)
-    def allowed_origins(self, faker: Faker) -> Generator[str, None, None]:
-        yield from self.setup_and_teardown("ALLOWED_ORIGINS", faker.pystr())
+    def allowed_origins(
+        self, var_name: str, faker: Faker
+    ) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
 
     def test_should_define_a_method(self, config: Config) -> None:
         assert isinstance(config.get_allowed_origins, types.MethodType) is True
@@ -333,10 +373,10 @@ class TestGetAllowedOrigins(TestConfig):
         assert result == expected_result
 
     def test_should_fail_and_raise_exception_when_environment_variable_is_not_set(
-        self, config: Config
+        self, var_name: str, config: Config
     ) -> None:
-        os.environ.pop("ALLOWED_ORIGINS")
-        message = "ALLOWED_ORIGINS environment variable isn't set!"
+        os.environ.pop(var_name)
+        message = f"{var_name} environment variable isn't set!"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -349,3 +389,29 @@ class TestGetAllowedOrigins(TestConfig):
         assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
+
+
+class TestSetDatabaseURL(TestConfig):
+    @pytest.fixture
+    def var_name(self) -> str:
+        return "DATABASE_URL"
+
+    @pytest.fixture(autouse=True)
+    def allowed_origins(
+        self, var_name: str, faker: Faker
+    ) -> Generator[str, None, None]:
+        yield from self.setup_and_teardown(var_name, faker.pystr())
+
+    def test_should_define_a_method(self, config: Config) -> None:
+        assert isinstance(config.set_database_url, types.FunctionType) is True
+
+    def test_should_succeed_and_return_none_when_environment_variable_is_set(
+        self, var_name: str, config: Config, faker: Faker
+    ) -> None:
+        var_value = faker.pystr()
+        expected_result = None
+
+        result = config.set_database_url(var_value)
+
+        assert result == expected_result
+        assert os.environ[var_name] == var_value

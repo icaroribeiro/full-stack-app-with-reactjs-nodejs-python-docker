@@ -1,291 +1,289 @@
-// import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-// import { User, UserList } from '../../api/components/user'
-// import { UserFactory } from '../../factories/user-factory'
-// import { APIPaginationService } from '../../../src/services/api-pagination-service'
+import { User, UserMapper } from '../../../src/api/components/user'
+import { UserFactory } from '../../factories/user-factory'
+import {
+  APIPaginationData,
+  APIPaginationService,
+} from '../../../src/services/api-pagination-service'
+import { APIPaginationResponse } from '../../../src/api/shared'
+import { beforeEach } from 'node:test'
 
-// describe('PaginationService', () => {
-//   const baseURL = 'http://localhost:5002/users'
-//   const apiPaginationService = new APIPaginationService()
+describe('APIPaginationService', () => {
+  let baseURL = 'http://localhost:5002/users'
+  const userMapper = new UserMapper()
+  const userFactory = new UserFactory()
+  const apiPaginationService = new APIPaginationService()
 
-//   const userFactory = new UserFactory.build()
+  describe('.createResponse', () => {
+    it('should define a function', () => {
+      expect(typeof apiPaginationService.createResponse).toBe('function')
+    })
 
-//   describe('.createResponse', () => {
-//     it('should define a function', () => {
-//       expect(typeof apiPaginationService.createAPIPaginationResponse).toBe(
-//         'function',
-//       )
-//     })
+    it('should succeed and return a response when there are no records', () => {
+      const page = 1
+      const limit = 1
+      const totalPages = 0
+      const totalRecords = 0
+      const records: User[] = []
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: null,
+      }
 
-//     it('should succeed and return a response with neither previous nor next fields when page is 1', () => {
-//       const page = 1
-//       const limit = 1
-//       const totalPages = 0
-//       const totalRecords = 0
-//       const count = 0
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: undefined,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        baseURL,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when previous page is completely filled with all records', () => {
+      const url = `${baseURL}?page=2`
+      const page = 2
+      const limit = 1
+      const totalPages = 1
+      const totalRecords = 1
+      const records: User[] = []
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: null,
+      }
 
-//     it('should succeed and return a response with no previous field when previous page is filled with all records', () => {
-//       const baseURL = 'http://localhost:5002/users?page=2'
-//       const page = 2
-//       const limit = 1
-//       const totalPages = 1
-//       const totalRecords = 1
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: undefined,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when previous page is not completely filled with all records', () => {
+      const url = `${baseURL}?page=2&limit=2`
+      const page = 2
+      const limit = 2
+      const totalPages = 1
+      const totalRecords = 1
+      const records: User[] = []
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: null,
+      }
 
-//     it('should succeed and return a response with no previous field when previous page can still be filled with some records', () => {
-//       const baseURL = 'http://localhost:5002/users?page=2&limit=2'
-//       const page = 2
-//       const limit = 2
-//       const totalPages = 1
-//       const totalRecords = 1
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: undefined,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when previous page is completely filled and there are still records left', () => {
+      const url = `${baseURL}?page=2`
+      const page = 2
+      const limit = 1
+      const totalPages = 2
+      const totalRecords = 2
+      const count = 1
+      const records: User[] = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toResponse(u))
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const previous = url.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: previous,
+        next: null,
+      }
 
-//     it('should succeed and return a response with previous field when previous page cannot to be filled with all records', () => {
-//       const baseURL = 'http://localhost:5002/users?page=2'
-//       const page = 2
-//       const limit = 1
-//       const totalPages = 2
-//       const totalRecords = 2
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       let previous = baseURL
-//       previous = previous.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: previous,
-//         next: undefined,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when current page is completely filled with all records', () => {
+      const url = `${baseURL}?page=3`
+      const page = 3
+      const limit = 1
+      const totalPages = 3
+      const totalRecords = 3
+      const count = 1
+      const records: User[] = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toResponse(u))
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const previous = url.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: previous,
+        next: null,
+      }
 
-//     it('should succeed and return a response with no next field when current page is filled with all records', () => {
-//       const baseURL = 'http://localhost:5002/users?page=3'
-//       const page = 3
-//       const limit = 1
-//       const totalPages = 3
-//       const totalRecords = 3
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       let previous = baseURL
-//       previous = previous.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: previous,
-//         next: undefined,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when only page query param is sent in request url', () => {
+      const url = `${baseURL}?page=1`
+      const page = 1
+      const limit = 1
+      const totalPages = 2
+      const totalRecords = 2
+      const count = 1
+      const records: User[] = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toResponse(u))
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const next = url.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: next,
+      }
 
-//     it('should succeed and return a response with next field when only page query param is sent in request url', () => {
-//       const baseURL = 'http://localhost:5002/users?page=1'
-//       const page = 1
-//       const limit = 1
-//       const totalPages = 2
-//       const totalRecords = 2
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       let next = baseURL
-//       next = next.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: next,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when only limit query param is sent in request url', () => {
+      const url = `${baseURL}?limit=2`
+      const page = 1
+      const limit = 2
+      const totalPages = 2
+      const totalRecords = 4
+      const count = 2
+      const records: User[] = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toResponse(u))
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const next = `${url}&page=${page + 1}`
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: next,
+      }
 
-//     it('should succeed and return a response with next field when only limit query param is sent in request url', () => {
-//       const baseURL = 'http://localhost:5002/users?limit=2'
-//       const page = 1
-//       const limit = 2
-//       const totalPages = 2
-//       const totalRecords = 4
-//       const count = 2
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       const next = baseURL + `&page=${page + 1}`
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: next,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        url,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
+      expect(result).toEqual(expectedResult)
+    })
 
-//       expect(result).toEqual(expectedResult)
-//     })
+    it('should succeed and return a response when neither page nor limit query params are sent in request url', () => {
+      const page = 1
+      const limit = 1
+      const totalPages = 2
+      const totalRecords = 2
+      const count = 2
+      const records: User[] = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toResponse(u))
+      const apiPaginationData: APIPaginationData<User> = {
+        page: page,
+        limit: limit,
+        totalRecords: totalRecords,
+        records: records,
+      }
+      const next = `${baseURL}?page=${page + 1}&limit=${limit}`
+      const expectedResult: APIPaginationResponse<User> = {
+        page: apiPaginationData.page,
+        limit: apiPaginationData.limit,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        records: records,
+        previous: null,
+        next: next,
+      }
 
-//     it('should succeed and return a response with next field when neither page nor limit query params are sent in request url', () => {
-//       const baseURL = 'http://localhost:5002/users'
-//       const page = 1
-//       const limit = 1
-//       const totalPages = 2
-//       const totalRecords = 2
-//       const count = 1
-//       const records: UserList = userFactory.buildMany(count)
-//       const apiPaginationData = {
-//         page: page,
-//         limit: limit,
-//         totalRecords: totalRecords,
-//         records: records,
-//       }
-//       const next = baseURL + `?page=${page + 1}&limit=${limit}`
-//       const expectedResult = {
-//         page: apiPaginationData.page,
-//         limit: apiPaginationData.limit,
-//         totalPages: totalPages,
-//         totalRecords: totalRecords,
-//         records: records,
-//         previous: undefined,
-//         next: next,
-//       }
+      const result = apiPaginationService.createResponse<User>(
+        baseURL,
+        apiPaginationData,
+      )
 
-//       const paginationService = new PaginationService()
-//       const result = paginationService.createResponse<User>(
-//         baseURL,
-//         apiPaginationData,
-//       )
-
-//       expect(result).toEqual(expectedResult)
-//     })
-//   })
-// })
+      expect(result).toEqual(expectedResult)
+    })
+  })
+})

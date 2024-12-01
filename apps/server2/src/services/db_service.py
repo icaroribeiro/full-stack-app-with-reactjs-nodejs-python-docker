@@ -43,7 +43,7 @@ class IDBService(ABC):
 
 
 class DBService(IDBService):
-    __async_engine: AsyncEngine
+    __async_engine: AsyncEngine | None
 
     def __init__(self):
         self.__async_engine = None
@@ -62,7 +62,7 @@ class DBService(IDBService):
                 url=database_url,
             )
         except Exception as error:
-            message = "Database connection failed!"
+            message = "An error occurred when connecting to database!"
             print(message, error)
             raise ServerError(
                 message,
@@ -79,7 +79,7 @@ class DBService(IDBService):
                     return True
                 except Exception as error:
                     await conn.rollback()
-                    message = "Async transaction not established!"
+                    message = "An error occurred when checking database is alive!"
                     print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"

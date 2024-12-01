@@ -39,7 +39,7 @@ class Container {
         this._container.resolve<UserRepository>('UserRepository'),
       ),
     })
-    this._container.register<IAPIPaginationService>('PaginationService', {
+    this._container.register<IAPIPaginationService>('APIPaginationService', {
       useValue: new APIPaginationService(),
     })
   }

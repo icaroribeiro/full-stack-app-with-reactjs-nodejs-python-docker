@@ -15,19 +15,37 @@ class TestContainer:
     ) -> Container:
         return Container()
 
-    def test_should_succeed_when_checking_dependencies_injection(
+    def test_should_succeed_when_checking_injection_of_dependencies(
         self, container: Container
     ) -> None:
-        assert isinstance(container.db_service_provider(), DBService) is True
-        assert isinstance(container.user_repository_provider(), UserRepository) is True
+        providers_by_name = {
+            "db_service_provider": container.db_service_provider,
+            "user_repository_provider": container.user_repository_provider,
+            "health_check_service_provider": container.health_check_service_provider,
+            "user_service_provider": container.user_service_provider,
+            "api_pagination_service_provider": container.api_pagination_service_provider,
+        }
+        assert container.providers == providers_by_name
+        assert isinstance(providers_by_name["db_service_provider"](), DBService) is True
         assert (
-            isinstance(container.health_check_service_provider(), HealthCheckService)
+            isinstance(providers_by_name["user_repository_provider"](), UserRepository)
             is True
         )
-        assert isinstance(container.user_service_provider(), UserService) is True
         assert (
             isinstance(
-                container.api_pagination_service_provider(), APIPaginationService
+                providers_by_name["health_check_service_provider"](),
+                HealthCheckService,
+            )
+            is True
+        )
+        assert (
+            isinstance(providers_by_name["user_service_provider"](), UserService)
+            is True
+        )
+        assert (
+            isinstance(
+                providers_by_name["api_pagination_service_provider"](),
+                APIPaginationService,
             )
             is True
         )

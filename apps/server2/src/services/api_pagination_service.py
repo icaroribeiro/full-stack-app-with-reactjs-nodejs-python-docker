@@ -16,14 +16,14 @@ class APIPaginationData(BaseModel):
 
 class IAPIPaginationService(ABC):
     @abstractmethod
-    def create_api_pagination_response(
+    def create_response(
         self, base_url: str, api_pagination_data: APIPaginationData
     ) -> APIPaginationResponse:
         raise Exception("NotImplementedException")
 
 
 class APIPaginationService:
-    def create_api_pagination_response(
+    def create_response(
         self, base_url: str, api_pagination_data: APIPaginationData
     ) -> APIPaginationResponse:
         return APIPaginationResponse(

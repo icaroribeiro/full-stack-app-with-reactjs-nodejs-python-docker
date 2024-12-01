@@ -53,13 +53,13 @@ async def initialize_database_base(
     await db_service.migrate_database(alembic_file_path)
 
     def finalize():
-        async def deactivate_database() -> None:
+        async def finalize_database() -> None:
             await db_service.delete_database_tables()
             # print("Database tables deleted successfully!")
             await db_service.deactivate_database()
             # print("Database deactivated successfully!")
 
-        asyncio.get_event_loop().run_until_complete(deactivate_database())
+        asyncio.get_event_loop().run_until_complete(finalize_database())
 
     request.addfinalizer(finalize)
     # print("Database initialized successfully!")
