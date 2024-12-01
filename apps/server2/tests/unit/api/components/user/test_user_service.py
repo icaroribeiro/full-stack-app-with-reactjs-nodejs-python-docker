@@ -96,11 +96,11 @@ class TestRetrieveAndCountUsers(TestUserService):
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        page = fake.pyint()
-        limit = fake.pyint()
-        count = fake.pyint()
+        page = faker.pyint()
+        limit = faker.pyint()
+        count = faker.pyint()
         mocked_users = UserFactory.build_batch(count)
         mocked_read_and_count_users = mocker.AsyncMock(
             return_value=[mocked_users, count]
@@ -119,10 +119,10 @@ class TestRetrieveAndCountUsers(TestUserService):
         user_repository: UserRepository,
         user_service: UserService,
         mocker: MockerFixture,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        page = fake.pyint()
-        limit = fake.pyint()
+        page = faker.pyint()
+        limit = faker.pyint()
         error = Exception("Failed")
         message = "An error occurred when reading and counting users from database"
         server_error = ServerError(

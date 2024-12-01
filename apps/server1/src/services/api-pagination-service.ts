@@ -83,4 +83,4 @@ class APIPaginationService {
   }
 }
 
-export { IPaginationService, APIPaginationData, PaginationService }
+export { IAPIPaginationService, APIPaginationService, APIPaginationData }

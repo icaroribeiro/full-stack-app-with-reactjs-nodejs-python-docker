@@ -12,8 +12,8 @@ import {
 } from '../api/components/user'
 import { DBService, IDBService } from '../services/db-service'
 import {
-  IPaginationService,
-  PaginationService,
+  IAPIPaginationService,
+  APIPaginationService,
 } from '../services/api-pagination-service'
 
 class Container {
@@ -39,8 +39,8 @@ class Container {
         this._container.resolve<UserRepository>('UserRepository'),
       ),
     })
-    this._container.register<IPaginationService>('PaginationService', {
-      useValue: new PaginationService(),
+    this._container.register<IAPIPaginationService>('PaginationService', {
+      useValue: new APIPaginationService(),
     })
   }
 

@@ -1,14 +1,13 @@
 from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Query, Request, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 
 from api.components.user.user_mapper import UserMapper
 from api.components.user.user_models import UserRequest, UserResponse
 from api.components.user.user_service import UserService
 from api.shared.api_error_response import APIErrorResponse
+from api.shared.api_pagination_response import APIPaginationResponse
 from container.container import Container
 from services.api_pagination_service import APIPaginationData, APIPaginationService
 
@@ -78,17 +77,15 @@ class UserController(APIRouter):
         )
         @inject
         async def add_user(
+            response: Response,
             user_request: UserRequest,
             user_service: UserService = self.dependencies[0],
-        ) -> JSONResponse:
+        ) -> UserResponse:
             domain_user = UserMapper.to_domain(user_request)
             returned_user = await user_service.register_user(domain_user)
             user_response = UserMapper.to_response(returned_user)
-            response = JSONResponse(
-                content=jsonable_encoder(user_response),
-                status_code=status.HTTP_201_CREATED,
-            )
-            return response
+            response.status_code = status.HTTP_201_CREATED
+            return user_response
 
         @APIRouter.api_route(
             self,
@@ -134,11 +131,12 @@ class UserController(APIRouter):
         @inject
         async def fetch_paginated_users(
             request: Request,
+            response: Response,
             page: Annotated[int | None, Query()] = 1,
             limit: Annotated[int | None, Query()] = 1,
             user_service: UserService = self.dependencies[0],
             api_pagination_service: APIPaginationService = self.dependencies[1],
-        ) -> JSONResponse:
+        ) -> APIPaginationResponse:
             base_url = str(request.url)
             (returned_users, count) = await user_service.retrieve_and_count_users(
                 page, limit
@@ -151,11 +149,8 @@ class UserController(APIRouter):
                     base_url, api_pagination_data
                 )
             )
-            response = JSONResponse(
-                content=jsonable_encoder(api_pagination_response),
-                status_code=status.HTTP_200_OK,
-            )
-            return response
+            response.status_code = status.HTTP_200_OK
+            return api_pagination_response
 
         @APIRouter.api_route(
             self,
@@ -209,16 +204,14 @@ class UserController(APIRouter):
         )
         @inject
         async def fetch_user(
+            response: Response,
             user_id: str,
             user_service: UserService = self.dependencies[0],
-        ) -> JSONResponse:
+        ) -> UserResponse:
             returned_user = await user_service.retrieve_user(user_id)
             user_response = UserMapper.to_response(returned_user)
-            response = JSONResponse(
-                content=jsonable_encoder(user_response),
-                status_code=status.HTTP_200_OK,
-            )
-            return response
+            response.status_code = status.HTTP_200_OK
+            return user_response
 
         @APIRouter.api_route(
             self,
@@ -285,18 +278,16 @@ class UserController(APIRouter):
         )
         @inject
         async def renew_user(
+            response: Response,
             user_id: str,
             user_request: UserRequest,
             user_service: UserService = self.dependencies[0],
-        ) -> JSONResponse:
+        ) -> UserResponse:
             domain_user = UserMapper.to_domain(user_request)
             returned_user = await user_service.replace_user(user_id, domain_user)
             user_response = UserMapper.to_response(returned_user)
-            response = JSONResponse(
-                content=jsonable_encoder(user_response),
-                status_code=status.HTTP_200_OK,
-            )
-            return response
+            response.status_code = status.HTTP_200_OK
+            return user_response
 
         @APIRouter.api_route(
             self,
@@ -350,13 +341,11 @@ class UserController(APIRouter):
         )
         @inject
         async def destroy_user(
+            response: Response,
             user_id: str,
             user_service: UserService = self.dependencies[0],
-        ) -> JSONResponse:
+        ) -> UserResponse:
             returned_user = await user_service.remove_user(user_id)
             user_response = UserMapper.to_response(returned_user)
-            response = JSONResponse(
-                content=jsonable_encoder(user_response),
-                status_code=status.HTTP_200_OK,
-            )
-            return response
+            response.status_code = status.HTTP_200_OK
+            return user_response

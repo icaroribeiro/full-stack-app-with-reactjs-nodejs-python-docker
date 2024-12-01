@@ -56,9 +56,9 @@ class TestAddUser(TestUserHttp):
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build(email=fake.word())
+        mocked_user: UserModel = UserFactory.build(email=faker.word())
         user_request = {"name": mocked_user.name, "email": mocked_user.email}
 
         response = await async_client.post(url, json=user_request)
@@ -245,7 +245,7 @@ class TestFetchUser(TestUserHttp):
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
 
@@ -304,7 +304,7 @@ class TestRenewUser(TestUserHttp):
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
         user_request = {
@@ -326,9 +326,9 @@ class TestRenewUser(TestUserHttp):
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build(email=fake.word())
+        mocked_user: UserModel = UserFactory.build(email=faker.word())
         user_request = {
             "name": mocked_user.name,
             "email": mocked_user.email,

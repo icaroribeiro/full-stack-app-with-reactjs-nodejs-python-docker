@@ -36,12 +36,13 @@ class HealthCheckController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    details: { context: '', cause: '' },
+    detail: { context: '', cause: '' },
     isOperational: false,
   })
   getHealth(): HealthCheckResponse {
     const isHealthy = this.healthCheckService.checkHealth()
-    const healthCheckResponse = HealthCheckMapper.toResponse(isHealthy)
+    const healthCheckMapper = new HealthCheckMapper()
+    const healthCheckResponse = healthCheckMapper.toResponse(isHealthy)
     this.setStatus(httpStatus.OK)
     return healthCheckResponse
   }

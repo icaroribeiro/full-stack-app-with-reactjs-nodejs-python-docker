@@ -1,7 +1,7 @@
-import { sql } from 'drizzle-orm'
+import { sql, InferSelectModel } from 'drizzle-orm'
 import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
-const usersTable = pgTable('users', {
+const userSchema = pgTable('users', {
   id: uuid('id')
     .primaryKey()
     .default(sql`uuid_generate_v4()`)
@@ -12,4 +12,6 @@ const usersTable = pgTable('users', {
   updatedAt: timestamp('updated_at').$onUpdate(() => new Date()),
 })
 
-export { usersTable }
+type UserModel = InferSelectModel<typeof userSchema>
+
+export { userSchema, UserModel }

@@ -2,15 +2,12 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status'
 
 import { ServerError } from '../../../server-error'
 import { IUserRepository } from './user-repository'
-import { User, UserList } from './user-types'
+import { User } from './user-types'
 
 interface IUserService {
   registerUser(user: User): Promise<User>
   // retrieveUserList(): Promise<UserList>
-  retrieveAndCountUsers(
-    page: number,
-    limit: number,
-  ): Promise<[UserList, number]>
+  retrieveAndCountUsers(page: number, limit: number): Promise<[User[], number]>
   retrieveUser(userId: string): Promise<User>
   replaceUser(userId: string, user: User): Promise<User>
   removeUser(userId: string): Promise<User>
@@ -51,7 +48,7 @@ class UserService implements IUserService {
   async retrieveAndCountUsers(
     page: number,
     limit: number,
-  ): Promise<[UserList, number]> {
+  ): Promise<[User[], number]> {
     try {
       return await this.userRepository.readAndCountUsers(page, limit)
     } catch (error) {
@@ -65,7 +62,7 @@ class UserService implements IUserService {
   }
 
   async retrieveUser(userId: string): Promise<User> {
-    let retrievedUser: User | undefined
+    let retrievedUser: User | null
     try {
       retrievedUser = await this.userRepository.readUser(userId)
     } catch (error) {
@@ -75,7 +72,7 @@ class UserService implements IUserService {
         cause: error,
       })
     }
-    if (retrievedUser === undefined) {
+    if (!retrievedUser) {
       const message = 'User not found'
       throw new ServerError(message, NOT_FOUND, {
         context: userId,
@@ -86,7 +83,7 @@ class UserService implements IUserService {
   }
 
   async replaceUser(userId: string, user: User): Promise<User> {
-    let replacedUser: User | undefined
+    let replacedUser: User | null
     try {
       replacedUser = await this.userRepository.updateUser(userId, user)
     } catch (error) {
@@ -96,7 +93,7 @@ class UserService implements IUserService {
         cause: error,
       })
     }
-    if (replacedUser === undefined) {
+    if (!replacedUser) {
       const message = 'User not found'
       throw new ServerError(message, NOT_FOUND, {
         context: { userId: userId, user: user },
@@ -107,7 +104,7 @@ class UserService implements IUserService {
   }
 
   async removeUser(userId: string): Promise<User> {
-    let removedUser: User | undefined
+    let removedUser: User | null
     try {
       removedUser = await this.userRepository.deleteUser(userId)
     } catch (error) {
@@ -117,7 +114,7 @@ class UserService implements IUserService {
         cause: error,
       })
     }
-    if (removedUser === undefined) {
+    if (!removedUser) {
       const message = 'User not found'
       throw new ServerError(message, NOT_FOUND, {
         context: userId,

@@ -1,7 +1,10 @@
 import { HealthCheckResponse } from './health-check-types'
 
+interface IHealthCheckMapper {
+  toResponse(isHealthy: boolean): HealthCheckResponse
+}
 class HealthCheckMapper {
-  public static toResponse(isHealthy: boolean): HealthCheckResponse {
+  toResponse(isHealthy: boolean): HealthCheckResponse {
     return {
       healthy: isHealthy,
     }

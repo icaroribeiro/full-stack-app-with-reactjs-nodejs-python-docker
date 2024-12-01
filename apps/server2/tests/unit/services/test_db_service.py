@@ -83,9 +83,9 @@ class TestConnectDatabase(TestDBService):
         self,
         db_service: DBService,
         initialize_database: None,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        database_url = fake.url("")
+        database_url = faker.url("")
         error = NoSuchModuleError(
             f"Could not parse SQLAlchemy URL from string '{database_url}'"
         )
@@ -165,10 +165,10 @@ class TestMigrateDatabase(TestDBService):
         self,
         config: Config,
         db_service: DBService,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
         db_service.connect_database(config.get_database_url())
-        alembic_file_path = fake.file_path()
+        alembic_file_path = faker.file_path()
         message = "An error occurred when migrating the database"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -239,9 +239,9 @@ class TestGetDatabaseTableRowCount(TestDBService):
         self,
         config: Config,
         db_service: DBService,
-        fake: Faker,
+        faker: Faker,
     ) -> None:
-        name = fake.word()
+        name = faker.word()
         db_service.connect_database(config.get_database_url())
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
@@ -258,9 +258,9 @@ class TestGetDatabaseTableRowCount(TestDBService):
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_async_engine_is_none(
-        self, db_service: DBService, fake: Faker
+        self, db_service: DBService, faker: Faker
     ) -> None:
-        name = fake.name()
+        name = faker.name()
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 

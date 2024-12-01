@@ -1,27 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { User, UserResponse } from './user-types'
 
-class UserMapper {
-  public static toPersistence(user: User): any {
+interface IUserMapper {
+  toPersistence(user: User): any
+  toDomain(raw: any): User
+  toResponse(user: User): UserResponse
+}
+
+class UserMapper implements IUserMapper {
+  toPersistence(user: User): any {
     return {
       name: user.name,
       email: user.email,
     }
   }
 
-  public static toDomain(raw: any): User {
+  toDomain(raw: any): User {
     return {
-      id: raw.id || undefined,
+      id: raw.id,
       name: raw.name,
       email: raw.email,
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt,
     }
   }
 
-  public static toResponse(user: User): UserResponse {
+  toResponse(user: User): UserResponse {
     return {
-      id: user.id || 'unknown',
+      id: user.id,
       name: user.name,
       email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     }
   }
 }

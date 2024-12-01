@@ -1,4 +1,4 @@
-import { INTERNAL_SERVER_ERROR } from 'http-status'
+import httpStatus from 'http-status'
 
 import { DBService } from '../../../services'
 import { ServerError } from '../../../server-error'
@@ -15,7 +15,7 @@ class HealthCheckService implements IHealthCheckService {
       return this.dbService.checkDatabaseIsAlive()
     } catch (error) {
       const message = 'An error occurred when checking if application is alive'
-      throw new ServerError(message, INTERNAL_SERVER_ERROR, {
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: 'unknown',
         cause: error,
       })

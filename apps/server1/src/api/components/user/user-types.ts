@@ -4,19 +4,19 @@ type UserRequest = {
 }
 
 type User = {
-  id?: string | undefined
+  id: string | null
   name: string
   email: string
+  createdAt: Date | null
+  updatedAt: Date | null
 }
-
-type UserList = User[]
 
 type UserResponse = {
-  id: string
+  id: string | null
   name: string
   email: string
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
-type UserListResponse = UserResponse[]
-
-export { User, UserList, UserListResponse, UserRequest, UserResponse }
+export { User, UserRequest, UserResponse }

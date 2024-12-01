@@ -67,10 +67,10 @@ class TestReadAndCountUsers(TestUserRepository):
         initialize_database: None,
         clear_database_tables: None,
         user_repository: UserRepository,
-        fake: Faker,
+        faker: Faker,
     ):
-        page = fake.pyint()
-        limit = fake.pyint()
+        page = faker.pyint()
+        limit = faker.pyint()
         expected_records_result = []
         expected_total_result = 0
 
