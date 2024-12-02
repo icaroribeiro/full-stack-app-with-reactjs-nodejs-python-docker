@@ -5,6 +5,7 @@ import httpStatus from 'http-status'
 import postgres from 'postgres'
 
 import { ServerError, Detail } from '../server-error'
+import { Exception } from 'tsoa'
 
 interface IDBService {
   connectDatabase(databaseURL: string): void
@@ -56,10 +57,13 @@ class DBService implements IDBService {
           tx.execute(sql`SELECT 1`)
           isAlive = true
         } catch (error) {
-          tx.rollback()
           const message = 'An error occurred when checking database is alive!'
           console.error(message, error)
-          throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          try {
+            tx.rollback()
+          } catch (error) {
+            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          }
         }
       })
       return isAlive
@@ -99,10 +103,13 @@ class DBService implements IDBService {
           const result = await tx.execute(query)
           count = result.length ? parseInt(result[0].count as string) : 0
         } catch (error) {
-          tx.rollback()
           const message = `An error occurred when counting rows of database table ${name}`
           console.error(message, error)
-          throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          try {
+            tx.rollback()
+          } catch (error) {
+            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          }
         }
       })
       return count
@@ -130,10 +137,13 @@ class DBService implements IDBService {
             await tx.execute(query)
           }
         } catch (error) {
-          tx.rollback()
           const message = 'An error occurred when cleaning the database tables'
           console.error(message, error)
-          throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          try {
+            tx.rollback()
+          } catch (error) {
+            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          }
         }
       })
       return
@@ -146,31 +156,27 @@ class DBService implements IDBService {
   public async deleteDatabaseTables(): Promise<void> {
     if (this._db) {
       await this._db.transaction(async (tx) => {
+        let error: Exception | null = null
         try {
           const query = sql`
-            SELECT table_name
-            FROM information_schema.tables
-              WHERE table_schema = 'public'
-                AND table_type = 'BASE TABLE';
-          `
+              SELECT table_name
+              FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_type = 'BASE TABLE';
+            `
           const tables = await tx.execute(query)
           for (const table of tables) {
-            console.log(`Table name: ${table.table_name}`)
-            const query = sql.raw(
-              /* sql */ `DROP TABLE ${table.table_name} CASCADE;`,
-            )
-            // const query = sql<string>`
-            //   TRUNCATE TABLE ${table.table_name} CASCADE;
-            // `
-            console.log('CCC')
+            const query = sql.raw(`DROP TABLE ${table.table_name} CASCADE;`)
             await tx.execute(query)
-            console.log('DDDD')
           }
         } catch (error) {
-          // tx.rollback()
           const message = 'An error occurred when deleting the database tables'
           console.error(message, error)
-          throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          try {
+            tx.rollback()
+          } catch (error) {
+            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
+          }
         }
       })
       return

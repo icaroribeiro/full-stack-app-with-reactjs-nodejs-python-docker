@@ -3,6 +3,7 @@
 // import { migrate } from 'drizzle-orm/postgres-js/migrator'
 // import { INTERNAL_SERVER_ERROR } from 'http-status'
 // import path from 'path'
+import httpStatus from 'http-status'
 // import { fileURLToPath } from 'url'
 import {
   afterAll,
@@ -22,6 +23,7 @@ import {
   initializeDatabase,
 } from '../../test-helpers'
 import exp from 'constants'
+import { ServerError } from '../../../src/server-error'
 
 // import { UserList, UserMapper } from '../../api/components/user'
 // import { ServerError } from '../../server-error'
@@ -46,11 +48,16 @@ import exp from 'constants'
 
 describe('DBService', () => {
   const config = new Config()
-  const dbService = new DBService()
+  let dbService: DBService
 
   beforeAll(async () => {
     await startDatabaseContainer(config)
   }, 30000)
+
+  beforeEach(() => {
+    dbService = new DBService()
+  })
+
   //   const factory: DBContainerTestFactory = new DBContainerTestFactory()
   //   const mockedMigrate = vi.mocked(migrate)
   //   beforeEach(() => {
@@ -76,12 +83,16 @@ describe('DBService', () => {
 
       await finalizeDatabase(dbService)
     })
-    // it('should fail and throw exception when db is undefined', () => {
-    //   const message = 'DB is undefined!'
-    //   const serverError = new ServerError(message, INTERNAL_SERVER_ERROR)
-    //   const dbService = new DBService()
-    //   expect(() => dbService.db).toThrowError(serverError)
-    // })
+
+    it('should fail and throw exception when database is null', () => {
+      const message = 'Database is null!'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
+
+      expect(() => dbService.db).toThrowError(serverError)
+    })
   })
 
   //   describe('.connectDatabase', () => {
