@@ -1,7 +1,6 @@
 import types
 
 import pytest
-from db.models.user import UserModel
 from tests.factories.user_factory import UserFactory
 
 from api.components.user.user_mapper import UserMapper
@@ -26,7 +25,7 @@ class TestToPersistence(TestUserMapper):
         self,
         user_mapper: UserMapper,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         expected_result = {"name": mocked_user.name, "email": mocked_user.email}
 
         result = user_mapper.to_persistence(mocked_user)
@@ -45,7 +44,7 @@ class TestToDomain(TestUserMapper):
         self,
         user_mapper: UserMapper,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         raw_user_data = {
             "id": mocked_user.id,
             "name": mocked_user.name,
@@ -76,7 +75,7 @@ class TestToResponse(TestUserMapper):
         self,
         user_mapper: UserMapper,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         expected_result = UserResponse(
             id=mocked_user.id,
             name=mocked_user.name,

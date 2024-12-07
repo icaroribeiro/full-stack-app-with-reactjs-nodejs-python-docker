@@ -1,63 +1,64 @@
-// import 'reflect-metadata'
-// import { INTERNAL_SERVER_ERROR } from 'http-status'
-// import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { DBService } from '../../../../../src/services'
+import { HealthCheckService } from '../../../../../src/api/components/health-check'
+import httpStatus from 'http-status'
+import { ServerError } from '../../../../../src/server-error'
 
-// import { DBService } from '../../../../services'
-// import { ServerError } from '../../../../server-error'
-// import { HealthCheckService } from '..'
+vi.mock('../../../../../src/services/db-service', () => {
+  const actual = vi.importActual<
+    typeof import('../../../../../src/services/db-service')
+  >('../../../../../src/services/db-service')
+  return {
+    ...actual,
+    DBService: vi.fn(),
+  }
+})
 
-// vi.mock('../../../../services', () => {
-//   const actual = vi.importActual<typeof import('../../../../services')>(
-//     '../../../../services',
-//   )
-//   return {
-//     ...actual,
-//     DBService: vi.fn(),
-//   }
-// })
+describe('HealthCheckService', () => {
+  const dbService = vi.mocked(new DBService())
+  const healthCheckService = new HealthCheckService(dbService)
 
-// describe('HealthCheckService', () => {
-//   const mockedDBService = vi.mocked(new DBService())
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
 
-//   afterEach(() => {
-//     vi.clearAllMocks()
-//   })
+  describe('.checkHealth', () => {
+    it('should define a function', () => {
+      expect(typeof healthCheckService.checkHealth).toBe('function')
+    })
 
-//   describe('.checkHealth', () => {
-//     it('should define a function', () => {
-//       const healthCheckService = new HealthCheckService(mockedDBService)
+    it('should succeed and return true when application is healthy', async () => {
+      const mockedCheckDatabaseIsAlive = vi.fn().mockReturnValue(true)
+      dbService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
+      const expectedResult = true
 
-//       expect(typeof healthCheckService.checkHealth).toBe('function')
-//     })
+      const result = await healthCheckService.checkHealth()
 
-//     it('should succeed and return true', () => {
-//       const mockedCheckDatabaseIsAlive = vi.fn().mockReturnValue(true)
-//       mockedDBService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
-//       const expectedResult = true
+      expect(result).toEqual(expectedResult)
+      expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
+    })
 
-//       const healthCheckService = new HealthCheckService(mockedDBService)
-//       const result = healthCheckService.checkHealth()
+    it('should fail and throw exception when application is not healthy', () => {
+      const error = new Error('failed')
+      const message =
+        'An error occurred when checking if application is healthy'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+        {
+          context: 'unknown',
+          cause: error,
+        },
+      )
+      const mockedCheckDatabaseIsAlive = vi.fn().mockImplementation(() => {
+        throw new Error('failed')
+      })
+      dbService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
 
-//       expect(result).toEqual(expectedResult)
-//       expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
-//     })
-
-//     it("should fail and throw exception when health can't be checked", () => {
-//       const error = new Error('failed')
-//       const message = 'An error occurred when checking if application is alive'
-//       const serverError = new ServerError(message, INTERNAL_SERVER_ERROR, {
-//         context: 'unknown',
-//         cause: error,
-//       })
-//       const mockedCheckDatabaseIsAlive = vi.fn().mockImplementation(() => {
-//         throw new Error('failed')
-//       })
-//       mockedDBService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
-
-//       const healthCheckService = new HealthCheckService(mockedDBService)
-
-//       expect(() => healthCheckService.checkHealth()).toThrowError(serverError)
-//       expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
-//     })
-//   })
-// })
+      expect(() => healthCheckService.checkHealth()).rejects.toThrowError(
+        serverError,
+      )
+      expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
+    })
+  })
+})

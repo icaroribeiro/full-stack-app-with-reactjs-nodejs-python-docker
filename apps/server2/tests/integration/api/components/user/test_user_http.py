@@ -35,7 +35,7 @@ class TestAddUser(TestUserHttp):
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         user_request = {"name": mocked_user.name, "email": mocked_user.email}
         expected_response_body = DictToObj(user_request)
 
@@ -219,7 +219,7 @@ class TestFetchUser(TestUserHttp):
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -247,7 +247,7 @@ class TestFetchUser(TestUserHttp):
         url: str,
         faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
 
         response = await async_client.get(f"{url}/{mocked_user.id}")
 
@@ -266,7 +266,7 @@ class TestRenewUser(TestUserHttp):
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -306,7 +306,7 @@ class TestRenewUser(TestUserHttp):
         url: str,
         faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         user_request = {
             "name": mocked_user.name,
             "email": mocked_user.email,
@@ -351,7 +351,7 @@ class TestDestroyUser(TestUserHttp):
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -378,7 +378,7 @@ class TestDestroyUser(TestUserHttp):
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user = UserFactory.build()
 
         response = await async_client.get(f"{url}/{mocked_user.id}")
 

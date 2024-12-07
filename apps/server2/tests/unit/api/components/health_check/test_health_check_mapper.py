@@ -19,7 +19,7 @@ class TestToResponse(TestHealthCheckMapper):
     ) -> None:
         assert isinstance(health_check_mapper.to_response, types.FunctionType) is True
 
-    def test_should_succeed_and_return_a_health_check_response(
+    def test_should_succeed_and_return_health_check_response(
         self,
         health_check_mapper: HealthCheckMapper,
     ) -> None:

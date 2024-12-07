@@ -2,10 +2,7 @@ import { Config } from '../src/config/config'
 import { DBService } from '../src/services'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql'
+import { PostgreSqlContainer } from '@testcontainers/postgresql'
 
 const currentPath = fileURLToPath(import.meta.url)
 const appPath = path.resolve(currentPath, '..', '..')

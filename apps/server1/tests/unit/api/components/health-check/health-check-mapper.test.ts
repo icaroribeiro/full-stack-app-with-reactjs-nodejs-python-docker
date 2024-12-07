@@ -1,23 +1,27 @@
-// import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import {
+  HealthCheckMapper,
+  HealthCheckResponse,
+} from '../../../../../src/api/components/health-check'
 
-// import { HealthCheckResponse, HealthCheckMapper } from '..'
+describe('HealthCheckMapper', () => {
+  const healthCheckMapper = new HealthCheckMapper()
 
-// describe('HealthCheckMapper', async () => {
-//   describe('.toResponse', () => {
-//     it('should define a function', () => {
-//       expect(typeof HealthCheckMapper.toResponse).toBe('function')
-//     })
+  describe('.toResponse', () => {
+    it('should define a function', () => {
+      expect(typeof healthCheckMapper.toResponse).toBe('function')
+    })
 
-//     it('should succeed and return a health check data transfer object', async () => {
-//       const isHealthy = true
-//       const healthCheckResponse: HealthCheckResponse = {
-//         healthy: isHealthy,
-//       }
-//       const expectedResult = healthCheckResponse
+    it('should succeed and return health check response', async () => {
+      const isHealthy = true
+      const healthCheckResponse: HealthCheckResponse = {
+        healthy: isHealthy,
+      }
+      const expectedResult = healthCheckResponse
 
-//       const result = HealthCheckMapper.toResponse(isHealthy)
+      const result = healthCheckMapper.toResponse(isHealthy)
 
-//       expect(result).toEqual(expectedResult)
-//     })
-//   })
-// })
+      expect(result).toEqual(expectedResult)
+    })
+  })
+})

@@ -4,17 +4,18 @@ import { DBService } from '../../../services'
 import { ServerError } from '../../../server-error'
 
 interface IHealthCheckService {
-  checkHealth(): boolean
+  checkHealth(): Promise<boolean>
 }
 
 class HealthCheckService implements IHealthCheckService {
   constructor(private dbService: DBService) {}
 
-  checkHealth(): boolean {
+  async checkHealth(): Promise<boolean> {
     try {
-      return this.dbService.checkDatabaseIsAlive()
+      return await this.dbService.checkDatabaseIsAlive()
     } catch (error) {
-      const message = 'An error occurred when checking if application is alive'
+      const message =
+        'An error occurred when checking if application is healthy'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: 'unknown',
         cause: error,

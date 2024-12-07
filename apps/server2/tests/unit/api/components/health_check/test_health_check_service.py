@@ -26,7 +26,7 @@ class TestCheckHealth(TestHealthCheckService):
         assert isinstance(health_check_service.check_health, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_true(
+    async def test_should_succeed_and_return_true_when_application_is_healthy(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -43,14 +43,14 @@ class TestCheckHealth(TestHealthCheckService):
         db_service.check_database_is_alive.assert_called_once()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_health_cannot_be_checked(
+    async def test_should_fail_and_raise_exception_when_application_is_not_healthy(
         self,
         db_service: DBService,
         health_check_service: HealthCheckService,
         mocker: MockerFixture,
     ) -> None:
         error = Exception("Failed")
-        message = "An error occurred when checking if application is alive"
+        message = "An error occurred when checking if application is healthy"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
