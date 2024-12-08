@@ -99,7 +99,7 @@ class TestRetrieveAndCountUsers(TestUserService):
     ) -> None:
         page = faker.pyint()
         limit = faker.pyint()
-        count = faker.pyint()
+        count = faker.pyint(min_value=1, max_value=3)
         mocked_users = UserFactory.build_batch(count)
         mocked_read_and_count_users = mocker.AsyncMock(
             return_value=[mocked_users, count]
@@ -167,7 +167,7 @@ class TestRetrieveUser(TestUserService):
         user_repository.read_user.assert_called_once_with(mocked_user.id)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_user_is_not_retrieved(
+    async def test_should_fail_and_raise_exception_when_user_cannot_be_retrieved(
         self,
         user_repository: UserRepository,
         user_service: UserService,
@@ -245,7 +245,7 @@ class TestReplaceUser(TestUserService):
         user_repository.update_user.assert_called_once_with(mocked_user.id, mocked_user)
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_user_is_not_replaced(
+    async def test_should_fail_and_raise_exception_when_user_cannot_be_replaced(
         self,
         user_repository: UserRepository,
         user_service: UserService,

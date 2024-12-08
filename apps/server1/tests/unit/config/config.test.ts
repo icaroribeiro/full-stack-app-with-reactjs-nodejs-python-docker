@@ -4,6 +4,7 @@ import { faker } from '@faker-js/faker'
 import { afterEach } from 'node:test'
 import { ServerError } from '../../../src/server-error'
 import httpStatus from 'http-status'
+import { config } from '../../test-helpers'
 
 function setup(varName: string, varValue: string): any {
   let exists = false
@@ -29,7 +30,6 @@ function teardown(varName: string, varValue: string, exists: boolean): void {
 describe('Config', () => {
   let exists: boolean
   let varValue: string
-  const config = new Config()
 
   describe('.getEnv', () => {
     const varName = 'ENV'

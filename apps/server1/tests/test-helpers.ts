@@ -2,12 +2,19 @@ import { Config } from '../src/config/config'
 import { DBService } from '../src/services'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql'
 
 const currentPath = fileURLToPath(import.meta.url)
 const appPath = path.resolve(currentPath, '..', '..')
 
-async function startDatabaseContainer(config: Config): Promise<void> {
+const config = new Config()
+
+async function startDatabaseContainer(
+  config: Config,
+): Promise<StartedPostgreSqlContainer> {
   const dbUser = config.getDatabaseUser()
   const dbPassword = config.getDatabasePassword()
   const dbName = config.getDatabaseName()
@@ -18,6 +25,13 @@ async function startDatabaseContainer(config: Config): Promise<void> {
     .start()
   const dbURL = container.getConnectionUri()
   config.setDataseURL(dbURL)
+  return container
+}
+
+async function stopDatabaseContainer(
+  container: StartedPostgreSqlContainer,
+): Promise<void> {
+  await container.stop()
 }
 
 async function initializeDatabase(
@@ -34,4 +48,10 @@ async function finalizeDatabase(dbService: DBService): Promise<void> {
   await dbService.deactivateDatabase()
 }
 
-export { startDatabaseContainer, initializeDatabase, finalizeDatabase }
+export {
+  config,
+  startDatabaseContainer,
+  stopDatabaseContainer,
+  initializeDatabase,
+  finalizeDatabase,
+}
