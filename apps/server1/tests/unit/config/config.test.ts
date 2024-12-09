@@ -31,8 +31,8 @@ describe('Config', () => {
   let exists: boolean
   let varValue: string
 
-  describe('.getEnv', () => {
-    const varName = 'ENV'
+  describe('.getNodeEnv', () => {
+    const varName = 'NODE_ENV'
 
     beforeEach(() => {
       const result = setup(varName, faker.string.alphanumeric(5))
@@ -45,13 +45,13 @@ describe('Config', () => {
     })
 
     it('should define a function', () => {
-      expect(typeof config.getEnv).toBe('function')
+      expect(typeof config.getNodeEnv).toBe('function')
     })
 
     it('should succeed and return environment variable when it is set', () => {
       const expectedResult = varValue
 
-      const result = config.getEnv()
+      const result = config.getNodeEnv()
 
       expect(result).toEqual(expectedResult)
     })
@@ -64,7 +64,7 @@ describe('Config', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() => config.getEnv()).toThrowError(serverError)
+      expect(() => config.getNodeEnv()).toThrowError(serverError)
     })
   })
 

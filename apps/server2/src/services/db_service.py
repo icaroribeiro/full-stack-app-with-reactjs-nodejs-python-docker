@@ -74,12 +74,15 @@ class DBService(IDBService):
         if self.__async_engine is not None:
             async with self.__async_engine.connect() as conn:
                 try:
-                    await conn.execute(text("SELECT 1"))
+                    query = text("""
+                        SELECT 1
+                    """)
+                    await conn.execute(query)
                     await conn.commit()
                     return True
                 except Exception as error:
                     await conn.rollback()
-                    message = "An error occurred when checking database is alive!"
+                    message = "An error occurred when checking database is alive"
                     print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
         message = "Async engine is None!"

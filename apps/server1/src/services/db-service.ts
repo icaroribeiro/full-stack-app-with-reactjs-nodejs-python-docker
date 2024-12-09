@@ -54,10 +54,13 @@ class DBService implements IDBService {
       let isAlive: boolean = false
       await this._db.transaction(async (tx) => {
         try {
-          tx.execute(sql`SELECT 1`)
+          const query = sql.raw(`
+            SELECT 1
+          `)
+          await tx.execute(query)
           isAlive = true
         } catch (error) {
-          const message = 'An error occurred when checking database is alive!'
+          const message = 'An error occurred when checking database is alive'
           console.error(message, error)
           try {
             tx.rollback()
@@ -96,10 +99,10 @@ class DBService implements IDBService {
       let count: number = 0
       await this._db.transaction(async (tx) => {
         try {
-          const query = sql<string>`
+          const query = sql.raw(`
             SELECT count(*) 
             FROM ${name};
-          `
+          `)
           const result = await tx.execute(query)
           count = result.length ? parseInt(result[0].count as string) : 0
         } catch (error) {
@@ -123,17 +126,17 @@ class DBService implements IDBService {
     if (this._db) {
       await this._db.transaction(async (tx) => {
         try {
-          const query = sql`
+          const query = sql.raw(`
             SELECT table_name
             FROM information_schema.tables
               WHERE table_schema = 'public'
                 AND table_type = 'BASE TABLE';
-          `
+          `)
           const tables = await tx.execute(query)
           for (const table of tables) {
-            const query = sql<string>`
+            const query = sql.raw(`
               TRUNCATE TABLE ${table.table_name} CASCADE;
-            `
+            `)
             await tx.execute(query)
           }
         } catch (error) {
@@ -158,15 +161,17 @@ class DBService implements IDBService {
       await this._db.transaction(async (tx) => {
         let error: Exception | null = null
         try {
-          const query = sql`
-              SELECT table_name
-              FROM information_schema.tables
-                WHERE table_schema = 'public'
-                  AND table_type = 'BASE TABLE';
-            `
+          const query = sql.raw(`
+            SELECT table_name
+            FROM information_schema.tables
+              WHERE table_schema = 'public'
+                AND table_type = 'BASE TABLE';
+          `)
           const tables = await tx.execute(query)
           for (const table of tables) {
-            const query = sql.raw(`DROP TABLE ${table.table_name} CASCADE;`)
+            const query = sql.raw(`
+              DROP TABLE ${table.table_name} CASCADE;
+            `)
             await tx.execute(query)
           }
         } catch (error) {

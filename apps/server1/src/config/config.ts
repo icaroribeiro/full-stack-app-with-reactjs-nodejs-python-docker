@@ -3,8 +3,8 @@ import { INTERNAL_SERVER_ERROR } from 'http-status'
 import { ServerError } from '../server-error'
 
 class Config {
-  public getEnv(): string {
-    return this.getEnvVar('ENV')
+  public getNodeEnv(): string {
+    return this.getEnvVar('NODE_ENV')
   }
 
   public getPort(): string {

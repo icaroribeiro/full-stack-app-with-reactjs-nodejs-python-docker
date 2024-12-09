@@ -34,7 +34,7 @@ class TestCreateUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         expected_result = UserMapper.to_domain(mocked_user)
 
         result = await user_repository.create_user(mocked_user)
@@ -95,7 +95,7 @@ class TestReadAndCountUsers(TestUserRepository):
         user_repository: UserRepository,
     ):
         count = 3
-        mocked_user_list = UserFactory.build_batch(count)
+        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -131,7 +131,7 @@ class TestReadAndCountUsers(TestUserRepository):
         user_repository: UserRepository,
     ):
         count = 3
-        mocked_user_list = UserFactory.build_batch(count)
+        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -209,7 +209,7 @@ class TestReadUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -235,7 +235,7 @@ class TestReadUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
 
         result = await user_repository.read_user(mocked_user.id)
 
@@ -262,7 +262,7 @@ class TestUpdateUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -270,7 +270,7 @@ class TestUpdateUser(TestUserRepository):
             engine_result = await conn.execute(query)
             obj = DictToObj(engine_result.first()._asdict())
             await conn.commit()
-            domain_user = UserMapper.to_domain(
+            domain_user: User = UserMapper.to_domain(
                 UserFactory.build(id=obj.id, created_at=obj.created_at)
             )
         mocked_user.id = domain_user.id
@@ -294,8 +294,8 @@ class TestUpdateUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
-        domain_user = UserMapper.to_domain(UserFactory.build())
+        mocked_user: UserModel = UserFactory.build()
+        domain_user: User = UserMapper.to_domain(UserFactory.build())
 
         result = await user_repository.update_user(mocked_user.id, domain_user)
 
@@ -322,7 +322,7 @@ class TestDeleteUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
@@ -348,7 +348,7 @@ class TestDeleteUser(TestUserRepository):
         clear_database_tables: None,
         user_repository: UserRepository,
     ):
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
 
         result = await user_repository.delete_user(mocked_user.id)
 

@@ -1,25 +1,33 @@
 import httpStatus from 'http-status'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { config } from '../../../../test-helpers'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import {
+  config,
+  dbService,
+  finalizeDatabase,
+  initializeDatabase,
+  startDatabaseContainer,
+  startHttpServer,
+  stopDatabaseContainer,
+} from '../../../../test-helpers'
 import { HealthCheckResponse } from '../../../../../src/api/components/health-check'
+import { StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
 describe('Health Check HTTP', () => {
   const endpoint = '/health'
   const url = `http://localhost:${config.getPort()}${endpoint}`
+  let container: StartedPostgreSqlContainer
+  const beforeAllTimeout = 30000
 
-  // const factory: HttpTestFactory = new HttpTestFactory()
+  beforeAll(async () => {
+    container = await startDatabaseContainer(config)
+    await initializeDatabase(config, dbService)
+    startHttpServer(config)
+  }, beforeAllTimeout)
 
-  // beforeAll(async () => {
-  //   await factory.prepareAll()
-  // }, factory.beforeAllTimeout)
-
-  // afterEach(async () => {
-  //   await factory.closeEach()
-  // })
-
-  // afterAll(async () => {
-  //   await factory.closeAll()
-  // })
+  afterAll(async () => {
+    await finalizeDatabase(dbService)
+    await stopDatabaseContainer(container)
+  })
 
   describe('GET /health', () => {
     it('should succeed and return application is healthy', async () => {

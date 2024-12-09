@@ -1,6 +1,7 @@
 import types
 
 import pytest
+from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
 from pytest_mock import MockerFixture
@@ -42,7 +43,7 @@ class TestRegisterUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_create_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.create_user = mocked_create_user
         expected_result = mocked_user
@@ -59,7 +60,7 @@ class TestRegisterUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("Failed")
         message = "An error occurred when creating a new user into database"
         server_error = ServerError(
@@ -100,7 +101,7 @@ class TestRetrieveAndCountUsers(TestUserService):
         page = faker.pyint()
         limit = faker.pyint()
         count = faker.pyint(min_value=1, max_value=3)
-        mocked_users = UserFactory.build_batch(count)
+        mocked_users: list[UserModel] = UserFactory.build_batch(count)
         mocked_read_and_count_users = mocker.AsyncMock(
             return_value=[mocked_users, count]
         )
@@ -156,7 +157,7 @@ class TestRetrieveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_read_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.read_user = mocked_read_user
         expected_result = mocked_user
@@ -173,7 +174,7 @@ class TestRetrieveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("Failed")
         message = "An error occurred when reading a user from database"
         server_error = ServerError(
@@ -200,7 +201,7 @@ class TestRetrieveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,
@@ -234,7 +235,7 @@ class TestReplaceUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_update_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.update_user = mocked_update_user
         expected_result = mocked_user
@@ -251,7 +252,7 @@ class TestReplaceUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("Failed")
         message = "An error occurred when updating a user in database"
         server_error = ServerError(
@@ -281,7 +282,7 @@ class TestReplaceUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,
@@ -315,7 +316,7 @@ class TestRemoveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         mocked_delete_user = mocker.AsyncMock(return_value=mocked_user)
         user_repository.delete_user = mocked_delete_user
         expected_result = mocked_user
@@ -332,7 +333,7 @@ class TestRemoveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         error = Exception("Failed")
         message = "An error occurred when deleting a user from database"
         server_error = ServerError(
@@ -359,7 +360,7 @@ class TestRemoveUser(TestUserService):
         user_service: UserService,
         mocker: MockerFixture,
     ) -> None:
-        mocked_user = UserFactory.build()
+        mocked_user: UserModel = UserFactory.build()
         message = "User not found"
         server_error = ServerError(
             message,

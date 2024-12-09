@@ -57,11 +57,6 @@ export default defineConfig(({ command, mode }) => {
     test: {
       env: loadEnv('test', process.cwd(), ''),
       include: ['tests/**/*.test.ts'],
-      poolOptions: {
-        forks: {
-          singleFork: true,
-        },
-      },
       coverage: {
         reporter: [['lcov', { projectRoot: appPath }], 'text'],
       },

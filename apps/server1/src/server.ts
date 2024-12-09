@@ -3,7 +3,6 @@ import express, { Application, json, Request, Response } from 'express'
 import swaggerUi from 'swagger-ui-express'
 
 import swaggerDocument from '../api/swagger.json'
-// import { errorMiddleware } from './api/middlewares'
 import { RegisterRoutes } from './api/routes/routes'
 import { Config } from './config/config'
 import { Container } from './container/container'

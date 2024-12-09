@@ -50,7 +50,7 @@ describe('UserService', () => {
     it('should fail and throw exception when user cannot be registered', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when creating a new user into database'
+      const message = 'An error occurred when registering a new user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -98,8 +98,7 @@ describe('UserService', () => {
       const page = faker.number.int()
       const limit = faker.number.int()
       const error = new Error('failed')
-      const message =
-        'An error occurred when reading and counting users from database'
+      const message = 'An error occurred when reading and counting users'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -143,7 +142,7 @@ describe('UserService', () => {
     it('should fail and throw exception when user cannot be retrieved', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when reading a user from database'
+      const message = 'An error occurred when retrieving a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -203,7 +202,7 @@ describe('UserService', () => {
     it('should fail and throw exception when user cannot be replaced', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when updating a user in database'
+      const message = 'An error occurred when replacing a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -268,7 +267,7 @@ describe('UserService', () => {
     it('should fail and throw exception when a user cannot be removed', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when deleting a user from database'
+      const message = 'An error occurred when removing a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,

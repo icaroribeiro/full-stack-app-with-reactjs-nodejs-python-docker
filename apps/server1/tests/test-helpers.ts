@@ -6,11 +6,15 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
+import { Server } from '../src/server'
+import { createServer, Server as HttpServer } from 'http'
 
 const currentPath = fileURLToPath(import.meta.url)
 const appPath = path.resolve(currentPath, '..', '..')
 
 const config = new Config()
+
+const dbService = new DBService()
 
 async function startDatabaseContainer(
   config: Config,
@@ -48,10 +52,28 @@ async function finalizeDatabase(dbService: DBService): Promise<void> {
   await dbService.deactivateDatabase()
 }
 
+function startHttpServer(config: Config): void {
+  try {
+    const server: Server = new Server(config)
+    const httpServer: HttpServer = createServer(server.app)
+    const port = parseInt(config.getPort())
+    httpServer.listen(port, () => {
+      console.log('Server started successfully!')
+    })
+    httpServer.on('close', () => {
+      console.log('Server closed successfully!')
+    })
+  } catch (error) {
+    console.error('Server starting failed!', error)
+  }
+}
+
 export {
   config,
+  dbService,
   startDatabaseContainer,
   stopDatabaseContainer,
   initializeDatabase,
   finalizeDatabase,
+  startHttpServer,
 }

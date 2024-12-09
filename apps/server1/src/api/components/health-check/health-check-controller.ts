@@ -39,8 +39,8 @@ class HealthCheckController extends Controller {
     detail: { context: '', cause: '' },
     isOperational: false,
   })
-  getHealth(): HealthCheckResponse {
-    const isHealthy = this.healthCheckService.checkHealth()
+  async getHealth(): Promise<HealthCheckResponse> {
+    const isHealthy = await this.healthCheckService.checkHealth()
     const healthCheckMapper = new HealthCheckMapper()
     const healthCheckResponse = healthCheckMapper.toResponse(isHealthy)
     this.setStatus(httpStatus.OK)

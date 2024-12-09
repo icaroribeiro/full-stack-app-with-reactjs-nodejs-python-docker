@@ -216,7 +216,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
         count = 3
-        mocked_user_list = UserFactory.build_batch(count)
+        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -288,7 +288,7 @@ class TestClearDatabaseTable(TestDBService):
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
         count = 3
-        mocked_user_list = UserFactory.build_batch(count)
+        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)

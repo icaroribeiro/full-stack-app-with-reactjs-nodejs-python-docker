@@ -16,6 +16,11 @@ def config() -> Config:
     return Config()
 
 
+@pytest.fixture(scope="session")
+def db_service() -> DBService:
+    return DBService()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def start_database_container(request, config: Config) -> DbContainer:
     db_user = config.get_database_username()
@@ -38,11 +43,6 @@ def start_database_container(request, config: Config) -> DbContainer:
     request.addfinalizer(stop_database_container)
     # print("Database container started successfully!")
     return container
-
-
-@pytest.fixture(scope="session")
-def db_service() -> DBService:
-    return DBService()
 
 
 async def initialize_database_base(
