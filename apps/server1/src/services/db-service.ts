@@ -1,17 +1,16 @@
+import { ServerError } from '../server-error'
 import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import httpStatus from 'http-status'
-import postgres from 'postgres'
 
-import { ServerError, Detail } from '../server-error'
-import { Exception } from 'tsoa'
+import postgres from 'postgres'
 
 interface IDBService {
   connectDatabase(databaseURL: string): void
-  checkDatabaseIsAlive(): Promise<boolean>
+  checkDatabaseIsAlive(): Promise<boolean | undefined>
   migrateDatabase(migrationsFolder: string): Promise<void>
-  getDatabaseTableRowCount(name: string): Promise<number>
+  getDatabaseTableRowCount(name: string): Promise<number | undefined>
   clearDatabaseTables(): Promise<void>
   deleteDatabaseTables(): Promise<void>
   deactivateDatabase(): Promise<void>
@@ -49,27 +48,21 @@ class DBService implements IDBService {
     }
   }
 
-  public async checkDatabaseIsAlive(): Promise<boolean> {
+  public async checkDatabaseIsAlive(): Promise<boolean | undefined> {
     if (this._db) {
-      let isAlive: boolean = false
-      await this._db.transaction(async (tx) => {
+      return await this._db.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT 1
           `)
           await tx.execute(query)
-          isAlive = true
+          return true
         } catch (error) {
           const message = 'An error occurred when checking database is alive'
           console.error(message, error)
-          try {
-            tx.rollback()
-          } catch (error) {
-            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-          }
+          tx.rollback()
         }
       })
-      return isAlive
     }
     const message = 'Database is null!'
     console.error(message)
@@ -94,28 +87,24 @@ class DBService implements IDBService {
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
-  public async getDatabaseTableRowCount(name: string): Promise<number> {
+  public async getDatabaseTableRowCount(
+    name: string,
+  ): Promise<number | undefined> {
     if (this._db) {
-      let count: number = 0
-      await this._db.transaction(async (tx) => {
+      return await this._db.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT count(*) 
             FROM ${name};
           `)
           const result = await tx.execute(query)
-          count = result.length ? parseInt(result[0].count as string) : 0
+          return result.length ? parseInt(result[0].count as string) : 0
         } catch (error) {
           const message = `An error occurred when counting rows of database table ${name}`
           console.error(message, error)
-          try {
-            tx.rollback()
-          } catch (error) {
-            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-          }
+          tx.rollback()
         }
       })
-      return count
     }
     const message = 'Database is null!'
     console.error(message)
@@ -124,7 +113,7 @@ class DBService implements IDBService {
 
   public async clearDatabaseTables(): Promise<void> {
     if (this._db) {
-      await this._db.transaction(async (tx) => {
+      return await this._db.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT table_name
@@ -142,14 +131,9 @@ class DBService implements IDBService {
         } catch (error) {
           const message = 'An error occurred when cleaning the database tables'
           console.error(message, error)
-          try {
-            tx.rollback()
-          } catch (error) {
-            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-          }
+          tx.rollback()
         }
       })
-      return
     }
     const message = 'Database is null!'
     console.error(message)
@@ -158,10 +142,13 @@ class DBService implements IDBService {
 
   public async deleteDatabaseTables(): Promise<void> {
     if (this._db) {
-      await this._db.transaction(async (tx) => {
-        let error: Exception | null = null
+      return await this._db.transaction(async (tx) => {
         try {
-          const query = sql.raw(`
+          let query = sql.raw(`
+            DROP SCHEMA IF EXISTS drizzle CASCADE;
+          `)
+          await tx.execute(query)
+          query = sql.raw(`
             SELECT table_name
             FROM information_schema.tables
               WHERE table_schema = 'public'
@@ -169,22 +156,17 @@ class DBService implements IDBService {
           `)
           const tables = await tx.execute(query)
           for (const table of tables) {
-            const query = sql.raw(`
-              DROP TABLE ${table.table_name} CASCADE;
+            query = sql.raw(`
+              DROP TABLE IF EXISTS ${table.table_name} CASCADE;
             `)
             await tx.execute(query)
           }
         } catch (error) {
           const message = 'An error occurred when deleting the database tables'
           console.error(message, error)
-          try {
-            tx.rollback()
-          } catch (error) {
-            throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-          }
+          tx.rollback()
         }
       })
-      return
     }
     const message = 'Database is null!'
     console.error(message)
@@ -194,8 +176,7 @@ class DBService implements IDBService {
   public async deactivateDatabase(): Promise<void> {
     if (this._dbClient) {
       try {
-        await this._dbClient.end()
-        return
+        return await this._dbClient.end()
       } catch (error) {
         const message = 'An error occurred when deactivating the database'
         console.error(message, error)

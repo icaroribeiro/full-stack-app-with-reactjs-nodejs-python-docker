@@ -60,9 +60,9 @@
 
 //   //   const factory: DBContainerTestFactory = new DBContainerTestFactory()
 //   //   const mockedMigrate = vi.mocked(migrate)
-//   //   beforeEach(() => {
-//   //     mockedMigrate.mockImplementation(actualModule.migrate)
-//   //   })
+//   beforeEach(() => {
+//     mockedMigrate.mockImplementation(actualModule.migrate)
+//   })
 //   //   beforeAll(async () => {
 //   //     await factory.prepareAll()
 //   //   }, factory.beforeAllTimeout)

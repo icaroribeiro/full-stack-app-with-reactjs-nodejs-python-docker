@@ -1,16 +1,11 @@
 import { Config } from '../src/config/config'
 import { DBService } from '../src/services'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql'
 import { Server } from '../src/server'
 import { createServer, Server as HttpServer } from 'http'
-
-const currentPath = fileURLToPath(import.meta.url)
-const appPath = path.resolve(currentPath, '..', '..')
 
 const config = new Config()
 
@@ -38,20 +33,6 @@ async function stopDatabaseContainer(
   await container.stop()
 }
 
-async function initializeDatabase(
-  config: Config,
-  dbService: DBService,
-): Promise<void> {
-  dbService.connectDatabase(config.getDatabaseURL())
-  const migrationsFolder = path.join(appPath, 'db', 'migrations')
-  await dbService.migrateDatabase(migrationsFolder)
-}
-
-async function finalizeDatabase(dbService: DBService): Promise<void> {
-  await dbService.deleteDatabaseTables()
-  await dbService.deactivateDatabase()
-}
-
 function startHttpServer(config: Config): void {
   try {
     const server: Server = new Server(config)
@@ -73,7 +54,5 @@ export {
   dbService,
   startDatabaseContainer,
   stopDatabaseContainer,
-  initializeDatabase,
-  finalizeDatabase,
   startHttpServer,
 }

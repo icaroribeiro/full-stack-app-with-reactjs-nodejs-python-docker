@@ -47,10 +47,10 @@ describe('UserService', () => {
       expect(mockedUserRepository.createUser).toHaveBeenCalledWith(mockedUser)
     })
 
-    it('should fail and throw exception when user cannot be registered', async () => {
+    it('should fail and throw exception when an error occurred when creating a user', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when registering a new user'
+      const message = 'An error occurred when creating a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -67,6 +67,26 @@ describe('UserService', () => {
       ).rejects.toThrowError(serverError)
       expect(mockedUserRepository.createUser).toHaveBeenCalledWith(mockedUser)
     })
+
+    it('should fail and throw exception when user could not be registered', async () => {
+      const mockedUser = userFactory.build()
+      const message = 'User could not be registered'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+        {
+          context: mockedUser,
+          cause: undefined,
+        },
+      )
+      const mockedCreateUser = vi.fn().mockReturnValue(undefined)
+      mockedUserRepository.createUser = mockedCreateUser
+
+      await expect(() =>
+        userService.registerUser(mockedUser),
+      ).rejects.toThrowError(serverError)
+      expect(mockedUserRepository.createUser).toHaveBeenCalledWith(mockedUser)
+    })
   })
 
   describe('.retrieveAndCountUsers', () => {
@@ -75,8 +95,8 @@ describe('UserService', () => {
     })
 
     it('should succeed and return a list of users with non-zero total when users exist', async () => {
-      const page = faker.number.int()
-      const limit = faker.number.int()
+      const page = faker.number.int({ min: 1, max: 3 })
+      const limit = faker.number.int({ min: 1, max: 3 })
       const count = faker.number.int({ min: 1, max: 3 })
       const mockedUsers = userFactory.buildBatch(count)
       const mockedReadAndCountUsers = vi
@@ -94,9 +114,9 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when list of users and total cannot be retrieved', async () => {
-      const page = faker.number.int()
-      const limit = faker.number.int()
+    it('should fail and throw exception when an error occurred when reading and couting users', async () => {
+      const page = faker.number.int({ min: 1, max: 3 })
+      const limit = faker.number.int({ min: 1, max: 3 })
       const error = new Error('failed')
       const message = 'An error occurred when reading and counting users'
       const serverError = new ServerError(
@@ -108,6 +128,32 @@ describe('UserService', () => {
         },
       )
       const mockedReadAndCountUsers = vi.fn().mockRejectedValue(error)
+      mockedUserRepository.readAndCountUsers = mockedReadAndCountUsers
+
+      await expect(() =>
+        userService.retrieveAndCountUsers(page, limit),
+      ).rejects.toThrowError(serverError)
+      expect(mockedUserRepository.readAndCountUsers).toHaveBeenCalledWith(
+        page,
+        limit,
+      )
+    })
+
+    it('should fail and throw exception when users could not be read and counted', async () => {
+      const page = faker.number.int({ min: 1, max: 3 })
+      const limit = faker.number.int({ min: 1, max: 3 })
+      const message = 'Users could not be read and counted'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+        {
+          context: { page: page, limit: limit },
+          cause: undefined,
+        },
+      )
+      const mockedReadAndCountUsers = vi
+        .fn()
+        .mockReturnValue([undefined, undefined])
       mockedUserRepository.readAndCountUsers = mockedReadAndCountUsers
 
       await expect(() =>
@@ -139,10 +185,10 @@ describe('UserService', () => {
       expect(mockedUserRepository.readUser).toHaveBeenCalledWith(mockedUser.id)
     })
 
-    it('should fail and throw exception when user cannot be retrieved', async () => {
+    it('should fail and throw exception when an error occurred when reading a user', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when retrieving a user'
+      const message = 'An error occurred when reading a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -151,7 +197,7 @@ describe('UserService', () => {
           cause: error,
         },
       )
-      const mockedReadUser = vi.fn().mockRejectedValue(new Error('failed'))
+      const mockedReadUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.readUser = mockedReadUser
 
       await expect(() =>
@@ -160,14 +206,14 @@ describe('UserService', () => {
       expect(mockedUserRepository.readUser).toHaveBeenCalledWith(mockedUser.id)
     })
 
-    it('should fail and throw exception when user is not found', async () => {
+    it('should fail and throw exception when user could not be read', async () => {
       const mockedUser = userFactory.build()
-      const message = 'User not found'
+      const message = 'User could not be read'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
         cause: undefined,
       })
-      const mockedReadUser = vi.fn().mockResolvedValue(null)
+      const mockedReadUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.readUser = mockedReadUser
 
       await expect(() =>
@@ -199,10 +245,10 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when user cannot be replaced', async () => {
+    it('should fail and throw exception when an error occurred when updating a user', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when replacing a user'
+      const message = 'An error occurred when updating a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -211,7 +257,7 @@ describe('UserService', () => {
           cause: error,
         },
       )
-      const mockedUpdateUser = vi.fn().mockRejectedValue(new Error('failed'))
+      const mockedUpdateUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.updateUser = mockedUpdateUser
 
       await expect(() =>
@@ -223,14 +269,14 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when user is not found', async () => {
+    it('should fail and throw exception when user could not be updated', async () => {
       const mockedUser = userFactory.build()
-      const message = 'User not found'
+      const message = 'User could not be updated'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
         cause: undefined,
       })
-      const mockedUpdateUser = vi.fn().mockResolvedValue(null)
+      const mockedUpdateUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.updateUser = mockedUpdateUser
 
       await expect(() =>
@@ -264,10 +310,10 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when a user cannot be removed', async () => {
+    it('should fail and throw exception when an error occurred when deleting a user', async () => {
       const mockedUser = userFactory.build()
       const error = new Error('failed')
-      const message = 'An error occurred when removing a user'
+      const message = 'An error occurred when deleting a user'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -276,7 +322,7 @@ describe('UserService', () => {
           cause: error,
         },
       )
-      const mockedDeleteUser = vi.fn().mockRejectedValue(new Error('failed'))
+      const mockedDeleteUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.deleteUser = mockedDeleteUser
 
       await expect(() =>
@@ -287,14 +333,14 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when user is not found', async () => {
+    it('should fail and throw exception when user could not be removed', async () => {
       const mockedUser = userFactory.build()
-      const message = 'User not found'
+      const message = 'User could not be removed'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
         cause: undefined,
       })
-      const mockedDeleteUser = vi.fn().mockResolvedValue(null)
+      const mockedDeleteUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.deleteUser = mockedDeleteUser
 
       await expect(() =>

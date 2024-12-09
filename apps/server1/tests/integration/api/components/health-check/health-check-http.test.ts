@@ -3,8 +3,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   config,
   dbService,
-  finalizeDatabase,
-  initializeDatabase,
   startDatabaseContainer,
   startHttpServer,
   stopDatabaseContainer,
@@ -20,12 +18,12 @@ describe('Health Check HTTP', () => {
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
-    await initializeDatabase(config, dbService)
+    dbService.connectDatabase(config.getDatabaseURL())
     startHttpServer(config)
   }, beforeAllTimeout)
 
   afterAll(async () => {
-    await finalizeDatabase(dbService)
+    await dbService.deactivateDatabase()
     await stopDatabaseContainer(container)
   })
 

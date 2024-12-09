@@ -61,7 +61,7 @@ class TestReadAndCountUsers(TestUserRepository):
         )
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_empty_list_of_user_with_zero_total_when_users_do_not_exist(
+    async def test_should_succeed_and_return_empty_list_of_users_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -202,7 +202,7 @@ class TestReadUser(TestUserRepository):
         assert isinstance(user_repository.read_user, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_user_when_user_is_found(
+    async def test_should_succeed_and_return_user_when_user_is_read(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -218,10 +218,9 @@ class TestReadUser(TestUserRepository):
             obj = DictToObj(engine_result.first()._asdict())
             await conn.commit()
             domain_user = UserMapper.to_domain(obj)
-        mocked_user.id = domain_user.id
         expected_result = domain_user
 
-        result = await user_repository.read_user(mocked_user.id)
+        result = await user_repository.read_user(domain_user.id)
 
         row_count = 1
         assert await db_service.get_database_table_row_count("users") == row_count
@@ -273,10 +272,9 @@ class TestUpdateUser(TestUserRepository):
             domain_user: User = UserMapper.to_domain(
                 UserFactory.build(id=obj.id, created_at=obj.created_at)
             )
-        mocked_user.id = domain_user.id
         expected_result = domain_user
 
-        result = await user_repository.update_user(mocked_user.id, domain_user)
+        result = await user_repository.update_user(domain_user.id, domain_user)
 
         row_count = 1
         assert await db_service.get_database_table_row_count("users") == row_count

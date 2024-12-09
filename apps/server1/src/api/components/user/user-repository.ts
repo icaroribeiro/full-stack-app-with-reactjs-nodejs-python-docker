@@ -49,20 +49,20 @@ class UserRepository implements IUserRepository {
   ): Promise<[User[] | undefined, number | undefined]> {
     const userMapper = new UserMapper()
 
-    const userIdsQuery = this.dbService.db
-      .select({ id: schemas.userSchema.id })
-      .from(schemas.userSchema)
-
-    const paginatedUsersSubquery = withPagination(
-      userIdsQuery.$dynamic(),
-      page,
-      limit,
-      desc(schemas.userSchema.createdAt),
-    ).as('subquery')
-
-    const users: User[] | undefined = await this.dbService.db.transaction(
+    const records: User[] | undefined = await this.dbService.db.transaction(
       async (tx) => {
         try {
+          const userIdsQuery = this.dbService.db
+            .select({ id: schemas.userSchema.id })
+            .from(schemas.userSchema)
+
+          const paginatedUsersSubquery = withPagination(
+            userIdsQuery.$dynamic(),
+            page,
+            limit,
+            desc(schemas.userSchema.createdAt),
+          ).as('subquery')
+
           const result = await tx
             .select()
             .from(schemas.userSchema)
@@ -97,7 +97,7 @@ class UserRepository implements IUserRepository {
       },
     )
 
-    return [users, total]
+    return [records, total]
   }
 
   async readUser(userId: string): Promise<User | undefined> {
@@ -109,9 +109,6 @@ class UserRepository implements IUserRepository {
           .select()
           .from(schemas.userSchema)
           .where(eq(schemas.userSchema.id, userId))
-        // if (result.length == 0) {
-        //   return
-        // }
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when reading a user from database'
@@ -131,9 +128,6 @@ class UserRepository implements IUserRepository {
           .set({ name: user.name, email: user.email })
           .where(eq(schemas.userSchema.id, userId))
           .returning()
-        // if (result.length == 0) {
-        //   return undefined
-        // }
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when deleting a user from database'
@@ -152,9 +146,6 @@ class UserRepository implements IUserRepository {
           .delete(schemas.userSchema)
           .where(eq(schemas.userSchema.id, userId))
           .returning()
-        // if (result.length == 0) {
-        //   return undefined
-        // }
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when deleting a user from database'

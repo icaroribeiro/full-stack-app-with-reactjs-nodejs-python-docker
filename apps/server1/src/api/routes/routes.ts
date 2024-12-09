@@ -1,84 +1,115 @@
 /* tslint:disable */
 /* eslint-disable */
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TsoaRoute, fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
+import {
+  TsoaRoute,
+  fetchMiddlewares,
+  ExpressTemplateService,
+} from '@tsoa/runtime'
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { HealthCheckController } from './../components/health-check/health-check-controller';
-import { iocContainer } from './../../libs/tsoa/tsyringe-ioc-container';
-import type { IocContainer, IocContainerFactory } from '@tsoa/runtime';
-import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
-
-
+import { HealthCheckController } from './../components/health-check/health-check-controller'
+import { iocContainer } from './../../libs/tsoa/tsyringe-ioc-container'
+import type { IocContainer, IocContainerFactory } from '@tsoa/runtime'
+import type {
+  Request as ExRequest,
+  Response as ExResponse,
+  RequestHandler,
+  Router,
+} from 'express'
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "HealthCheckResponse": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"healthy":{"dataType":"boolean","required":true}},"validators":{}},
+  HealthCheckResponse: {
+    dataType: 'refAlias',
+    type: {
+      dataType: 'nestedObjectLiteral',
+      nestedProperties: { healthy: { dataType: 'boolean', required: true } },
+      validators: {},
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "APIErrorResponse": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"isOperational":{"dataType":"boolean","required":true},"detail":{"dataType":"any"},"message":{"dataType":"string","required":true}},"validators":{}},
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  APIErrorResponse: {
+    dataType: 'refAlias',
+    type: {
+      dataType: 'nestedObjectLiteral',
+      nestedProperties: {
+        isOperational: { dataType: 'boolean', required: true },
+        detail: { dataType: 'any' },
+        message: { dataType: 'string', required: true },
+      },
+      validators: {},
     },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-};
-const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"throw-on-extras","bodyCoercion":true});
+  },
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+}
+const templateService = new ExpressTemplateService(models, {
+  noImplicitAdditionalProperties: 'throw-on-extras',
+  bodyCoercion: true,
+})
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
-
-
-
 export function RegisterRoutes(app: Router) {
+  // ###########################################################################################################
+  //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
+  //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
+  // ###########################################################################################################
 
-    // ###########################################################################################################
-    //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
-    //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
-    // ###########################################################################################################
+  app.get(
+    '/health',
+    ...fetchMiddlewares<RequestHandler>(HealthCheckController),
+    ...fetchMiddlewares<RequestHandler>(
+      HealthCheckController.prototype.getHealth,
+    ),
 
+    async function HealthCheckController_getHealth(
+      request: ExRequest,
+      response: ExResponse,
+      next: any,
+    ) {
+      const args: Record<string, TsoaRoute.ParameterSchema> = {}
 
-    
-        app.get('/health',
-            ...(fetchMiddlewares<RequestHandler>(HealthCheckController)),
-            ...(fetchMiddlewares<RequestHandler>(HealthCheckController.prototype.getHealth)),
+      // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
-            async function HealthCheckController_getHealth(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-            };
+      let validatedArgs: any[] = []
+      try {
+        validatedArgs = templateService.getValidatedArgs({
+          args,
+          request,
+          response,
+        })
 
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const container: IocContainer =
+          typeof iocContainer === 'function'
+            ? (iocContainer as IocContainerFactory)(request)
+            : iocContainer
 
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+        const controller: any = await container.get<HealthCheckController>(
+          HealthCheckController,
+        )
+        if (typeof controller['setStatus'] === 'function') {
+          controller.setStatus(undefined)
+        }
 
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+        await templateService.apiHandler({
+          methodName: 'getHealth',
+          controller,
+          response,
+          next,
+          validatedArgs,
+          successStatus: 200,
+        })
+      } catch (err) {
+        return next(err)
+      }
+    },
+  )
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
-                const controller: any = await container.get<HealthCheckController>(HealthCheckController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
-              await templateService.apiHandler({
-                methodName: 'getHealth',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: 200,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 }
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
