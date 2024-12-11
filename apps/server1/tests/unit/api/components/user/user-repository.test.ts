@@ -19,11 +19,10 @@ import { DrizzleError } from 'drizzle-orm'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const currentPath = fileURLToPath(import.meta.url)
-const appPath = path.resolve(currentPath, '..', '..', '..', '..', '..', '..')
-const migrationsFolder = path.join(appPath, 'db', 'migrations')
-
 describe('UserRepository', async () => {
+  const currentPath = fileURLToPath(import.meta.url)
+  const appPath = path.resolve(currentPath, '..', '..', '..', '..', '..', '..')
+  const migrationsFolder = path.join(appPath, 'db', 'migrations')
   const userRepository = new UserRepository(dbService)
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
@@ -101,91 +100,97 @@ describe('UserRepository', async () => {
       expect(totalResult).toEqual(expectedTotalResult)
     })
 
-    // it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
-    //   const count = 3
-    //   const mockedUserList: UserList = userFactory.buildMany(count)
-    //   for (const mockedUser of mockedUserList) {
-    //     const rawUserData = UserMapper.toPersistence(mockedUser)
-    //     const insertedUser = await dbService.db
-    //       .insert(schemas.usersTable)
-    //       .values(rawUserData)
-    //       .returning()
-    //     mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
-    //   }
-    //   const page = 1
-    //   const limit = 1
-    //   const expectedPaginatedRecordsResult: UserList = [
-    //     mockedUserList[mockedUserList.length - 1],
-    //   ]
-    //   const expectedTotalRecordsResult = 3
+    it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
+      await dbService.migrateDatabase(migrationsFolder)
+      const count = 3
+      const mockedUserList = userFactory.buildBatch(count)
+      const domainUserList: User[] = []
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = userMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.userSchema)
+          .values(rawUserData)
+          .returning()
+        const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
+        domainUserList.push(domainUser)
+      }
+      const page = 1
+      const limit = 1
+      const expectedRecordsResult: User[] = [
+        domainUserList[domainUserList.length - 1],
+      ]
+      const expectedTotalResult = count
 
-    //   const userRepository = new UserRepository(dbService)
-    //   const [paginatedRecordsResult, totalRecordsResult] =
-    //     await userRepository.readAndCountUsers(page, limit)
+      const [recordsResult, totalResult] =
+        await userRepository.readAndCountUsers(page, limit)
 
-    //   const rowCount = 3
-    //   await expect(
-    //     factory.dbService.getDatabaseTableRowCount('users'),
-    //   ).resolves.toEqual(rowCount)
-    //   expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
-    //   expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
-    // })
+      const rowCount = count
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(recordsResult).toEqual(expectedRecordsResult)
+      expect(totalResult).toEqual(expectedTotalResult)
+    })
 
-    //   it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
-    //     const count = 3
-    //     const mockedUserList: UserList = userFactory.buildMany(count)
-    //     for (const mockedUser of mockedUserList) {
-    //       const rawUserData = UserMapper.toPersistence(mockedUser)
-    //       const insertedUser = await dbService.db
-    //         .insert(schemas.usersTable)
-    //         .values(rawUserData)
-    //         .returning()
-    //       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
-    //     }
-    //     const page = 2
-    //     const limit = 3
-    //     const expectedPaginatedRecordsResult: UserList = []
-    //     const expectedTotalRecordsResult = 3
+    it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
+      await dbService.migrateDatabase(migrationsFolder)
+      const count = 3
+      const mockedUserList = userFactory.buildBatch(count)
+      const domainUserList: User[] = []
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = userMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.userSchema)
+          .values(rawUserData)
+          .returning()
+        const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
+        domainUserList.push(domainUser)
+      }
+      const page = 2
+      const limit = 3
+      const expectedRecordsResult: User[] = []
+      const expectedTotalResult = count
 
-    //     const userRepository = new UserRepository(dbService)
-    //     const [paginatedRecordsResult, totalRecordsResult] =
-    //       await userRepository.readAndCountUsers(page, limit)
+      const [recordsResult, totalResult] =
+        await userRepository.readAndCountUsers(page, limit)
 
-    //     const rowCount = 3
-    //     await expect(
-    //       factory.dbService.getDatabaseTableRowCount('users'),
-    //     ).resolves.toEqual(rowCount)
-    //     expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
-    //     expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
-    //   })
+      const rowCount = count
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(recordsResult).toEqual(expectedRecordsResult)
+      expect(totalResult).toEqual(expectedTotalResult)
+    })
 
-    //   it('should succeed and return a list of users with non-zero total when page is not the first one and can be filled', async () => {
-    //     const count = 5
-    //     const mockedUserList: UserList = userFactory.buildMany(count)
-    //     for (const mockedUser of mockedUserList) {
-    //       const rawUserData = UserMapper.toPersistence(mockedUser)
-    //       const insertedUser = await dbService.db
-    //         .insert(schemas.usersTable)
-    //         .values(rawUserData)
-    //         .returning()
-    //       mockedUser.id = UserMapper.toDomain(insertedUser[0]).id
-    //     }
-    //     const page = 3
-    //     const limit = 2
-    //     const expectedPaginatedRecordsResult: UserList = [mockedUserList[0]]
-    //     const expectedTotalRecordsResult = 5
+    it('should succeed and return a list of users with non-zero total when page is not the first and can be filled', async () => {
+      await dbService.migrateDatabase(migrationsFolder)
+      const count = 5
+      const mockedUserList = userFactory.buildBatch(count)
+      const domainUserList: User[] = []
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = userMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.userSchema)
+          .values(rawUserData)
+          .returning()
+        const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
+        domainUserList.push(domainUser)
+      }
+      const page = 3
+      const limit = 2
+      const expectedRecordsResult: User[] = [domainUserList[0]]
+      const expectedTotalResult = 5
 
-    //     const userRepository = new UserRepository(dbService)
-    //     const [paginatedRecordsResult, totalRecordsResult] =
-    //       await userRepository.readAndCountUsers(page, limit)
+      const [recordsResult, totalResult] =
+        await userRepository.readAndCountUsers(page, limit)
 
-    //     const rowCount = 5
-    //     await expect(
-    //       factory.dbService.getDatabaseTableRowCount('users'),
-    //     ).resolves.toEqual(rowCount)
-    //     expect(paginatedRecordsResult).toEqual(expectedPaginatedRecordsResult)
-    //     expect(totalRecordsResult).toEqual(expectedTotalRecordsResult)
-    //   })
+      const rowCount = 5
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(recordsResult).toEqual(expectedRecordsResult)
+      expect(totalResult).toEqual(expectedTotalResult)
+    })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
       const page = faker.number.int({ min: 1, max: 3 })
