@@ -10,7 +10,7 @@ interface IDBService {
   connectDatabase(databaseURL: string): void
   checkDatabaseIsAlive(): Promise<boolean | undefined>
   migrateDatabase(migrationsFolder: string): Promise<void>
-  getDatabaseTableRowCount(name: string): Promise<number | undefined>
+  getDatabaseTableRowCount(table_name: string): Promise<number | undefined>
   clearDatabaseTables(): Promise<void>
   deleteDatabaseTables(): Promise<void>
   deactivateDatabase(): Promise<void>
@@ -29,7 +29,7 @@ class DBService implements IDBService {
     if (this._db) {
       return this._db
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
@@ -39,7 +39,7 @@ class DBService implements IDBService {
       this._dbClient = postgres(databaseURL, { max: 1 })
       this._db = drizzle(this._dbClient)
     } catch (error) {
-      const message = 'Database connection failed!'
+      const message = 'An error occurred when connecting database'
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: databaseURL,
@@ -64,7 +64,7 @@ class DBService implements IDBService {
         }
       })
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
@@ -77,36 +77,36 @@ class DBService implements IDBService {
         })
         return
       } catch (error) {
-        const message = 'An error occurred when migrating the database!'
+        const message = 'An error occurred when migrating the database'
         console.error(message, error)
         throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
       }
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async getDatabaseTableRowCount(
-    name: string,
+    table_name: string,
   ): Promise<number | undefined> {
     if (this._db) {
       return await this._db.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT count(*) 
-            FROM ${name};
+            FROM ${table_name};
           `)
           const result = await tx.execute(query)
           return result.length ? parseInt(result[0].count as string) : 0
         } catch (error) {
-          const message = `An error occurred when counting rows of database table ${name}`
+          const message = `An error occurred when counting rows of database table ${table_name}`
           console.error(message, error)
           tx.rollback()
         }
       })
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
@@ -135,7 +135,7 @@ class DBService implements IDBService {
         }
       })
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
@@ -168,7 +168,7 @@ class DBService implements IDBService {
         }
       })
     }
-    const message = 'Database is null!'
+    const message = 'Database is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
@@ -183,7 +183,7 @@ class DBService implements IDBService {
         throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
       }
     }
-    const message = 'Database client is null!'
+    const message = 'Database client is null'
     console.error(message)
     throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }

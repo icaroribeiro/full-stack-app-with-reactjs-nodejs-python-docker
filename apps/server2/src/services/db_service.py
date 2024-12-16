@@ -26,7 +26,7 @@ class IDBService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def get_database_table_row_count(self, name: str) -> int:
+    async def get_database_table_row_count(self, table_name: str) -> int:
         raise Exception("NotImplementedException")
 
     @abstractmethod
@@ -104,13 +104,13 @@ class DBService(IDBService):
         print(message)
         raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    async def get_database_table_row_count(self, name: str) -> int:
+    async def get_database_table_row_count(self, table_name: str) -> int:
         if self.__async_engine is not None:
             async with self.__async_engine.connect() as conn:
                 try:
                     query = text(f"""
                         SELECT count(*)
-                        FROM {name};
+                        FROM {table_name};
                     """)
                     result = await conn.execute(query)
                     _tuple = result.first()
@@ -119,7 +119,8 @@ class DBService(IDBService):
                 except Exception as error:
                     await conn.rollback()
                     message = (
-                        f"An error occurred when counting rows of database table {name}"
+                        "An error occurred when counting rows of "
+                        f"database table {table_name}"
                     )
                     print(message, error)
                     raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)

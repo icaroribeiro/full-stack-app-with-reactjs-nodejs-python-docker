@@ -211,7 +211,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
         config: Config,
         db_service: DBService,
     ) -> None:
-        name = "users"
+        table_name = "users"
         db_service.connect_database(config.get_database_url())
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
@@ -228,7 +228,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
                 domain_user_list.append(UserMapper.to_domain(obj))
         expected_result = count
 
-        result = await db_service.get_database_table_row_count(name)
+        result = await db_service.get_database_table_row_count(table_name)
 
         assert result == expected_result
         await db_service.delete_database_tables()
@@ -241,15 +241,15 @@ class TestGetDatabaseTableRowCount(TestDBService):
         db_service: DBService,
         faker: Faker,
     ) -> None:
-        name = faker.word()
+        table_name = faker.word()
         db_service.connect_database(config.get_database_url())
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
-        message = f"An error occurred when counting rows of database table {name}"
+        message = f"An error occurred when counting rows of database table {table_name}"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         with pytest.raises(ServerError) as exc_info:
-            await db_service.get_database_table_row_count(name)
+            await db_service.get_database_table_row_count(table_name)
 
         assert exc_info.value.message == server_error.message
         assert exc_info.value.detail == server_error.detail
@@ -260,12 +260,12 @@ class TestGetDatabaseTableRowCount(TestDBService):
     async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService, faker: Faker
     ) -> None:
-        name = faker.name()
+        table_name = faker.name()
         message = "Async engine is None!"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         with pytest.raises(ServerError) as exc_info:
-            await db_service.get_database_table_row_count(name)
+            await db_service.get_database_table_row_count(table_name)
 
         assert exc_info.value.message == server_error.message
         assert exc_info.value.detail == server_error.detail

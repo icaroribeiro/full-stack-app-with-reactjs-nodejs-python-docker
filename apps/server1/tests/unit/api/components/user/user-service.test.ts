@@ -18,6 +18,7 @@ vi.mock('../../../../../src/api/components/user/user-repository', () => {
     UserRepository: vi.fn(),
   }
 })
+
 describe('UserService', () => {
   const dbService = new DBService()
   const mockedUserRepository = vi.mocked(new UserRepository(dbService))
