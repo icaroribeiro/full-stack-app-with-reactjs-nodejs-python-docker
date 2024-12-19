@@ -43,17 +43,6 @@ vi.mock('drizzle-orm/postgres-js/migrator', async () => {
   }
 })
 
-// // const actualPostgres =
-// //   await vi.importActual<typeof import('postgres')>('postgres')
-
-vi.mock('postgres', async () => {
-  const actual = await vi.importActual<typeof import('postgres')>('postgres')
-  return {
-    ...actual,
-    postgres: vi.fn(),
-  }
-})
-
 describe('DBService', () => {
   let dbService = new DBService()
   let container: StartedPostgreSqlContainer
@@ -63,19 +52,14 @@ describe('DBService', () => {
   const appPath = path.resolve(currentPath, '..', '..', '..', '..')
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
-  const mockedPostgres = vi.mocked(postgres)
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
   }, beforeAllTimeout)
 
-  beforeEach(() => {
+  beforeEach(async () => {
     dbService = new DBService()
     mockedMigrate.mockImplementation(actualMigrator.migrate)
-    mockedPostgres.prototype.end = vi.fn()
-    // vi.spyOn(postgres.Sql<{}>, 'end').mockRejectedValue(
-    //   new Error(),
-    // )
   })
 
   afterEach(() => {
@@ -157,19 +141,8 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when pg database execute method fails', async () => {
-      dbService.connectDatabase(config.getDatabaseURL())
-      const error = new Error('failed')
-      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
-
-      expect(() => dbService.checkDatabaseIsAlive()).rejects.toThrowError(
-        new DrizzleError({ message: 'Rollback' }),
-      )
-      await dbService.deactivateDatabase()
-    })
-
-    it('should fail and throw exception when db is null', () => {
-      const message = 'Database is null'
+    it('should fail and throw exception when database is not connected', () => {
+      const message = 'An error occurred when checking database is alive'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -178,6 +151,22 @@ describe('DBService', () => {
       expect(() => dbService.checkDatabaseIsAlive()).rejects.toThrowError(
         serverError,
       )
+    })
+
+    it('should fail and throw exception when transaction is not executed', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const error = new Error('failed')
+      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+      const message = 'An error occurred when checking database is alive'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
+
+      expect(() => dbService.checkDatabaseIsAlive()).rejects.toThrowError(
+        serverError,
+      )
+      await dbService.deactivateDatabase()
     })
   })
 
@@ -202,9 +191,9 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when database is null', async () => {
+    it('should fail and throw exception when database is not connected', () => {
       const migrationsFolder = faker.string.sample()
-      const message = 'Database is null'
+      const message = 'An error occurred when migrating the database'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -237,6 +226,7 @@ describe('DBService', () => {
     it('should define a function', () => {
       expect(typeof dbService.getDatabaseTableRowCount).toBe('function')
     })
+
     it('should succeed and return number of database table rows', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
       const migrationsFolder = path.join(appPath, 'db', 'migrations')
@@ -263,21 +253,9 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when pg database execute method fails', async () => {
-      dbService.connectDatabase(config.getDatabaseURL())
-      const error = new Error('failed')
-      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+    it('should fail and throw exception when database is not connected', () => {
       const tableName = faker.string.sample()
-
-      expect(() =>
-        dbService.getDatabaseTableRowCount(tableName),
-      ).rejects.toThrowError(new DrizzleError({ message: 'Rollback' }))
-      await dbService.deactivateDatabase()
-    })
-
-    it('should fail and throw exception when database is null', () => {
-      const tableName = 'users'
-      const message = 'Database is null'
+      const message = `An error occurred when counting rows of database table ${tableName}`
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -288,157 +266,169 @@ describe('DBService', () => {
       ).rejects.toThrowError(serverError)
     })
 
-    describe('.clearDatabaseTables', () => {
-      it('should define a function', () => {
-        expect(typeof dbService.clearDatabaseTables).toBe('function')
-      })
+    it('should fail and throw exception when transaction is not executed', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const error = new Error('failed')
+      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+      const tableName = faker.string.sample()
+      const message = `An error occurred when counting rows of database table ${tableName}`
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
 
-      it('should succeed and return undefined when database tables are cleaned', async () => {
-        dbService.connectDatabase(config.getDatabaseURL())
-        const migrationsFolder = path.join(appPath, 'db', 'migrations')
-        await dbService.migrateDatabase(migrationsFolder)
-        const tableName = 'users'
-        const count = 3
-        const mockedUserList: UserModel[] = userFactory.buildBatch(count)
-        const domainUserList: User[] = []
-        for (const mockedUser of mockedUserList) {
-          const rawUserData = userMapper.toPersistence(mockedUser)
-          const insertedUser = await dbService.db
-            .insert(schemas.userSchema)
-            .values(rawUserData)
-            .returning()
-          const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
-          domainUserList.push(domainUser)
-        }
-        await expect(
-          dbService.getDatabaseTableRowCount(tableName),
-        ).resolves.toEqual(count)
-        const expectedResult = 0
+      expect(() =>
+        dbService.getDatabaseTableRowCount(tableName),
+      ).rejects.toThrowError(serverError)
+      await dbService.deactivateDatabase()
+    })
+  })
 
-        const result = await dbService.clearDatabaseTables()
-
-        expect(result).toEqual(undefined)
-        await expect(
-          dbService.getDatabaseTableRowCount('users'),
-        ).resolves.toEqual(expectedResult)
-        await dbService.deleteDatabaseTables()
-        await dbService.deactivateDatabase()
-      })
-
-      it('should fail and throw exception when pg database execute method fails', async () => {
-        dbService.connectDatabase(config.getDatabaseURL())
-        const error = new Error('failed')
-        vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
-
-        expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
-          new DrizzleError({ message: 'Rollback' }),
-        )
-        await dbService.deactivateDatabase()
-      })
-
-      it('should fail and throw exception when database is null', () => {
-        const message = 'Database is null'
-        const serverError = new ServerError(
-          message,
-          httpStatus.INTERNAL_SERVER_ERROR,
-        )
-
-        expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
-          serverError,
-        )
-      })
+  describe('.clearDatabaseTables', () => {
+    it('should define a function', () => {
+      expect(typeof dbService.clearDatabaseTables).toBe('function')
     })
 
-    describe('.deleteDatabaseTables', () => {
-      it('should define a function', () => {
-        expect(typeof dbService.deleteDatabaseTables).toBe('function')
-      })
+    it('should succeed and return undefined when database tables are cleaned', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const migrationsFolder = path.join(appPath, 'db', 'migrations')
+      await dbService.migrateDatabase(migrationsFolder)
+      const tableName = 'users'
+      const count = 3
+      const mockedUserList: UserModel[] = userFactory.buildBatch(count)
+      const domainUserList: User[] = []
+      for (const mockedUser of mockedUserList) {
+        const rawUserData = userMapper.toPersistence(mockedUser)
+        const insertedUser = await dbService.db
+          .insert(schemas.userSchema)
+          .values(rawUserData)
+          .returning()
+        const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
+        domainUserList.push(domainUser)
+      }
+      await expect(
+        dbService.getDatabaseTableRowCount(tableName),
+      ).resolves.toEqual(count)
+      const expectedResult = 0
 
-      it('should succeed and return undefined when database tables are deleted', async () => {
-        dbService.connectDatabase(config.getDatabaseURL())
-        const migrationsFolder = path.join(appPath, 'db', 'migrations')
-        await dbService.migrateDatabase(migrationsFolder)
+      const result = await dbService.clearDatabaseTables()
 
-        let result = await dbService.deleteDatabaseTables()
+      expect(result).toEqual(undefined)
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(expectedResult)
+      await dbService.deleteDatabaseTables()
+      await dbService.deactivateDatabase()
+    })
 
-        expect(result).toEqual(undefined)
-        const query = sql.raw(`
+    it('should fail and throw exception when database is not connected', () => {
+      const message = 'An error occurred when cleaning the database tables'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
+
+      expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
+        serverError,
+      )
+    })
+
+    it('should fail and throw exception when transaction is not executed', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const error = new Error('failed')
+      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+      const message = 'An error occurred when cleaning the database tables'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
+
+      expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
+        serverError,
+      )
+      await dbService.deactivateDatabase()
+    })
+  })
+
+  describe('.deleteDatabaseTables', () => {
+    it('should define a function', () => {
+      expect(typeof dbService.deleteDatabaseTables).toBe('function')
+    })
+
+    it('should succeed and return undefined when database tables are deleted', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const migrationsFolder = path.join(appPath, 'db', 'migrations')
+      await dbService.migrateDatabase(migrationsFolder)
+
+      let result = await dbService.deleteDatabaseTables()
+
+      expect(result).toEqual(undefined)
+      const query = sql.raw(`
           SELECT table_name
           FROM information_schema.tables
             WHERE table_schema = 'public'
               AND table_type = 'BASE TABLE';
         `)
-        const database_tables = await dbService.db.execute(query)
-        expect(database_tables.length).toEqual(0)
-        await dbService.deleteDatabaseTables()
-        await dbService.deactivateDatabase()
-      })
-
-      it('should fail and throw exception when pg database execute method fails', async () => {
-        dbService.connectDatabase(config.getDatabaseURL())
-        const error = new Error('failed')
-        vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
-
-        expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
-          new DrizzleError({ message: 'Rollback' }),
-        )
-        await dbService.deactivateDatabase()
-      })
-
-      it('should fail and throw exception when database is null', () => {
-        const message = 'Database is null'
-        const serverError = new ServerError(
-          message,
-          httpStatus.INTERNAL_SERVER_ERROR,
-        )
-
-        expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
-          serverError,
-        )
-      })
+      const database_tables = await dbService.db.execute(query)
+      expect(database_tables.length).toEqual(0)
+      await dbService.deleteDatabaseTables()
+      await dbService.deactivateDatabase()
     })
 
-    describe('.deactivateDatabase', () => {
-      it('should define a function', () => {
-        expect(typeof dbService.deactivateDatabase).toBe('function')
-      })
+    it('should fail and throw exception when database is not connected', () => {
+      const message = 'An error occurred when deleting the database tables'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
 
-      it('should succeed and return undefined when database is deactivated', async () => {
-        dbService.connectDatabase(config.getDatabaseURL())
-        const migrationsFolder = path.join(appPath, 'db', 'migrations')
-        await dbService.migrateDatabase(migrationsFolder)
+      expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
+        serverError,
+      )
+    })
 
-        const result = await dbService.deactivateDatabase()
+    it('should fail and throw exception when transaction is not executed', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const error = new Error('failed')
+      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+      const message = 'An error occurred when deleting the database tables'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
 
-        expect(result).toEqual(undefined)
-      })
+      expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
+        serverError,
+      )
+      await dbService.deactivateDatabase()
+    })
+  })
 
-      // it('should fail and throw exception when database client end method fails', async () => {
-      //   dbService.connectDatabase(config.getDatabaseURL())
-      //   const error = new Error('failed')
-      //   mockedPostgres.prototype.end = vi.fn().mockImplementation(() => 10)
-      //   const message = 'An error occurred when deactivating the database'
-      //   const serverError = new ServerError(
-      //     message,
-      //     httpStatus.INTERNAL_SERVER_ERROR,
-      //   )
+  describe('.deactivateDatabase', () => {
+    it('should define a function', () => {
+      expect(typeof dbService.deactivateDatabase).toBe('function')
+    })
 
-      //   expect(() => dbService.deactivateDatabase()).rejects.toThrowError(
-      //     serverError,
-      //   )
-      // })
+    it('should succeed and return undefined when database is deactivated', async () => {
+      dbService.connectDatabase(config.getDatabaseURL())
+      const migrationsFolder = path.join(appPath, 'db', 'migrations')
+      await dbService.migrateDatabase(migrationsFolder)
 
-      it('should fail and throw exception when database client is null', () => {
-        const message = 'Database client is null'
-        const serverError = new ServerError(
-          message,
-          httpStatus.INTERNAL_SERVER_ERROR,
-        )
+      const result = await dbService.deactivateDatabase()
 
-        expect(() => dbService.deactivateDatabase()).rejects.toThrowError(
-          serverError,
-        )
-      })
+      expect(result).toEqual(undefined)
+    })
+
+    it('should fail and throw exception when database is not connected', () => {
+      const message = 'An error occurred when deactivating the database'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
+
+      expect(() => dbService.deactivateDatabase()).rejects.toThrowError(
+        serverError,
+      )
     })
   })
 })

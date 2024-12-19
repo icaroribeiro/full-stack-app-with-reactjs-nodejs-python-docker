@@ -1,3 +1,4 @@
+import { except } from 'drizzle-orm/mysql-core'
 import { ServerError } from '../server-error'
 import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
@@ -49,8 +50,8 @@ class DBService implements IDBService {
   }
 
   public async checkDatabaseIsAlive(): Promise<boolean | undefined> {
-    if (this._db) {
-      return await this._db.transaction(async (tx) => {
+    try {
+      return await this._db!.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT 1
@@ -58,62 +59,56 @@ class DBService implements IDBService {
           await tx.execute(query)
           return true
         } catch (error) {
-          const message = 'An error occurred when checking database is alive'
-          console.error(message, error)
+          console.error(error)
           tx.rollback()
         }
       })
+    } catch (error) {
+      const message = 'An error occurred when checking database is alive'
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async migrateDatabase(migrationsFolder: string): Promise<void> {
-    if (this._db) {
-      try {
-        await migrate(this._db, {
-          migrationsFolder: migrationsFolder,
-        })
-        return
-      } catch (error) {
-        const message = 'An error occurred when migrating the database'
-        console.error(message, error)
-        throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-      }
+    try {
+      await migrate(this._db!, {
+        migrationsFolder: migrationsFolder,
+      })
+    } catch (error) {
+      const message = 'An error occurred when migrating the database'
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async getDatabaseTableRowCount(
-    table_name: string,
+    tableName: string,
   ): Promise<number | undefined> {
-    if (this._db) {
-      return await this._db.transaction(async (tx) => {
+    try {
+      return await this._db!.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT count(*) 
-            FROM ${table_name};
+            FROM ${tableName};
           `)
           const result = await tx.execute(query)
           return result.length ? parseInt(result[0].count as string) : 0
         } catch (error) {
-          const message = `An error occurred when counting rows of database table ${table_name}`
-          console.error(message, error)
+          console.error(error)
           tx.rollback()
         }
       })
+    } catch (error) {
+      const message = `An error occurred when counting rows of database table ${tableName}`
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async clearDatabaseTables(): Promise<void> {
-    if (this._db) {
-      return await this._db.transaction(async (tx) => {
+    try {
+      return await this._db!.transaction(async (tx) => {
         try {
           const query = sql.raw(`
             SELECT table_name
@@ -129,63 +124,58 @@ class DBService implements IDBService {
             await tx.execute(query)
           }
         } catch (error) {
-          const message = 'An error occurred when cleaning the database tables'
-          console.error(message, error)
+          console.error(error)
           tx.rollback()
         }
       })
+    } catch (error) {
+      const message = 'An error occurred when cleaning the database tables'
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async deleteDatabaseTables(): Promise<void> {
-    if (this._db) {
-      return await this._db.transaction(async (tx) => {
+    try {
+      return await this._db!.transaction(async (tx) => {
         try {
           let query = sql.raw(`
-            DROP SCHEMA IF EXISTS drizzle CASCADE;
-          `)
+              DROP SCHEMA IF EXISTS drizzle CASCADE;
+            `)
           await tx.execute(query)
           query = sql.raw(`
-            SELECT table_name
-            FROM information_schema.tables
-              WHERE table_schema = 'public'
-                AND table_type = 'BASE TABLE';
-          `)
+              SELECT table_name
+              FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_type = 'BASE TABLE';
+            `)
           const tables = await tx.execute(query)
           for (const table of tables) {
             query = sql.raw(`
-              DROP TABLE IF EXISTS ${table.table_name} CASCADE;
-            `)
+                DROP TABLE IF EXISTS ${table.table_name} CASCADE;
+              `)
             await tx.execute(query)
           }
         } catch (error) {
-          const message = 'An error occurred when deleting the database tables'
-          console.error(message, error)
+          console.error(error)
           tx.rollback()
         }
       })
+    } catch (error) {
+      const message = 'An error occurred when deleting the database tables'
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   public async deactivateDatabase(): Promise<void> {
-    if (this._dbClient) {
-      try {
-        return await this._dbClient.end()
-      } catch (error) {
-        const message = 'An error occurred when deactivating the database'
-        console.error(message, error)
-        throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-      }
+    try {
+      await this._dbClient!.end()
+    } catch (error) {
+      const message = 'An error occurred when deactivating the database'
+      console.error(message, error)
+      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
     }
-    const message = 'Database client is null'
-    console.error(message)
-    throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 }
 

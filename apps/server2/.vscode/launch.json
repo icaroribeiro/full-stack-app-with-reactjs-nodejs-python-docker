@@ -10,11 +10,7 @@
 			"request": "launch",
 			"module": "pytest",
 			"console": "integratedTerminal",
-			"args": [
-				// "-v",
-				// "-s",
-				"${workspaceFolder}/${relativeFileDirname}/${fileBasename}"
-			]
+			"args": ["-v", "-s", "${workspaceFolder}/tests"]
 		}
 	]
 }

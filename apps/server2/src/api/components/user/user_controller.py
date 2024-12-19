@@ -108,7 +108,7 @@ class UserController(APIRouter):
                                 "name": "name",
                                 "email": "email@email.com",
                                 "created_at": "XXXX-XX-XXTXX:XX:XX.XXXXXX",
-                                "updated_at": "",
+                                "updated_at": None,
                             }
                         }
                     },
@@ -120,7 +120,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "detail": {"context": "", "cause": ""},
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": False,
                             }
                         }
@@ -138,11 +138,12 @@ class UserController(APIRouter):
             api_pagination_service: APIPaginationService = self.dependencies[1],
         ) -> APIPaginationResponse:
             base_url = str(request.url)
-            (returned_users, count) = await user_service.retrieve_and_count_users(
-                page, limit
-            )
+            (
+                retrieved_users,
+                total_records,
+            ) = await user_service.retrieve_and_count_users(page, limit)
             api_pagination_data = APIPaginationData(
-                page=page, limit=limit, total_records=count, records=returned_users
+                page, limit, total_records, retrieved_users
             )
             api_pagination_response = api_pagination_service.create_response(
                 base_url, api_pagination_data
@@ -167,19 +168,19 @@ class UserController(APIRouter):
                                 "name": "name",
                                 "email": "email@email.com",
                                 "created_at": "XXXX-XX-XXTXX:XX:XX.XXXXXX",
-                                "updated_at": "",
+                                "updated_at": None,
                             }
                         }
                     },
                 },
                 status.HTTP_404_NOT_FOUND: {
                     "model": APIErrorResponse,
-                    "description": "Unprocessable Entity",
+                    "description": "Not Found",
                     "content": {
                         "application/json": {
                             "example": {
-                                "message": "",
-                                "detail": {"context": "", "cause": ""},
+                                "message": "Not Found",
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": True,
                             }
                         }
@@ -192,7 +193,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "detail": {"context": "", "cause": ""},
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": False,
                             }
                         }
@@ -206,8 +207,8 @@ class UserController(APIRouter):
             user_id: str,
             user_service: UserService = self.dependencies[0],
         ) -> UserResponse:
-            returned_user = await user_service.retrieve_user(user_id)
-            user_response = UserMapper.to_response(returned_user)
+            retrieved_user = await user_service.retrieve_user(user_id)
+            user_response = UserMapper.to_response(retrieved_user)
             response.status_code = status.HTTP_200_OK
             return user_response
 
@@ -228,7 +229,7 @@ class UserController(APIRouter):
                                 "name": "name",
                                 "email": "email@email.com",
                                 "created_at": "XXXX-XX-XXTXX:XX:XX.XXXXXX",
-                                "updated_at": "",
+                                "updated_at": None,
                             }
                         }
                     },
@@ -239,8 +240,8 @@ class UserController(APIRouter):
                     "content": {
                         "application/json": {
                             "example": {
-                                "message": "",
-                                "detail": {"context": "", "cause": ""},
+                                "message": "Not Found",
+                                "detail": {"context": "context", "cause": ""},
                                 "isOperational": True,
                             }
                         }
@@ -252,8 +253,8 @@ class UserController(APIRouter):
                     "content": {
                         "application/json": {
                             "example": {
-                                "message": "",
-                                "detail": {"context": "", "cause": ""},
+                                "message": "Unprocessable Entity",
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": True,
                             }
                         }
@@ -266,7 +267,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "detail": {"context": "", "cause": ""},
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": False,
                             }
                         }
@@ -304,7 +305,7 @@ class UserController(APIRouter):
                                 "name": "name",
                                 "email": "email@email.com",
                                 "created_at": "XXXX-XX-XXTXX:XX:XX.XXXXXX",
-                                "updated_at": "",
+                                "updated_at": None,
                             }
                         }
                     },
@@ -315,8 +316,8 @@ class UserController(APIRouter):
                     "content": {
                         "application/json": {
                             "example": {
-                                "message": "",
-                                "detail": {"context": "", "cause": ""},
+                                "message": "Not Found",
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": True,
                             }
                         }
@@ -329,7 +330,7 @@ class UserController(APIRouter):
                         "application/json": {
                             "example": {
                                 "message": "Internal Server Error",
-                                "detail": {"context": "", "cause": ""},
+                                "detail": {"context": "context", "cause": "cause"},
                                 "isOperational": False,
                             }
                         }

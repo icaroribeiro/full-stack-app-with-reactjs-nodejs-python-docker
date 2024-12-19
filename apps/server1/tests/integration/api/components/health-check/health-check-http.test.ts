@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
+  closeHttpServer,
   config,
   dbService,
   startDatabaseContainer,
@@ -23,6 +24,7 @@ describe('Health Check HTTP', () => {
   }, beforeAllTimeout)
 
   afterAll(async () => {
+    closeHttpServer()
     await dbService.deactivateDatabase()
     await stopDatabaseContainer(container)
   })

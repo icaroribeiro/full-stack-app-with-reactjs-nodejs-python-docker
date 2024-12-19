@@ -8,8 +8,8 @@ import { Server } from '../src/server'
 import { createServer, Server as HttpServer } from 'http'
 
 const config = new Config()
-
 const dbService = new DBService()
+let httpServer: HttpServer
 
 async function startDatabaseContainer(
   config: Config,
@@ -36,16 +36,23 @@ async function stopDatabaseContainer(
 function startHttpServer(config: Config): void {
   try {
     const server: Server = new Server(config)
-    const httpServer: HttpServer = createServer(server.app)
+    httpServer = createServer(server.app)
     const port = parseInt(config.getPort())
     httpServer.listen(port, () => {
       console.log('Server started successfully!')
     })
-    httpServer.on('close', () => {
+  } catch (error) {
+    console.error('Server starting failed!', error)
+  }
+}
+
+function closeHttpServer(): void {
+  try {
+    httpServer.close(() => {
       console.log('Server closed successfully!')
     })
   } catch (error) {
-    console.error('Server starting failed!', error)
+    console.error('Server closing failed!', error)
   }
 }
 
@@ -55,4 +62,5 @@ export {
   startDatabaseContainer,
   stopDatabaseContainer,
   startHttpServer,
+  closeHttpServer,
 }

@@ -36,7 +36,7 @@ class HealthCheckController extends Controller {
   })
   @Response<APIErrorResponse>('500', 'Internal Server Error', {
     message: 'Internal Server Error',
-    detail: { context: '', cause: '' },
+    detail: { context: 'context', cause: 'cause' },
     isOperational: false,
   })
   async getHealth(): Promise<HealthCheckResponse> {
