@@ -1,17 +1,16 @@
-import { except } from 'drizzle-orm/mysql-core'
-import { ServerError } from '../server-error'
 import { sql } from 'drizzle-orm'
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import httpStatus from 'http-status'
-
 import postgres from 'postgres'
+
+import { ServerError } from '../server-error'
 
 interface IDBService {
   connectDatabase(databaseURL: string): void
-  checkDatabaseIsAlive(): Promise<boolean | undefined>
+  checkDatabaseIsAlive(): Promise<boolean | void>
   migrateDatabase(migrationsFolder: string): Promise<void>
-  getDatabaseTableRowCount(table_name: string): Promise<number | undefined>
+  getDatabaseTableRowCount(table_name: string): Promise<number | void>
   clearDatabaseTables(): Promise<void>
   deleteDatabaseTables(): Promise<void>
   deactivateDatabase(): Promise<void>
@@ -49,7 +48,7 @@ class DBService implements IDBService {
     }
   }
 
-  public async checkDatabaseIsAlive(): Promise<boolean | undefined> {
+  public async checkDatabaseIsAlive(): Promise<boolean | void> {
     try {
       return await this._db!.transaction(async (tx) => {
         try {
@@ -84,7 +83,7 @@ class DBService implements IDBService {
 
   public async getDatabaseTableRowCount(
     tableName: string,
-  ): Promise<number | undefined> {
+  ): Promise<number | void> {
     try {
       return await this._db!.transaction(async (tx) => {
         try {

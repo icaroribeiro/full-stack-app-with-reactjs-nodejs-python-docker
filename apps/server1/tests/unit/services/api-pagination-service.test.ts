@@ -38,8 +38,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
-        next: null,
       }
 
       const result = apiPaginationService.createResponse<User>(
@@ -69,8 +67,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
-        next: null,
       }
 
       const result = apiPaginationService.createResponse<User>(
@@ -100,8 +96,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
-        next: null,
       }
 
       const result = apiPaginationService.createResponse<User>(
@@ -136,7 +130,6 @@ describe('APIPaginationService', () => {
         totalRecords: totalRecords,
         records: records,
         previous: previous,
-        next: null,
       }
 
       const result = apiPaginationService.createResponse<User>(
@@ -171,7 +164,6 @@ describe('APIPaginationService', () => {
         totalRecords: totalRecords,
         records: records,
         previous: previous,
-        next: null,
       }
 
       const result = apiPaginationService.createResponse<User>(
@@ -205,7 +197,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
         next: next,
       }
 
@@ -240,7 +231,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
         next: next,
       }
 
@@ -274,7 +264,6 @@ describe('APIPaginationService', () => {
         totalPages: totalPages,
         totalRecords: totalRecords,
         records: records,
-        previous: null,
         next: next,
       }
 

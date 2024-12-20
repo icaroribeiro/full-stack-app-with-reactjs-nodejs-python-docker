@@ -16,7 +16,7 @@
     "start-dev": "vite --mode development",
     "pre-build": "rimraf dist && mkdir dist",
     "make-bundle": "tsc -b && vite build --mode production",
-    "build": "pnpm pre:build && pnpm make-bundle"
+    "build": "pnpm pre-build && pnpm make-bundle"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.5",

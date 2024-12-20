@@ -1,16 +1,16 @@
 import httpStatus from 'http-status'
 
-import { DBService } from '../../../services'
 import { ServerError } from '../../../server-error'
+import { DBService } from '../../../services'
 
 interface IHealthCheckService {
-  checkHealth(): Promise<boolean>
+  checkHealth(): Promise<boolean | void>
 }
 
 class HealthCheckService implements IHealthCheckService {
   constructor(private dbService: DBService) {}
 
-  async checkHealth(): Promise<boolean> {
+  async checkHealth(): Promise<boolean | void> {
     try {
       return await this.dbService.checkDatabaseIsAlive()
     } catch (error) {

@@ -4,7 +4,6 @@ import pytest
 from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
-from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 from sqlalchemy import insert
 from tests.factories.user_factory import UserFactory
@@ -72,7 +71,7 @@ class TestAddUser(TestUserHttp):
 
 class TestFetchPaginatedUsers(TestUserHttp):
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_200_status_code_with_empty_list_of_user_with_zero_total_when_users_do_not_exist(
+    async def test_should_succeed_and_return_200_status_code_with_empty_list_of_users_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -85,10 +84,12 @@ class TestFetchPaginatedUsers(TestUserHttp):
             page=1, limit=1, total_pages=0, total_records=0, records=[]
         )
 
-        response = await async_client.get(f"{base_url}")
+        response = await async_client.get(base_url)
 
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == expected_response_body.model_dump()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
@@ -123,12 +124,12 @@ class TestFetchPaginatedUsers(TestUserHttp):
             next=next,
         )
 
-        response = await async_client.get(f"{base_url}")
+        response = await async_client.get(base_url)
 
         row_count = 3
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == expected_response_body.model_dump()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
@@ -161,15 +162,15 @@ class TestFetchPaginatedUsers(TestUserHttp):
             records=[],
         )
 
-        response = await async_client.get(f"{base_url}")
+        response = await async_client.get(base_url)
 
         row_count = 3
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == expected_response_body.model_dump()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_one_and_can_be_filled(
+    async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
         initialize_database: None,
@@ -206,7 +207,7 @@ class TestFetchPaginatedUsers(TestUserHttp):
         row_count = 5
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == expected_response_body.model_dump()
 
 
 class TestFetchUser(TestUserHttp):
@@ -282,7 +283,7 @@ class TestRenewUser(TestUserHttp):
             "name": mocked_updated_user.name,
             "email": mocked_updated_user.email,
         }
-        expected_response_body = DictToObj(user_request)
+        expected_response = DictToObj(user_request)
 
         response = await async_client.put(f"{url}/{domain_user.id}", json=user_request)
 
@@ -291,8 +292,8 @@ class TestRenewUser(TestUserHttp):
         assert response.status_code == status.HTTP_200_OK
         response_body: UserResponse = DictToObj(response.json())
         assert response_body.id == domain_user.id
-        assert response_body.name == expected_response_body.name
-        assert response_body.email == expected_response_body.email
+        assert response_body.name == expected_response.name
+        assert response_body.email == expected_response.email
         assert response_body.created_at == domain_user.created_at.isoformat()
         assert response_body.updated_at is not None
 
@@ -314,6 +315,8 @@ class TestRenewUser(TestUserHttp):
 
         response = await async_client.put(f"{url}/{mocked_user.id}", json=user_request)
 
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_404_NOT_FOUND
         response_body: APIErrorResponse = DictToObj(response.json())
         assert response_body.is_operational is True
@@ -336,6 +339,8 @@ class TestRenewUser(TestUserHttp):
 
         response = await async_client.put(f"{url}/{mocked_user.id}", json=user_request)
 
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         response_body: APIErrorResponse = DictToObj(response.json())
         assert response_body.is_operational is True
@@ -360,14 +365,14 @@ class TestDestroyUser(TestUserHttp):
             obj = DictToObj(engine_result.first()._asdict())
             await conn.commit()
             domain_user = UserMapper.to_domain(obj)
-        expected_response_body = UserMapper.to_response(domain_user)
+        expected_response = UserMapper.to_response(domain_user)
 
         response = await async_client.delete(f"{url}/{domain_user.id}")
 
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == jsonable_encoder(expected_response)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(
@@ -380,8 +385,10 @@ class TestDestroyUser(TestUserHttp):
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
 
-        response = await async_client.get(f"{url}/{mocked_user.id}")
+        response = await async_client.delete(f"{url}/{mocked_user.id}")
 
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_404_NOT_FOUND
         response_body: APIErrorResponse = DictToObj(response.json())
         assert response_body.is_operational is True

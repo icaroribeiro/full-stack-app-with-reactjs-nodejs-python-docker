@@ -15,30 +15,29 @@ describe('Health Check HTTP', () => {
   const endpoint = '/health'
   const url = `http://localhost:${config.getPort()}${endpoint}`
   let container: StartedPostgreSqlContainer
-  const beforeAllTimeout = 30000
+  const timeout = 100000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
     dbService.connectDatabase(config.getDatabaseURL())
     startHttpServer(config)
-  }, beforeAllTimeout)
+  }, timeout)
 
   afterAll(async () => {
     closeHttpServer()
     await dbService.deactivateDatabase()
     await stopDatabaseContainer(container)
-  })
+  }, timeout)
 
   describe('GET /health', () => {
-    it('should succeed and return application is healthy', async () => {
-      const expectedResult: HealthCheckResponse = { healthy: true }
+    it('should succeed and return 200 status code when application is healthy', async () => {
+      const expectedResponseBody = { healthy: true }
 
-      const response: Response = await fetch(url)
+      const response = await fetch(url)
 
       expect(response.status).toBe(httpStatus.OK)
-      const body: Array<Record<string, unknown>> =
-        (await response.json()) as Array<Record<string, unknown>>
-      expect(body).toEqual(expectedResult)
+      const responseBody = (await response.json()) as Record<string, unknown>
+      expect(responseBody).toEqual(expectedResponseBody)
     })
   })
 })

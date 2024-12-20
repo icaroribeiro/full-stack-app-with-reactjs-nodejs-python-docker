@@ -52,12 +52,12 @@ class APIPaginationService {
     page: number,
     limit: number,
     totalRecords: number,
-  ): string | null {
+  ): string | undefined {
     if (page == 1) {
-      return null
+      return undefined
     }
     if (totalRecords - (page - 1) * limit <= 0) {
-      return null
+      return undefined
     }
     return baseURL.replace(/(page=)[^&]+/, '$1' + `${page - 1}`)
   }
@@ -67,9 +67,9 @@ class APIPaginationService {
     page: number,
     limit: number,
     totalRecords: number,
-  ): string | null {
+  ): string | undefined {
     if (totalRecords - page * limit <= 0) {
-      return null
+      return undefined
     }
     if (baseURL.includes('page')) {
       return baseURL.replace(/(page=)[^&]+/, '$1' + `${page + 1}`)
@@ -81,4 +81,4 @@ class APIPaginationService {
   }
 }
 
-export { IAPIPaginationService, APIPaginationService, APIPaginationData }
+export { APIPaginationData,APIPaginationService, IAPIPaginationService }

@@ -20,14 +20,13 @@ import {
 } from '../../test-helpers'
 import { ServerError } from '../../../src/server-error'
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql'
-import { DrizzleError, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { PgDatabase } from 'drizzle-orm/pg-core'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { UserFactory } from '../../factories/user-factory'
 import { User, UserMapper } from '../../../src/api/components/user'
 import { UserModel } from '../../../db/schemas'
-import postgres from 'postgres'
 
 const actualMigrator = await vi.importActual<
   typeof import('drizzle-orm/postgres-js/migrator')
@@ -46,16 +45,16 @@ vi.mock('drizzle-orm/postgres-js/migrator', async () => {
 describe('DBService', () => {
   let dbService = new DBService()
   let container: StartedPostgreSqlContainer
-  const beforeAllTimeout = 30000
   const mockedMigrate = vi.mocked(migrate)
   const currentPath = fileURLToPath(import.meta.url)
   const appPath = path.resolve(currentPath, '..', '..', '..', '..')
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
+  const timeout = 100000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
-  }, beforeAllTimeout)
+  }, timeout)
 
   beforeEach(async () => {
     dbService = new DBService()
@@ -68,7 +67,7 @@ describe('DBService', () => {
 
   afterAll(async () => {
     await stopDatabaseContainer(container)
-  })
+  }, timeout)
 
   describe('.db', () => {
     it('should succeed and return db', async () => {

@@ -8,6 +8,13 @@
       "when": 1728594178599,
       "tag": "0000_hard_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1734706985399,
+      "tag": "0001_outgoing_boom_boom",
+      "breakpoints": true
     }
   ]
 }

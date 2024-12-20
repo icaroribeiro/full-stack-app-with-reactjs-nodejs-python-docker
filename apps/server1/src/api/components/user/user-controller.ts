@@ -6,6 +6,7 @@ import {
   Delete,
   Example,
   Get,
+  Middlewares,
   Path,
   Post,
   Put,
@@ -19,10 +20,15 @@ import {
 import { inject, injectable } from 'tsyringe'
 
 import { IAPIPaginationService } from '../../../services'
-import { APIErrorResponse, APIPaginationResponse } from '../../shared'
+import {
+  APIErrorResponse,
+  APIPaginationResponse,
+  validationMiddleware,
+} from '../../shared'
 import { UserMapper } from './user-mapper'
 import { IUserService } from './user-service'
-import { UserRequest, UserResponse } from './user-types'
+import { User, UserRequest, UserResponse } from './user-types'
+import { userSchema } from './user-validator'
 
 @injectable()
 @Route('users')
@@ -30,8 +36,8 @@ import { UserRequest, UserResponse } from './user-types'
 class UserController extends Controller {
   constructor(
     @inject('UserService') private userService: IUserService,
-    @inject('PaginationService')
-    private paginationService: IAPIPaginationService,
+    @inject('APIPaginationService')
+    private apiPaginationService: IAPIPaginationService,
   ) {
     super()
   }
@@ -58,6 +64,7 @@ class UserController extends Controller {
     detail: { context: 'context', cause: 'cause' },
     isOperational: false,
   })
+  @Middlewares(validationMiddleware(userSchema))
   public async addUser(@Body() body: UserRequest): Promise<UserResponse> {
     const userMapper = new UserMapper()
     const user = userMapper.toDomain(body)
@@ -112,10 +119,8 @@ class UserController extends Controller {
       totalRecords: totalRecords,
       records: retrievedUsers,
     }
-    const apiPaginationResponse = this.paginationService.createResponse(
-      baseURL,
-      apiPaginationData,
-    )
+    const apiPaginationResponse =
+      this.apiPaginationService.createResponse<User>(baseURL, apiPaginationData)
     this.setStatus(httpStatus.OK)
     return apiPaginationResponse
   }
@@ -177,6 +182,7 @@ class UserController extends Controller {
     detail: { context: 'context', cause: 'cause' },
     isOperational: false,
   })
+  @Middlewares(validationMiddleware(userSchema))
   public async renewUser(
     @Path() userId: string,
     @Body() body: UserRequest,

@@ -10,7 +10,14 @@
 			"request": "launch",
 			"module": "pytest",
 			"console": "integratedTerminal",
-			"args": ["-v", "-s", "${workspaceFolder}/tests"]
+			"args": [
+				"-v",
+				"-s",
+				"--cov",
+				"src",
+				"--rootdir",
+				"${workspaceFolder}/tests"
+			]
 		}
 	]
 }

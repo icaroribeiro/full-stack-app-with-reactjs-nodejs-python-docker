@@ -7,14 +7,35 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"HealthCheckResponse": {
+			"UserResponse": {
 				"properties": {
-					"healthy": {
-						"type": "boolean"
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
-					"healthy"
+					"updatedAt",
+					"createdAt",
+					"email",
+					"name",
+					"id"
 				],
 				"type": "object"
 			},
@@ -31,6 +52,72 @@
 				"required": [
 					"isOperational",
 					"message"
+				],
+				"type": "object"
+			},
+			"UserRequest": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name"
+				],
+				"type": "object"
+			},
+			"APIPaginationResponse_UserResponse_": {
+				"properties": {
+					"next": {
+						"type": "string"
+					},
+					"previous": {
+						"type": "string"
+					},
+					"records": {
+						"items": {
+							"$ref": "#/components/schemas/UserResponse"
+						},
+						"type": "array"
+					},
+					"totalRecords": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"records",
+					"totalRecords",
+					"totalPages",
+					"limit",
+					"page"
+				],
+				"type": "object"
+			},
+			"HealthCheckResponse": {
+				"properties": {
+					"healthy": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"healthy"
 				],
 				"type": "object"
 			}
@@ -51,6 +138,468 @@
 		}
 	},
 	"paths": {
+		"/users": {
+			"post": {
+				"operationId": "AddUser",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com",
+											"createdAt": "2024-12-21T22:12:00.090Z",
+											"updatedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Unprocessable Entity",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to create a new user.",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRequest"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "FetchPaginatedUsers",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIPaginationResponse_UserResponse_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"page": 1,
+											"limit": 1,
+											"totalPages": 1,
+											"totalRecords": 1,
+											"records": [
+												{
+													"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+													"name": "name",
+													"email": "email@email.com",
+													"createdAt": "2024-12-21T22:12:00.096Z",
+													"updatedAt": null
+												}
+											],
+											"previous": "previous",
+											"next": "next"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to get users through page-based pagination schema.",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The number of the page. If isn't provided, it will be set to 1.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The number of records per page. If isn't provided, it will be set to 1.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/users/{userId}": {
+			"get": {
+				"operationId": "FetchUser",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com",
+											"createdAt": "2024-12-21T22:12:00.098Z",
+											"updatedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Not Found",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to get a user by its ID.",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "RenewUser",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com",
+											"createdAt": "2024-12-21T22:12:00.099Z",
+											"updatedAt": "2024-12-21T22:12:00.099Z"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Not Found",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Unprocessable Entity",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to update a user by its ID.",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DestroyUser",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+											"name": "name",
+											"email": "email@email.com",
+											"createdAt": "2024-12-21T22:12:00.100Z",
+											"updatedAt": null
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Not Found",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": true
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIErrorResponse"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"message": "Internal Server Error",
+											"detail": {
+												"context": "context",
+												"cause": "cause"
+											},
+											"isOperational": false
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "API endpoint used to delete a user by its ID.",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/health": {
 			"get": {
 				"operationId": "GetHealth",
@@ -84,8 +633,8 @@
 										"value": {
 											"message": "Internal Server Error",
 											"detail": {
-												"context": "",
-												"cause": ""
+												"context": "context",
+												"cause": "cause"
 											},
 											"isOperational": false
 										}

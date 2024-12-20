@@ -27,12 +27,12 @@ describe('UserRepository', async () => {
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
   let container: StartedPostgreSqlContainer
-  const beforeAllTimeout = 30000
+  const timeout = 100000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
     dbService.connectDatabase(config.getDatabaseURL())
-  }, beforeAllTimeout)
+  }, timeout)
 
   beforeEach(async () => {
     await dbService.clearDatabaseTables()
@@ -42,7 +42,7 @@ describe('UserRepository', async () => {
   afterAll(async () => {
     await dbService.deactivateDatabase()
     await stopDatabaseContainer(container)
-  })
+  }, timeout)
 
   describe('.createUser', () => {
     it('should define a function', () => {

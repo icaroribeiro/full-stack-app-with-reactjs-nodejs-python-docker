@@ -4,10 +4,10 @@ import swaggerUi from 'swagger-ui-express'
 
 import swaggerDocument from '../api/swagger.json'
 import { RegisterRoutes } from './api/routes/routes'
+import { APIErrorHandler } from './api/utils/api-error-handler'
 import { Config } from './config/config'
 import { Container } from './container/container'
 import { DBService } from './services'
-import { APIErrorHandler } from './api/utils/api-error-handler'
 
 class Server {
   private readonly _app: Application = express()
@@ -35,9 +35,7 @@ class Server {
     this._app.use(json())
     RegisterRoutes(this._app)
     const apiErrorHandler = new APIErrorHandler()
-    this._app.use(apiErrorHandler.handleRequestValidationError)
-    this._app.use(apiErrorHandler.handleServerError)
-    this._app.use(apiErrorHandler.handleCommonError)
+    this._app.use(apiErrorHandler.handleError)
   }
 
   public get app(): express.Application {

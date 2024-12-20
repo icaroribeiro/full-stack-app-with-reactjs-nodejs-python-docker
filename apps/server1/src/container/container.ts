@@ -10,11 +10,11 @@ import {
   UserRepository,
   UserService,
 } from '../api/components/user'
-import { DBService, IDBService } from '../services/db-service'
 import {
-  IAPIPaginationService,
   APIPaginationService,
+  IAPIPaginationService,
 } from '../services/api-pagination-service'
+import { DBService, IDBService } from '../services/db-service'
 
 class Container {
   private readonly _container: DependencyContainer

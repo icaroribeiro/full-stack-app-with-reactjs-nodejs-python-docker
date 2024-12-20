@@ -39,10 +39,10 @@ class HealthCheckController extends Controller {
     detail: { context: 'context', cause: 'cause' },
     isOperational: false,
   })
-  async getHealth(): Promise<HealthCheckResponse> {
+  public async getHealth(): Promise<HealthCheckResponse> {
     const isHealthy = await this.healthCheckService.checkHealth()
     const healthCheckMapper = new HealthCheckMapper()
-    const healthCheckResponse = healthCheckMapper.toResponse(isHealthy)
+    const healthCheckResponse = healthCheckMapper.toResponse(isHealthy!)
     this.setStatus(httpStatus.OK)
     return healthCheckResponse
   }

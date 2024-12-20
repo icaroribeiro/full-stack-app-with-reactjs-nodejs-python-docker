@@ -25,11 +25,10 @@ class UserRepository implements IUserRepository {
   }
 
   async createUser(user: User): Promise<User | undefined> {
-    const userMapper = new UserMapper()
-    const rawUserData = userMapper.toPersistence(user)
-
     return await this.dbService.db.transaction(async (tx) => {
       try {
+        const userMapper = new UserMapper()
+        const rawUserData = userMapper.toPersistence(user)
         const result = await tx
           .insert(schemas.userSchema)
           .values(rawUserData)
@@ -101,14 +100,13 @@ class UserRepository implements IUserRepository {
   }
 
   async readUser(userId: string): Promise<User | undefined> {
-    const userMapper = new UserMapper()
-
     return await this.dbService.db.transaction(async (tx) => {
       try {
         const result = await tx
           .select()
           .from(schemas.userSchema)
           .where(eq(schemas.userSchema.id, userId))
+        const userMapper = new UserMapper()
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when reading a user from database'
@@ -119,8 +117,6 @@ class UserRepository implements IUserRepository {
   }
 
   async updateUser(userId: string, user: User): Promise<User | undefined> {
-    const userMapper = new UserMapper()
-
     return await this.dbService.db.transaction(async (tx) => {
       try {
         const result = await tx
@@ -128,6 +124,7 @@ class UserRepository implements IUserRepository {
           .set({ name: user.name, email: user.email })
           .where(eq(schemas.userSchema.id, userId))
           .returning()
+        const userMapper = new UserMapper()
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when deleting a user from database'
@@ -138,14 +135,13 @@ class UserRepository implements IUserRepository {
   }
 
   async deleteUser(userId: string): Promise<User | undefined> {
-    const userMapper = new UserMapper()
-
     return await this.dbService.db.transaction(async (tx) => {
       try {
         const result = await tx
           .delete(schemas.userSchema)
           .where(eq(schemas.userSchema.id, userId))
           .returning()
+        const userMapper = new UserMapper()
         return result.map((u) => userMapper.toDomain(u))[0]
       } catch (error) {
         const message = 'An error occurred when deleting a user from database'

@@ -15,7 +15,7 @@ class TestHealthCheckHttp:
 
 class TestGetHealth(TestHealthCheckHttp):
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_application_is_heathy(
+    async def test_should_succeed_and_return_200_status_code_when_application_is_heathy(
         self, async_client: AsyncClient, url: str
     ) -> None:
         expected_response_body = HealthCheckResponse(healthy=True)
