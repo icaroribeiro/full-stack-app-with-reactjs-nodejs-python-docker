@@ -5,7 +5,7 @@
 			"dependsOn": ["^@monorepo/tools#build"],
 			"cache": false
 		},
-		"lint:fix": {
+		"fix-lint": {
 			"dependsOn": ["^@monorepo/tools#build"],
 			"cache": false
 		},

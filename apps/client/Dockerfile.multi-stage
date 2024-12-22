@@ -1,15 +1,14 @@
 # Stage 1: Configure the base image
 # --------------------------------------------------
-FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
+FROM node:20-bookworm AS base
+ENV PNPM_HOME=/pnpm \
+    PNPM_STORE_DIR=/pnpm/store
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
     
 # Stage 2: Configure the pruner image
 # --------------------------------------------------
 FROM base AS pruner
-RUN apk update
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY . .
 RUN pnpm install turbo --global
@@ -18,22 +17,20 @@ RUN turbo prune client --docker
 # Stage 3: Configure the builder image
 # --------------------------------------------------
 FROM base AS builder
-RUN apk update
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=pruner /app/out/full/ .
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=$PNPM_STORE_DIR pnpm install --frozen-lockfile
 RUN pnpm turbo build --filter=client
 
-# Stage 4: Configure the runner image
+# Stage 4: Configure and run the runtime image
 # --------------------------------------------------
-FROM node:20-slim AS runner
-RUN npm install serve --global
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
+COPY /apps/client/scripts/startup.sh ./scripts/startup.sh
 COPY --from=builder /app/apps/client/dist ./dist
-COPY --from=builder /app/apps/client/scripts/startup.sh .
-RUN chmod +x ./startup.sh
+RUN npm install serve --global
+RUN chmod +x ./scripts/startup.sh
 EXPOSE ${PORT}
-CMD ["/bin/bash","-c","./startup.sh"]
+CMD ["/bin/bash","-c","./scripts/startup.sh"]

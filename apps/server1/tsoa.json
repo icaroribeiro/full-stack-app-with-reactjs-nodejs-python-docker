@@ -1,0 +1,52 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/api/components/**/*controller.ts"],
+  "spec": {
+    "outputDirectory": "api",
+    "specVersion": 3,
+    "basePath": "",
+    "name": "Take-Home Assignment API",
+    "description": "A REST API developed using Node.js, TypeScript and Postgres database\n\nSome useful links:\n- [The REST API repository](https://github.com/icaroribeiro/full-stack-app-with-reactjs-nodejs-python-docker)",
+    "license": "MIT",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Ícaro Ribeiro",
+      "email": "icaroribeiro@hotmail.com",
+      "url": "https://www.linkedin.com/in/icaroribeiro"
+    },
+    "tags": [
+      {
+        "name": "health-check",
+        "description": "Everything about health check"
+      },
+      {
+        "name": "users",
+        "description": "Everything about users"
+      }
+    ],
+    "spec": {
+      "servers": [
+        {
+          "url": "http://localhost:5001",
+          "description": "Development environment"
+        },
+        {
+          "url": "http://localhost:5000",
+          "description": "Production environment"
+        }
+      ]
+    }
+  },
+  "swagger": {
+    "info": {},
+    "outputDirectory": "./dist",
+    "entryFile": "./src/index.ts"
+  },
+  "routes": {
+    "iocModule": "src/libs/tsoa/tsyringe-ioc-container.ts",
+    "routesDir": "src/api/routes",
+    "middleware": "express"
+  },
+  "ignore": ["**/node_modules/**"]
+}

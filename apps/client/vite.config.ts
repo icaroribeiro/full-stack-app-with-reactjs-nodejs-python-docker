@@ -1,6 +1,11 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vite'
+import path from 'path'
 import { loadEnv } from 'vite'
+import { fileURLToPath } from 'url'
+
+const currentPath = fileURLToPath(import.meta.url)
+const appPath = path.resolve(currentPath, '..')
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -17,7 +22,7 @@ export default defineConfig(({ mode }) => {
     test: {
       include: ['src/**/*.test.{ts,tsx}'],
       coverage: {
-        reporter: ['lcov', 'text'],
+        reporter: [['lcov', { projectRoot: appPath }], 'text'],
       },
     },
   }

@@ -9,18 +9,25 @@
   "type": "module",
   "scripts": {
     "lint": "eslint ./src",
-    "lint:fix": "eslint --fix ./src",
+    "fix-lint": "eslint --fix ./src",
     "format": "prettier --write ./src",
     "test": "vitest --run --coverage",
-    "test:watch": "vitest",
-    "start:dev": "vite --mode development",
-    "pre:build": "rimraf dist && mkdir dist",
-    "make:bundle": "tsc -b && vite build --mode production",
-    "build": "pnpm pre:build && pnpm make:bundle"
+    "watch-test": "vitest",
+    "start-dev": "vite --mode development",
+    "pre-build": "rimraf dist && mkdir dist",
+    "make-bundle": "tsc -b && vite build --mode production",
+    "build": "pnpm pre:build && pnpm make-bundle"
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.5",
+    "@material-tailwind/react": "^2.1.10",
+    "axios": "^1.7.7",
+    "http-status": "^1.7.4",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "react-router-dom": "^6.27.0",
+    "react-toastify": "^10.0.6"
   },
   "devDependencies": {
     "@monorepo/tools": "workspace:*",
@@ -28,9 +35,12 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
     "@vitest/coverage-v8": "^2.1.1",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9.11.1",
+    "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "tailwindcss": "^3.4.14",
     "typescript": "^5.6.2",
     "vite": "^5.4.8"
   }
