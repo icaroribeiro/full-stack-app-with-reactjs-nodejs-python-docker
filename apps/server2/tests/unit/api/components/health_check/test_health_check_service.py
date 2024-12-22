@@ -49,7 +49,7 @@ class TestCheckHealth(TestHealthCheckService):
         health_check_service: HealthCheckService,
         mocker: MockerFixture,
     ) -> None:
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when checking if application is healthy"
         server_error = ServerError(
             message,

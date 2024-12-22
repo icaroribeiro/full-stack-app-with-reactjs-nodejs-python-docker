@@ -4,11 +4,10 @@ import pytest
 from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
+from pytest_mock import MockerFixture
 from sqlalchemy import insert, text
 from sqlalchemy.exc import NoSuchModuleError
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-)
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 from tests.conftest import initialize_database_base
 from tests.factories.user_factory import UserFactory
 
@@ -89,7 +88,7 @@ class TestConnectDatabase(TestDBService):
         error = NoSuchModuleError(
             f"Could not parse SQLAlchemy URL from string '{database_url}'"
         )
-        message = "An error occurred when connecting to database!"
+        message = "An error occurred when connecting to database"
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -123,20 +122,26 @@ class TestCheckDatabaseIsAlive(TestDBService):
         assert result == expected_result
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
+    async def test_should_fail_and_raise_exception_when_transaction_is_not_executed(
         self,
+        config: Config,
         db_service: DBService,
+        mocker: MockerFixture,
     ) -> None:
-        message = "Async engine is None!"
-        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        db_service.connect_database(config.get_database_url())
+        error = Exception("failed")
+        with mocker.patch.object(AsyncConnection, "execute", side_effect=error):
+            message = "An error occurred when checking database is alive"
+            server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as exc_info:
-            await db_service.check_database_is_alive()
+            with pytest.raises(ServerError) as exc_info:
+                await db_service.check_database_is_alive()
 
-        assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
-        assert exc_info.value.status_code == server_error.status_code
-        assert exc_info.value.is_operational == server_error.is_operational
+            assert exc_info.value.message == server_error.message
+            assert exc_info.value.detail == server_error.detail
+            assert exc_info.value.status_code == server_error.status_code
+            assert exc_info.value.is_operational == server_error.is_operational
+            await db_service.deactivate_database()
 
 
 class TestMigrateDatabase(TestDBService):
@@ -179,23 +184,7 @@ class TestMigrateDatabase(TestDBService):
         assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
-
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
-        self,
-        db_service: DBService,
-    ) -> None:
-        alembic_file_path = "alembic.ini"
-        message = "Async engine is None!"
-        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        with pytest.raises(ServerError) as exc_info:
-            await db_service.migrate_database(alembic_file_path)
-
-        assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
-        assert exc_info.value.status_code == server_error.status_code
-        assert exc_info.value.is_operational == server_error.is_operational
+        db_service.deactivate_database()
 
 
 class TestGetDatabaseTableRowCount(TestDBService):
@@ -211,8 +200,8 @@ class TestGetDatabaseTableRowCount(TestDBService):
         config: Config,
         db_service: DBService,
     ) -> None:
-        table_name = "users"
         db_service.connect_database(config.get_database_url())
+        table_name = "users"
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
         count = 3
@@ -241,8 +230,8 @@ class TestGetDatabaseTableRowCount(TestDBService):
         db_service: DBService,
         faker: Faker,
     ) -> None:
-        table_name = faker.word()
         db_service.connect_database(config.get_database_url())
+        table_name = faker.word()
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
         message = f"An error occurred when counting rows of database table {table_name}"
@@ -255,22 +244,8 @@ class TestGetDatabaseTableRowCount(TestDBService):
         assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
-
-    @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
-        self, db_service: DBService, faker: Faker
-    ) -> None:
-        table_name = faker.name()
-        message = "Async engine is None!"
-        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        with pytest.raises(ServerError) as exc_info:
-            await db_service.get_database_table_row_count(table_name)
-
-        assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
-        assert exc_info.value.status_code == server_error.status_code
-        assert exc_info.value.is_operational == server_error.is_operational
+        await db_service.delete_database_tables()
+        await db_service.deactivate_database()
 
 
 class TestClearDatabaseTable(TestDBService):
@@ -309,19 +284,26 @@ class TestClearDatabaseTable(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
-        self, db_service: DBService
+    async def test_should_fail_and_raise_exception_when_transaction_is_not_executed(
+        self,
+        config: Config,
+        db_service: DBService,
+        mocker: MockerFixture,
     ) -> None:
-        message = "Async engine is None!"
-        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        db_service.connect_database(config.get_database_url())
+        error = Exception("failed")
+        with mocker.patch.object(AsyncConnection, "execute", side_effect=error):
+            message = "An error occurred when cleaning the database tables"
+            server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as exc_info:
-            await db_service.clear_database_tables()
+            with pytest.raises(ServerError) as exc_info:
+                await db_service.clear_database_tables()
 
-        assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
-        assert exc_info.value.status_code == server_error.status_code
-        assert exc_info.value.is_operational == server_error.is_operational
+            assert exc_info.value.message == server_error.message
+            assert exc_info.value.detail == server_error.detail
+            assert exc_info.value.status_code == server_error.status_code
+            assert exc_info.value.is_operational == server_error.is_operational
+            await db_service.deactivate_database()
 
 
 class TestDeleteDatabaseTables(TestDBService):
@@ -354,19 +336,26 @@ class TestDeleteDatabaseTables(TestDBService):
         await db_service.deactivate_database()
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_fail_and_raise_exception_when_async_engine_is_none(
-        self, db_service: DBService
+    async def test_should_fail_and_raise_exception_when_transaction_is_not_executed(
+        self,
+        config: Config,
+        db_service: DBService,
+        mocker: MockerFixture,
     ) -> None:
-        message = "Async engine is None!"
-        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        db_service.connect_database(config.get_database_url())
+        error = Exception("failed")
+        with mocker.patch.object(AsyncConnection, "execute", side_effect=error):
+            message = "An error occurred when deleting the database tables"
+            server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        with pytest.raises(ServerError) as exc_info:
-            await db_service.delete_database_tables()
+            with pytest.raises(ServerError) as exc_info:
+                await db_service.delete_database_tables()
 
-        assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
-        assert exc_info.value.status_code == server_error.status_code
-        assert exc_info.value.is_operational == server_error.is_operational
+            assert exc_info.value.message == server_error.message
+            assert exc_info.value.detail == server_error.detail
+            assert exc_info.value.status_code == server_error.status_code
+            assert exc_info.value.is_operational == server_error.is_operational
+            await db_service.deactivate_database()
 
 
 class TestDeactivateDatabase(TestDBService):
@@ -397,7 +386,7 @@ class TestDeactivateDatabase(TestDBService):
     async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService
     ) -> None:
-        message = "Async engine is None!"
+        message = "An error occurred when deactivating the database"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         with pytest.raises(ServerError) as exc_info:

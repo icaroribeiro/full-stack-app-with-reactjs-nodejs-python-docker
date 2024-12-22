@@ -1,6 +1,6 @@
 import * as schemas from '@db/schemas'
 import { faker } from '@faker-js/faker'
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
+// import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import httpStatus from 'http-status'
 import {
   afterAll,
@@ -28,24 +28,24 @@ import { UserFactory } from '../../factories/user-factory'
 import { User, UserMapper } from '../../../src/api/components/user'
 import { UserModel } from '../../../db/schemas'
 
-const actualMigrator = await vi.importActual<
-  typeof import('drizzle-orm/postgres-js/migrator')
->('drizzle-orm/postgres-js/migrator')
+// const actualMigrator = await vi.importActual<
+//   typeof import('drizzle-orm/postgres-js/migrator')
+// >('drizzle-orm/postgres-js/migrator')
 
-vi.mock('drizzle-orm/postgres-js/migrator', async () => {
-  const actual = await vi.importActual<
-    typeof import('drizzle-orm/postgres-js/migrator')
-  >('drizzle-orm/postgres-js/migrator')
-  return {
-    ...actual,
-    migrate: vi.fn(),
-  }
-})
+// vi.mock('drizzle-orm/postgres-js/migrator', async () => {
+//   const actual = await vi.importActual<
+//     typeof import('drizzle-orm/postgres-js/migrator')
+//   >('drizzle-orm/postgres-js/migrator')
+//   return {
+//     ...actual,
+//     migrate: vi.fn(),
+//   }
+// })
 
 describe('DBService', () => {
   let dbService = new DBService()
   let container: StartedPostgreSqlContainer
-  const mockedMigrate = vi.mocked(migrate)
+  // const mockedMigrate = vi.mocked(migrate)
   const currentPath = fileURLToPath(import.meta.url)
   const appPath = path.resolve(currentPath, '..', '..', '..', '..')
   const userFactory = new UserFactory()
@@ -58,7 +58,7 @@ describe('DBService', () => {
 
   beforeEach(async () => {
     dbService = new DBService()
-    mockedMigrate.mockImplementation(actualMigrator.migrate)
+    // mockedMigrate.mockImplementation(actualMigrator.migrate)
   })
 
   afterEach(() => {
@@ -97,7 +97,7 @@ describe('DBService', () => {
       expect(typeof dbService.connectDatabase).toBe('function')
     })
 
-    it('should succeed and return undefined when db is created', async () => {
+    it('should succeed and return undefined when database is created', async () => {
       const expectedResult = undefined
 
       const result = dbService.connectDatabase(config.getDatabaseURL())
@@ -140,18 +140,6 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when database is not connected', () => {
-      const message = 'An error occurred when checking database is alive'
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-      )
-
-      expect(() => dbService.checkDatabaseIsAlive()).rejects.toThrowError(
-        serverError,
-      )
-    })
-
     it('should fail and throw exception when transaction is not executed', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
       const error = new Error('failed')
@@ -190,23 +178,8 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when database is not connected', () => {
-      const migrationsFolder = faker.string.sample()
-      const message = 'An error occurred when migrating the database'
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-      )
-
-      expect(() =>
-        dbService.migrateDatabase(migrationsFolder),
-      ).rejects.toThrowError(serverError)
-    })
-
-    it('should fail and throw exception when migration fails', async () => {
+    it('should fail and throw exception when migration folder is invalid', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
-      const error = new Error('failed')
-      mockedMigrate.mockRejectedValue(error)
       const migrationsFolder = faker.string.sample()
       const message = 'An error occurred when migrating the database'
       const serverError = new ServerError(

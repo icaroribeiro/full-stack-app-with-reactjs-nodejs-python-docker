@@ -48,25 +48,24 @@ class DBService implements IDBService {
     }
   }
 
-  public async checkDatabaseIsAlive(): Promise<boolean | void> {
-    try {
-      return await this._db!.transaction(async (tx) => {
+  public async checkDatabaseIsAlive(): Promise<boolean> {
+    return await this._db!.transaction(async (tx) => {
+      try {
+        const query = sql.raw(`
+          SELECT 1
+        `)
+        await tx.execute(query)
+        return true
+      } catch (error) {
+        const message = 'An error occurred when checking database is alive'
+        console.error(message, error)
         try {
-          const query = sql.raw(`
-            SELECT 1
-          `)
-          await tx.execute(query)
-          return true
-        } catch (error) {
-          console.error(error)
           tx.rollback()
+        } finally {
+          throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
         }
-      })
-    } catch (error) {
-      const message = 'An error occurred when checking database is alive'
-      console.error(message, error)
-      throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR)
-    }
+      }
+    })
   }
 
   public async migrateDatabase(migrationsFolder: string): Promise<void> {

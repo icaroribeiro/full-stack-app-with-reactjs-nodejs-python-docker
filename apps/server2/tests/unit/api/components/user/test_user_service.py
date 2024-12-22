@@ -61,7 +61,7 @@ class TestRegisterUser(TestUserService):
         mocker: MockerFixture,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when creating a new user into database"
         server_error = ServerError(
             message,
@@ -123,7 +123,7 @@ class TestRetrieveAndCountUsers(TestUserService):
     ) -> None:
         page = faker.pyint()
         limit = faker.pyint()
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when reading and counting users from database"
         server_error = ServerError(
             message,
@@ -175,7 +175,7 @@ class TestRetrieveUser(TestUserService):
         mocker: MockerFixture,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when reading a user from database"
         server_error = ServerError(
             message,
@@ -253,7 +253,7 @@ class TestReplaceUser(TestUserService):
         mocker: MockerFixture,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when updating a user in database"
         server_error = ServerError(
             message,
@@ -334,7 +334,7 @@ class TestRemoveUser(TestUserService):
         mocker: MockerFixture,
     ) -> None:
         mocked_user: UserModel = UserFactory.build()
-        error = Exception("Failed")
+        error = Exception("failed")
         message = "An error occurred when deleting a user from database"
         server_error = ServerError(
             message,

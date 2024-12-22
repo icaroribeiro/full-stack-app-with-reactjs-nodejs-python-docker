@@ -62,7 +62,7 @@ class DBService(IDBService):
                 url=database_url,
             )
         except Exception as error:
-            message = "An error occurred when connecting to database!"
+            message = "An error occurred when connecting to database"
             print(message, error)
             raise ServerError(
                 message,
@@ -71,128 +71,100 @@ class DBService(IDBService):
             )
 
     async def check_database_is_alive(self) -> bool:
-        if self.__async_engine is not None:
-            async with self.__async_engine.connect() as conn:
-                try:
-                    query = text("""
+        async with self.__async_engine.connect() as conn:
+            try:
+                query = text("""
                         SELECT 1
                     """)
-                    await conn.execute(query)
-                    await conn.commit()
-                    return True
-                except Exception as error:
-                    await conn.rollback()
-                    message = "An error occurred when checking database is alive"
-                    print(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                await conn.execute(query)
+                await conn.commit()
+                return True
+            except Exception as error:
+                message = "An error occurred when checking database is alive"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def migrate_database(self, alembic_file_path: str) -> None:
-        if self.__async_engine is not None:
-            async with self.__async_engine.connect() as conn:
-                try:
-                    await conn.run_sync(self.__run_upgrade, alembic_file_path)
-                    return
-                except Exception as error:
-                    await conn.rollback()
-                    message = "An error occurred when migrating the database"
-                    print(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        async with self.__async_engine.connect() as conn:
+            try:
+                await conn.run_sync(self.__run_upgrade, alembic_file_path)
+            except Exception as error:
+                message = "An error occurred when migrating the database"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def get_database_table_row_count(self, table_name: str) -> int:
-        if self.__async_engine is not None:
-            async with self.__async_engine.connect() as conn:
-                try:
-                    query = text(f"""
-                        SELECT count(*)
-                        FROM {table_name};
-                    """)
-                    result = await conn.execute(query)
-                    _tuple = result.first()
-                    await conn.commit()
-                    return _tuple[0]
-                except Exception as error:
-                    await conn.rollback()
-                    message = (
-                        "An error occurred when counting rows of "
-                        f"database table {table_name}"
-                    )
-                    print(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        async with self.__async_engine.connect() as conn:
+            try:
+                query = text(f"""
+                    SELECT count(*)
+                    FROM {table_name};
+                """)
+                result = await conn.execute(query)
+                _tuple = result.first()
+                await conn.commit()
+                return _tuple[0]
+            except Exception as error:
+                message = (
+                    "An error occurred when counting rows of "
+                    f"database table {table_name}"
+                )
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def clear_database_tables(self) -> None:
-        if self.__async_engine is not None:
-            async with self.__async_engine.connect() as conn:
-                try:
-                    query = text("""
-                        SELECT table_name
-                        FROM information_schema.tables
-                            WHERE table_schema = 'public'
-                                AND table_type = 'BASE TABLE';
-                    """)
-                    result = await conn.execute(query)
-                    for _tuple in result.fetchall():
-                        table = _tuple[0]
-                        query = text(f"TRUNCATE TABLE {table} CASCADE;")
-                        await conn.execute(query)
-                    await conn.commit()
-                    return
-                except Exception as error:
-                    await conn.rollback()
-                    message = "An error occurred when cleaning the database tables"
-                    print(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        async with self.__async_engine.connect() as conn:
+            try:
+                query = text("""
+                    SELECT table_name
+                    FROM information_schema.tables
+                        WHERE table_schema = 'public'
+                            AND table_type = 'BASE TABLE';
+                """)
+                result = await conn.execute(query)
+                for _tuple in result.fetchall():
+                    table = _tuple[0]
+                    query = text(f"TRUNCATE TABLE {table} CASCADE;")
+                    await conn.execute(query)
+                await conn.commit()
+            except Exception as error:
+                message = "An error occurred when cleaning the database tables"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def delete_database_tables(self) -> None:
-        if self.__async_engine is not None:
-            async with self.__async_engine.connect() as conn:
-                try:
-                    query = text("""
-                        SELECT table_name
-                        FROM information_schema.tables
-                            WHERE table_schema = 'public'
-                                AND table_type = 'BASE TABLE';
-                    """)
-                    result = await conn.execute(query)
-                    for _tuple in result.fetchall():
-                        table = _tuple[0]
-                        query = text(f"DROP TABLE {table} CASCADE;")
-                        await conn.execute(query)
-                    await conn.commit()
-                    return
-                except Exception as error:
-                    await conn.rollback()
-                    message = "An error occurred when deleting the database tables"
-                    print(message, error)
-                    raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        async with self.__async_engine.connect() as conn:
+            try:
+                query = text("""
+                    SELECT table_name
+                    FROM information_schema.tables
+                        WHERE table_schema = 'public'
+                            AND table_type = 'BASE TABLE';
+                """)
+                result = await conn.execute(query)
+                for _tuple in result.fetchall():
+                    table = _tuple[0]
+                    query = text(f"DROP TABLE {table} CASCADE;")
+                    await conn.execute(query)
+                await conn.commit()
+            except Exception as error:
+                message = "An error occurred when deleting the database tables"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def deactivate_database(self) -> None:
-        if self.__async_engine is not None:
-            try:
-                await self.__async_engine.dispose()
-                self.__async_engine = None
-                return
-            except Exception as error:
-                message = "An error occurred when deactivating the database"
-                print(message, error)
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        message = "Async engine is None!"
-        print(message)
-        raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            await self.__async_engine.dispose()
+            self.__async_engine = None
+        except Exception as error:
+            message = "An error occurred when deactivating the database"
+            print(message, error)
+            raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @staticmethod
     def __run_upgrade(conn: Connection, alembic_file_path: str):
