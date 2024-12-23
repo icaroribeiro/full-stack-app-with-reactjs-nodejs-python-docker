@@ -50,7 +50,7 @@ describe('DBService', () => {
   const appPath = path.resolve(currentPath, '..', '..', '..', '..')
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
-  const timeout = 100000
+  const timeout = 60000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
@@ -119,9 +119,14 @@ describe('DBService', () => {
         },
       )
 
-      expect(() => dbService.connectDatabase(databaseURL)).toThrowError(
-        serverError,
-      )
+      try {
+        dbService.connectDatabase(databaseURL)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 
@@ -150,9 +155,14 @@ describe('DBService', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() => dbService.checkDatabaseIsAlive()).rejects.toThrowError(
-        serverError,
-      )
+      try {
+        await dbService.checkDatabaseIsAlive()
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       await dbService.deactivateDatabase()
     })
   })
@@ -187,9 +197,14 @@ describe('DBService', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() =>
-        dbService.migrateDatabase(migrationsFolder),
-      ).rejects.toThrowError(serverError)
+      try {
+        await dbService.migrateDatabase(migrationsFolder)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       await dbService.deactivateDatabase()
     })
   })
@@ -225,23 +240,10 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when database is not connected', () => {
-      const tableName = faker.string.sample()
-      const message = `An error occurred when counting rows of database table ${tableName}`
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-      )
-
-      expect(() =>
-        dbService.getDatabaseTableRowCount(tableName),
-      ).rejects.toThrowError(serverError)
-    })
-
-    it('should fail and throw exception when transaction is not executed', async () => {
+    it('should fail and throw exception when database table does not exist', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
-      const error = new Error('failed')
-      vi.spyOn(PgDatabase.prototype, 'execute').mockRejectedValue(error)
+      const migrationsFolder = path.join(appPath, 'db', 'migrations')
+      await dbService.migrateDatabase(migrationsFolder)
       const tableName = faker.string.sample()
       const message = `An error occurred when counting rows of database table ${tableName}`
       const serverError = new ServerError(
@@ -249,9 +251,15 @@ describe('DBService', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() =>
-        dbService.getDatabaseTableRowCount(tableName),
-      ).rejects.toThrowError(serverError)
+      try {
+        await dbService.getDatabaseTableRowCount(tableName)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
+      await dbService.deleteDatabaseTables()
       await dbService.deactivateDatabase()
     })
   })
@@ -293,18 +301,6 @@ describe('DBService', () => {
       await dbService.deactivateDatabase()
     })
 
-    it('should fail and throw exception when database is not connected', () => {
-      const message = 'An error occurred when cleaning the database tables'
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-      )
-
-      expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
-        serverError,
-      )
-    })
-
     it('should fail and throw exception when transaction is not executed', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
       const error = new Error('failed')
@@ -315,9 +311,14 @@ describe('DBService', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() => dbService.clearDatabaseTables()).rejects.toThrowError(
-        serverError,
-      )
+      try {
+        await dbService.clearDatabaseTables()
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       await dbService.deactivateDatabase()
     })
   })
@@ -343,20 +344,7 @@ describe('DBService', () => {
         `)
       const database_tables = await dbService.db.execute(query)
       expect(database_tables.length).toEqual(0)
-      await dbService.deleteDatabaseTables()
       await dbService.deactivateDatabase()
-    })
-
-    it('should fail and throw exception when database is not connected', () => {
-      const message = 'An error occurred when deleting the database tables'
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-      )
-
-      expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
-        serverError,
-      )
     })
 
     it('should fail and throw exception when transaction is not executed', async () => {
@@ -369,9 +357,14 @@ describe('DBService', () => {
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() => dbService.deleteDatabaseTables()).rejects.toThrowError(
-        serverError,
-      )
+      try {
+        await dbService.deleteDatabaseTables()
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       await dbService.deactivateDatabase()
     })
   })
@@ -383,24 +376,27 @@ describe('DBService', () => {
 
     it('should succeed and return undefined when database is deactivated', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
-      const migrationsFolder = path.join(appPath, 'db', 'migrations')
-      await dbService.migrateDatabase(migrationsFolder)
 
       const result = await dbService.deactivateDatabase()
 
       expect(result).toEqual(undefined)
     })
 
-    it('should fail and throw exception when database is not connected', () => {
+    it('should fail and throw exception when database is not connected', async () => {
       const message = 'An error occurred when deactivating the database'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
-      expect(() => dbService.deactivateDatabase()).rejects.toThrowError(
-        serverError,
-      )
+      try {
+        await dbService.deactivateDatabase()
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 })

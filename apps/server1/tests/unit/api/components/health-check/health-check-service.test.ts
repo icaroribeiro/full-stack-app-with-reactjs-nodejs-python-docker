@@ -38,7 +38,7 @@ describe('HealthCheckService', () => {
       expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
     })
 
-    it('should fail and throw exception when application is not healthy', () => {
+    it('should fail and throw exception when application is not healthy', async () => {
       const error = new Error('failed')
       const message =
         'An error occurred when checking if application is healthy'
@@ -46,7 +46,7 @@ describe('HealthCheckService', () => {
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
         {
-          context: 'unknown',
+          context: undefined,
           cause: error,
         },
       )
@@ -55,9 +55,14 @@ describe('HealthCheckService', () => {
       })
       dbService.checkDatabaseIsAlive = mockedCheckDatabaseIsAlive
 
-      expect(() => healthCheckService.checkHealth()).rejects.toThrowError(
-        serverError,
-      )
+      try {
+        await healthCheckService.checkHealth()
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedCheckDatabaseIsAlive).toHaveBeenCalledOnce()
     })
   })

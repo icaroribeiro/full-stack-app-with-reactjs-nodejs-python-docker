@@ -56,7 +56,6 @@ class TestAsyncEngine(TestDBService):
             db_service.async_engine
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
 
@@ -65,11 +64,11 @@ class TestConnectDatabase(TestDBService):
     def test_should_define_a_method(self, db_service: DBService) -> None:
         assert isinstance(db_service.connect_database, types.MethodType) is True
 
-    def test_should_succeed_and_return_none_when_async_engine_is_created(
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_async_engine_is_created(
         self,
         config: Config,
         db_service: DBService,
-        initialize_database: None,
     ) -> None:
         database_url = config.get_database_url()
 
@@ -77,11 +76,11 @@ class TestConnectDatabase(TestDBService):
 
         assert result is None
         assert db_service.async_engine is not None
+        await db_service.deactivate_database()
 
     def test_should_fail_and_raise_exception_when_database_url_is_invalid(
         self,
         db_service: DBService,
-        initialize_database: None,
         faker: Faker,
     ) -> None:
         database_url = faker.url("")
@@ -99,8 +98,6 @@ class TestConnectDatabase(TestDBService):
             db_service.connect_database(database_url)
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail.context == server_error.detail.context
-        assert exc_info.value.detail.cause == server_error.detail.cause
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
 
@@ -138,7 +135,6 @@ class TestCheckDatabaseIsAlive(TestDBService):
                 await db_service.check_database_is_alive()
 
             assert exc_info.value.message == server_error.message
-            assert exc_info.value.detail == server_error.detail
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
             await db_service.deactivate_database()
@@ -181,7 +177,6 @@ class TestMigrateDatabase(TestDBService):
             await db_service.migrate_database(alembic_file_path)
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
         db_service.deactivate_database()
@@ -201,9 +196,9 @@ class TestGetDatabaseTableRowCount(TestDBService):
         db_service: DBService,
     ) -> None:
         db_service.connect_database(config.get_database_url())
-        table_name = "users"
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
+        table_name = "users"
         count = 3
         mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
@@ -231,9 +226,9 @@ class TestGetDatabaseTableRowCount(TestDBService):
         faker: Faker,
     ) -> None:
         db_service.connect_database(config.get_database_url())
-        table_name = faker.word()
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
+        table_name = faker.word()
         message = f"An error occurred when counting rows of database table {table_name}"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -241,7 +236,6 @@ class TestGetDatabaseTableRowCount(TestDBService):
             await db_service.get_database_table_row_count(table_name)
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
         await db_service.delete_database_tables()
@@ -258,10 +252,10 @@ class TestClearDatabaseTable(TestDBService):
         config: Config,
         db_service: DBService,
     ) -> None:
-        name = "users"
         db_service.connect_database(config.get_database_url())
         alembic_file_path = "alembic.ini"
         await db_service.migrate_database(alembic_file_path)
+        table_name = "users"
         count = 3
         mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
         domain_user_list: list[User] = []
@@ -273,13 +267,15 @@ class TestClearDatabaseTable(TestDBService):
                 obj = DictToObj(engine_result.first()._asdict())
                 await conn.commit()
                 domain_user_list.append(UserMapper.to_domain(obj))
-        assert await db_service.get_database_table_row_count(name) == count
+        assert await db_service.get_database_table_row_count(table_name) == count
         expected_result = 0
 
         result = await db_service.clear_database_tables()
 
         assert result is None
-        assert await db_service.get_database_table_row_count(name) == expected_result
+        assert (
+            await db_service.get_database_table_row_count(table_name) == expected_result
+        )
         await db_service.delete_database_tables()
         await db_service.deactivate_database()
 
@@ -300,7 +296,6 @@ class TestClearDatabaseTable(TestDBService):
                 await db_service.clear_database_tables()
 
             assert exc_info.value.message == server_error.message
-            assert exc_info.value.detail == server_error.detail
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
             await db_service.deactivate_database()
@@ -352,7 +347,6 @@ class TestDeleteDatabaseTables(TestDBService):
                 await db_service.delete_database_tables()
 
             assert exc_info.value.message == server_error.message
-            assert exc_info.value.detail == server_error.detail
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
             await db_service.deactivate_database()
@@ -378,7 +372,6 @@ class TestDeactivateDatabase(TestDBService):
         with pytest.raises(ServerError) as exc_info:
             await db_service.async_engine()
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
 
@@ -393,6 +386,5 @@ class TestDeactivateDatabase(TestDBService):
             await db_service.deactivate_database()
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational

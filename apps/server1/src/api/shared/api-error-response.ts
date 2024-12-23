@@ -1,6 +1,8 @@
+import { Detail } from '../../server-error'
+
 type APIErrorResponse = {
   message: string
-  detail?: unknown
+  detail?: Detail
   isOperational: boolean
 }
 

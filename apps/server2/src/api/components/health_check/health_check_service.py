@@ -20,10 +20,10 @@ class HealthCheckService(IHealthCheckService):
         try:
             return await self.db_service.check_database_is_alive()
         except Exception as error:
-            message = "An error occurred when checking if application is alive"
+            message = "An error occurred when checking if application is healthy"
             print(message)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context="unknown", cause=str(error)),
+                Detail(context=None, cause=error),
             )

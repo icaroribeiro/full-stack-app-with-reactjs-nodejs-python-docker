@@ -33,7 +33,7 @@ class UserService implements IUserService {
     }
 
     if (newUser === undefined) {
-      const message = 'User could not be registered'
+      const message = 'User could not be created'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: user,
         cause: undefined,

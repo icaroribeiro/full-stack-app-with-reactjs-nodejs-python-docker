@@ -17,7 +17,7 @@ class HealthCheckService implements IHealthCheckService {
       const message =
         'An error occurred when checking if application is healthy'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
-        context: 'unknown',
+        context: undefined,
         cause: error,
       })
     }

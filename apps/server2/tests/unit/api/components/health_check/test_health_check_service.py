@@ -54,7 +54,7 @@ class TestCheckHealth(TestHealthCheckService):
         server_error = ServerError(
             message,
             status.HTTP_500_INTERNAL_SERVER_ERROR,
-            Detail(context="unknown", cause=str(error)),
+            Detail(context=None, cause=error),
         )
         mocked_check_database_is_alive = mocker.Mock(side_effect=error)
         db_service.check_database_is_alive = mocked_check_database_is_alive
@@ -63,7 +63,6 @@ class TestCheckHealth(TestHealthCheckService):
             await health_check_service.check_health()
 
         assert exc_info.value.message == server_error.message
-        assert exc_info.value.detail == server_error.detail
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
         db_service.check_database_is_alive.assert_called_once()

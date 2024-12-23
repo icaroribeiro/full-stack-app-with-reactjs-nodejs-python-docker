@@ -67,7 +67,7 @@ class DBService(IDBService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=database_url, cause=str(error)),
+                Detail(context=database_url, cause=error),
             )
 
     async def check_database_is_alive(self) -> bool:
@@ -83,7 +83,11 @@ class DBService(IDBService):
                 message = "An error occurred when checking database is alive"
                 print(message, error)
                 await conn.rollback()
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=None, cause=error),
+                )
 
     async def migrate_database(self, alembic_file_path: str) -> None:
         async with self.__async_engine.connect() as conn:
@@ -93,7 +97,11 @@ class DBService(IDBService):
                 message = "An error occurred when migrating the database"
                 print(message, error)
                 await conn.rollback()
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=alembic_file_path, cause=error),
+                )
 
     async def get_database_table_row_count(self, table_name: str) -> int:
         async with self.__async_engine.connect() as conn:
@@ -113,7 +121,11 @@ class DBService(IDBService):
                 )
                 print(message, error)
                 await conn.rollback()
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=table_name, cause=error),
+                )
 
     async def clear_database_tables(self) -> None:
         async with self.__async_engine.connect() as conn:
@@ -134,7 +146,11 @@ class DBService(IDBService):
                 message = "An error occurred when cleaning the database tables"
                 print(message, error)
                 await conn.rollback()
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=None, cause=error),
+                )
 
     async def delete_database_tables(self) -> None:
         async with self.__async_engine.connect() as conn:
@@ -155,7 +171,11 @@ class DBService(IDBService):
                 message = "An error occurred when deleting the database tables"
                 print(message, error)
                 await conn.rollback()
-                raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=None, cause=error),
+                )
 
     async def deactivate_database(self) -> None:
         try:
@@ -164,7 +184,11 @@ class DBService(IDBService):
         except Exception as error:
             message = "An error occurred when deactivating the database"
             print(message, error)
-            raise ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise ServerError(
+                message,
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                Detail(context=None, cause=error),
+            )
 
     @staticmethod
     def __run_upgrade(conn: Connection, alembic_file_path: str):

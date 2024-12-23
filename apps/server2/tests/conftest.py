@@ -11,6 +11,11 @@ from server import Server
 from services.db_service import DBService
 
 
+@pytest.fixture
+def faker() -> Faker:
+    return Faker()
+
+
 @pytest.fixture(scope="session")
 def config() -> Config:
     return Config()
@@ -38,10 +43,8 @@ def start_database_container(request, config: Config) -> DbContainer:
 
     def stop_database_container() -> None:
         container.stop()
-        # print("Database container stopped successfully!")
 
     request.addfinalizer(stop_database_container)
-    # print("Database container started successfully!")
     return container
 
 
@@ -49,31 +52,30 @@ async def initialize_database_base(
     request, config: Config, db_service: DBService
 ) -> None:
     db_service.connect_database(config.get_database_url())
-    alembic_file_path = "alembic.ini"
-    await db_service.migrate_database(alembic_file_path)
 
     def finalize():
         async def finalize_database() -> None:
-            await db_service.delete_database_tables()
-            # print("Database tables deleted successfully!")
             await db_service.deactivate_database()
-            # print("Database deactivated successfully!")
 
         asyncio.get_event_loop().run_until_complete(finalize_database())
 
     request.addfinalizer(finalize)
-    # print("Database initialized successfully!")
 
 
-@pytest.fixture(scope="class")
-async def initialize_database(request, config: Config, db_service: DBService):
-    await initialize_database_base(request, config, db_service)
+@pytest.fixture
+async def migrate_database(db_service: DBService):
+    alembic_file_path = "alembic.ini"
+    await db_service.migrate_database(alembic_file_path)
 
 
 @pytest.fixture
 async def clear_database_tables(db_service: DBService) -> None:
     await db_service.clear_database_tables()
-    # print("Database tables cleaned successfully!")
+
+
+@pytest.fixture
+async def delete_database_tables(db_service: DBService) -> None:
+    await db_service.delete_database_tables()
 
 
 @pytest.fixture(scope="session")
@@ -81,8 +83,3 @@ async def async_client(config: Config) -> AsyncGenerator[AsyncClient, None]:
     server = Server(config)
     async with AsyncClient(transport=ASGITransport(app=server.app)) as async_client:
         yield async_client
-
-
-@pytest.fixture
-def fake() -> Faker:
-    return Faker()

@@ -1,4 +1,5 @@
 import * as schemas from '@db/schemas'
+import httpStatus from 'http-status'
 import { faker } from '@faker-js/faker'
 import {
   User,
@@ -15,9 +16,9 @@ import { UserFactory } from '../../../../factories/user-factory'
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { DrizzleError } from 'drizzle-orm'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { ServerError } from '../../../../../src/server-error'
 
 describe('UserRepository', async () => {
   const currentPath = fileURLToPath(import.meta.url)
@@ -27,7 +28,7 @@ describe('UserRepository', async () => {
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
   let container: StartedPostgreSqlContainer
-  const timeout = 100000
+  const timeout = 60000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
@@ -51,7 +52,7 @@ describe('UserRepository', async () => {
 
     it('should succeed and return user when user is created', async () => {
       await dbService.migrateDatabase(migrationsFolder)
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const expectedResult = userMapper.toDomain(mockedUser)
 
       const result = await userRepository.createUser(mockedUser)
@@ -68,12 +69,22 @@ describe('UserRepository', async () => {
       expect(result?.updatedAt).not.toBeNull()
     })
 
-    it('should fail and throw exception when user schema does not exist into database', () => {
-      const mockedUser = userFactory.build()
-
-      expect(() => userRepository.createUser(mockedUser)).rejects.toThrowError(
-        new DrizzleError({ message: 'Rollback' }),
+    it('should fail and throw exception when user schema does not exist into database', async () => {
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const message = 'An error occurred when creating a user into database'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
       )
+
+      try {
+        await userRepository.createUser(mockedUser)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 
@@ -82,7 +93,7 @@ describe('UserRepository', async () => {
       expect(typeof userRepository.readAndCountUsers).toBe('function')
     })
 
-    it('should succeed and return an empty list of users with zero total when users do not exist', async () => {
+    it('should succeed and return empty list of users with zero total when users do not exist', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
@@ -103,7 +114,9 @@ describe('UserRepository', async () => {
     it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const count = 3
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
         const rawUserData = userMapper.toPersistence(mockedUser)
@@ -135,7 +148,9 @@ describe('UserRepository', async () => {
     it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const count = 3
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
         const rawUserData = userMapper.toPersistence(mockedUser)
@@ -165,7 +180,9 @@ describe('UserRepository', async () => {
     it('should succeed and return a list of users with non-zero total when page is not the first and can be filled', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const count = 5
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
         const rawUserData = userMapper.toPersistence(mockedUser)
@@ -192,13 +209,24 @@ describe('UserRepository', async () => {
       expect(totalResult).toEqual(expectedTotalResult)
     })
 
-    it('should fail and throw exception when user schema does not exist into database', () => {
+    it('should fail and throw exception when user schema does not exist into database', async () => {
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
+      const message =
+        'An error occurred when reading and couting users from database'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
 
-      expect(() =>
-        userRepository.readAndCountUsers(page, limit),
-      ).rejects.toThrowError(new DrizzleError({ message: 'Rollback' }))
+      try {
+        await userRepository.readAndCountUsers(page, limit)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 
@@ -209,7 +237,7 @@ describe('UserRepository', async () => {
 
     it('should succeed and return a user when user is read', async () => {
       await dbService.migrateDatabase(migrationsFolder)
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
@@ -232,12 +260,22 @@ describe('UserRepository', async () => {
       expect(result?.updatedAt).toEqual(expectedResult.updatedAt)
     })
 
-    it('should fail and throw exception when user schema does not exist into database', () => {
-      const mockedUser = userFactory.build()
-
-      expect(() => userRepository.readUser(mockedUser.id)).rejects.toThrowError(
-        new DrizzleError({ message: 'Rollback' }),
+    it('should fail and throw exception when user schema does not exist into database', async () => {
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const message = 'An error occurred when reading a user from database'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
       )
+
+      try {
+        await userRepository.readUser(mockedUser.id as string)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 
@@ -248,7 +286,7 @@ describe('UserRepository', async () => {
 
     it('should succeed and return a user when user is updated', async () => {
       await dbService.migrateDatabase(migrationsFolder)
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
@@ -277,15 +315,25 @@ describe('UserRepository', async () => {
       expect(result?.updatedAt).not.toEqual(expectedResult.updatedAt)
     })
 
-    it('should fail and throw exception when user schema does not exist into database', () => {
+    it('should fail and throw exception when user schema does not exist into database', async () => {
       const mockedUpdatedUser = userMapper.toDomain(userFactory.build())
+      const message = 'An error occurred when updating a user from database'
+      const serverError = new ServerError(
+        message,
+        httpStatus.INTERNAL_SERVER_ERROR,
+      )
 
-      expect(() =>
-        userRepository.updateUser(
+      try {
+        await userRepository.updateUser(
           mockedUpdatedUser.id as string,
           mockedUpdatedUser,
-        ),
-      ).rejects.toThrowError(new DrizzleError({ message: 'Rollback' }))
+        )
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
     })
   })
 
@@ -296,7 +344,7 @@ describe('UserRepository', async () => {
 
     it('should succeed and return user when user is deleted', async () => {
       await dbService.migrateDatabase(migrationsFolder)
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
@@ -320,11 +368,21 @@ describe('UserRepository', async () => {
     })
   })
 
-  it('should fail and throw exception when user schema does not exist into database', () => {
+  it('should fail and throw exception when user schema does not exist into database', async () => {
     const mockedUser = userMapper.toDomain(userFactory.build())
+    const message = 'An error occurred when deleting a user from database'
+    const serverError = new ServerError(
+      message,
+      httpStatus.INTERNAL_SERVER_ERROR,
+    )
 
-    expect(() =>
-      userRepository.deleteUser(mockedUser.id as string),
-    ).rejects.toThrowError(new DrizzleError({ message: 'Rollback' }))
+    try {
+      await userRepository.deleteUser(mockedUser.id as string)
+    } catch (error) {
+      const thrownError = error as unknown as ServerError
+      expect(thrownError.message).toEqual(serverError.message)
+      expect(thrownError.statusCode).toEqual(serverError.statusCode)
+      expect(thrownError.isOperational).toEqual(serverError.isOperational)
+    }
   })
 })

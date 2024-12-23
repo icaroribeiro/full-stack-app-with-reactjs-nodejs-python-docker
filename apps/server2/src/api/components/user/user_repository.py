@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from db.models.user import UserModel
+from fastapi import status
 from sqlalchemy import delete, desc, func, insert, select, update
 
 from api.components.user.user_mapper import UserMapper
 from api.components.user.user_models import User
 from api.utils.dict_to_obj import DictToObj
+from server_error import Detail, ServerError
 from services.db_service import DBService
 
 
@@ -22,15 +24,15 @@ class IUserRepository(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def read_user(self, userId: str) -> User | None:
+    async def read_user(self, user_id: str) -> User | None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def update_user(self, userId: str, user: User) -> User | None:
+    async def update_user(self, user_id: str, user: User) -> User | None:
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def delete_user(self, userId: str) -> User | None:
+    async def delete_user(self, user_id: str) -> User | None:
         raise Exception("NotImplementedException")
 
 
@@ -41,80 +43,133 @@ class UserRepository(IUserRepository):
     async def create_user(self, user: User) -> User:
         raw_user_data = UserMapper.to_persistence(user)
         async with self.db_service.async_engine.connect() as conn:
-            query = insert(UserModel).values(raw_user_data).returning(UserModel)
-            result = await conn.execute(query)
-            obj = DictToObj(result.first()._asdict())
-            await conn.commit()
-            return UserMapper.to_domain(obj)
+            try:
+                query = insert(UserModel).values(raw_user_data).returning(UserModel)
+                result = await conn.execute(query)
+                obj = DictToObj(result.first()._asdict())
+                await conn.commit()
+                return UserMapper.to_domain(obj)
+            except Exception as error:
+                message = "An error occurred when creating a user into database"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=user, cause=error),
+                )
 
     async def read_and_count_users(
         self, page: int, limit: int
     ) -> tuple[list[User], int]:
         async with self.db_service.async_engine.connect() as conn:
-            subquery = (
-                select(UserModel.id)
-                .order_by(desc(UserModel.created_at))
-                .limit(limit)
-                .offset((page - 1) * limit)
-                .subquery()
-            )
-            query = (
-                select(UserModel)
-                .join(
-                    subquery,
-                    UserModel.id == subquery.c.id,
+            try:
+                subquery = (
+                    select(UserModel.id)
+                    .order_by(desc(UserModel.created_at))
+                    .limit(limit)
+                    .offset((page - 1) * limit)
+                    .subquery()
                 )
-                .order_by(desc(UserModel.created_at))
-            )
-            result = await conn.execute(query)
-            records_result: list[User] = []
-            for record in result.all():
-                obj = DictToObj(record._asdict())
-                records_result.append(UserMapper.to_domain(obj))
+                query = (
+                    select(UserModel)
+                    .join(
+                        subquery,
+                        UserModel.id == subquery.c.id,
+                    )
+                    .order_by(desc(UserModel.created_at))
+                )
+                result = await conn.execute(query)
 
-            query = select(func.count(UserModel.id).label("count"))
-            result = await conn.execute(query)
-            obj = DictToObj(result.first()._asdict())
-            total_result = obj.count
-            await conn.commit()
+                records: list[User] = []
+                for record in result.all():
+                    obj = DictToObj(record._asdict())
+                    records.append(UserMapper.to_domain(obj))
 
-            return records_result, total_result
+                query = select(func.count(UserModel.id).label("count"))
+                result = await conn.execute(query)
+                obj = DictToObj(result.first()._asdict())
+                total = obj.count
+                await conn.commit()
 
-    async def read_user(self, userId: str) -> User | None:
+                return records, total
+            except Exception as error:
+                message = (
+                    "An error occurred when reading and couting users from database"
+                )
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context={"page": page, "limit": limit}, cause=error),
+                )
+
+    async def read_user(self, user_id: str) -> User | None:
         async with self.db_service.async_engine.connect() as conn:
-            query = select(UserModel).where(UserModel.id == UUID(userId))
-            result = await conn.execute(query)
-            if result.rowcount == 0:
-                return None
-            obj = DictToObj(result.first()._asdict())
-            await conn.commit()
-            return UserMapper.to_domain(obj)
+            try:
+                query = select(UserModel).where(UserModel.id == UUID(user_id))
+                result = await conn.execute(query)
+                if result.rowcount == 0:
+                    return None
+                obj = DictToObj(result.first()._asdict())
+                await conn.commit()
+                return UserMapper.to_domain(obj)
+            except Exception as error:
+                message = "An error occurred when reading a user from database"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=user_id, cause=error),
+                )
 
-    async def update_user(self, userId: str, user: User) -> User | None:
+    async def update_user(self, user_id: str, user: User) -> User | None:
         async with self.db_service.async_engine.connect() as conn:
-            query = (
-                update(UserModel)
-                .where(UserModel.id == UUID(userId))
-                .values(name=user.name, email=user.email)
-                .returning(UserModel)
-            )
-            result = await conn.execute(query)
-            if result.rowcount == 0:
-                return None
-            obj = DictToObj(result.first()._asdict())
-            await conn.commit()
-            return UserMapper.to_domain(obj)
+            try:
+                query = (
+                    update(UserModel)
+                    .where(UserModel.id == UUID(user_id))
+                    .values(name=user.name, email=user.email)
+                    .returning(UserModel)
+                )
+                result = await conn.execute(query)
+                if result.rowcount == 0:
+                    return None
+                obj = DictToObj(result.first()._asdict())
+                await conn.commit()
+                return UserMapper.to_domain(obj)
+            except Exception as error:
+                message = "An error occurred when updating a user from database"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context={"user_id": user_id, "user": user}, cause=error),
+                )
 
-    async def delete_user(self, userId: str) -> User | None:
+    async def delete_user(self, user_id: str) -> User | None:
         async with self.db_service.async_engine.connect() as conn:
-            query = (
-                delete(UserModel)
-                .where(UserModel.id == UUID(userId))
-                .returning(UserModel)
-            )
-            result = await conn.execute(query)
-            if result.rowcount == 0:
-                return None
-            obj = DictToObj(result.first()._asdict())
-            await conn.commit()
-            return UserMapper.to_domain(obj)
+            try:
+                query = (
+                    delete(UserModel)
+                    .where(UserModel.id == UUID(user_id))
+                    .returning(UserModel)
+                )
+                result = await conn.execute(query)
+                if result.rowcount == 0:
+                    return None
+                obj = DictToObj(result.first()._asdict())
+                await conn.commit()
+                return UserMapper.to_domain(obj)
+            except Exception as error:
+                message = "An error occurred when deleting a user from database"
+                print(message, error)
+                await conn.rollback()
+                raise ServerError(
+                    message,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    Detail(context=user_id, cause=error),
+                )

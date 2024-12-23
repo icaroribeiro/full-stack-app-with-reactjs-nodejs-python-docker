@@ -39,12 +39,21 @@
 				],
 				"type": "object"
 			},
+			"Detail": {
+				"properties": {
+					"cause": {},
+					"context": {}
+				},
+				"type": "object"
+			},
 			"APIErrorResponse": {
 				"properties": {
 					"isOperational": {
 						"type": "boolean"
 					},
-					"detail": {},
+					"detail": {
+						"$ref": "#/components/schemas/Detail"
+					},
 					"message": {
 						"type": "string"
 					}
@@ -155,7 +164,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-21T22:12:00.090Z",
+											"createdAt": "2024-12-23T14:46:21.081Z",
 											"updatedAt": null
 										}
 									}
@@ -247,7 +256,7 @@
 													"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 													"name": "name",
 													"email": "email@email.com",
-													"createdAt": "2024-12-21T22:12:00.096Z",
+													"createdAt": "2024-12-23T14:46:21.088Z",
 													"updatedAt": null
 												}
 											],
@@ -328,7 +337,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-21T22:12:00.098Z",
+											"createdAt": "2024-12-23T14:46:21.090Z",
 											"updatedAt": null
 										}
 									}
@@ -413,8 +422,8 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-21T22:12:00.099Z",
-											"updatedAt": "2024-12-21T22:12:00.099Z"
+											"createdAt": "2024-12-23T14:46:21.092Z",
+											"updatedAt": "2024-12-23T14:46:21.092Z"
 										}
 									}
 								}
@@ -530,7 +539,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-21T22:12:00.100Z",
+											"createdAt": "2024-12-23T14:46:21.093Z",
 											"updatedAt": null
 										}
 									}

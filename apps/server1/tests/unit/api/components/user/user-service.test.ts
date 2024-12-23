@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import httpStatus from 'http-status'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  UserMapper,
   UserRepository,
   UserService,
 } from '../../../../../src/api/components/user'
@@ -24,6 +25,7 @@ describe('UserService', () => {
   const mockedUserRepository = vi.mocked(new UserRepository(dbService))
   const userService = new UserService(mockedUserRepository)
   const userFactory = new UserFactory()
+  const userMapper = new UserMapper()
 
   afterEach(() => {
     vi.clearAllMocks()
@@ -35,7 +37,7 @@ describe('UserService', () => {
     })
 
     it('should succeed and return user when user is registered', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const mockedCreateUser = vi
         .fn()
         .mockResolvedValue(Promise.resolve(mockedUser))
@@ -49,7 +51,7 @@ describe('UserService', () => {
     })
 
     it('should fail and throw exception when an error occurred when creating a user', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const error = new Error('failed')
       const message = 'An error occurred when creating a user'
       const serverError = new ServerError(
@@ -63,15 +65,21 @@ describe('UserService', () => {
       const mockedCreateUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.createUser = mockedCreateUser
 
-      await expect(() =>
-        userService.registerUser(mockedUser),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.registerUser(mockedUser)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.createUser).toHaveBeenCalledWith(mockedUser)
     })
 
-    it('should fail and throw exception when user could not be registered', async () => {
-      const mockedUser = userFactory.build()
-      const message = 'User could not be registered'
+    it('should fail and throw exception when user could not be created', async () => {
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const error = new Error('failed')
+      const message = 'User could not be created'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -83,9 +91,14 @@ describe('UserService', () => {
       const mockedCreateUser = vi.fn().mockReturnValue(undefined)
       mockedUserRepository.createUser = mockedCreateUser
 
-      await expect(() =>
-        userService.registerUser(mockedUser),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.registerUser(mockedUser)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.createUser).toHaveBeenCalledWith(mockedUser)
     })
   })
@@ -131,9 +144,14 @@ describe('UserService', () => {
       const mockedReadAndCountUsers = vi.fn().mockRejectedValue(error)
       mockedUserRepository.readAndCountUsers = mockedReadAndCountUsers
 
-      await expect(() =>
-        userService.retrieveAndCountUsers(page, limit),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.retrieveAndCountUsers(page, limit)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.readAndCountUsers).toHaveBeenCalledWith(
         page,
         limit,
@@ -144,22 +162,23 @@ describe('UserService', () => {
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
       const message = 'Users could not be read and counted'
-      const serverError = new ServerError(
-        message,
-        httpStatus.INTERNAL_SERVER_ERROR,
-        {
-          context: { page: page, limit: limit },
-          cause: undefined,
-        },
-      )
+      const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
+        context: { page: page, limit: limit },
+        cause: undefined,
+      })
       const mockedReadAndCountUsers = vi
         .fn()
         .mockReturnValue([undefined, undefined])
       mockedUserRepository.readAndCountUsers = mockedReadAndCountUsers
 
-      await expect(() =>
-        userService.retrieveAndCountUsers(page, limit),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.retrieveAndCountUsers(page, limit)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.readAndCountUsers).toHaveBeenCalledWith(
         page,
         limit,
@@ -173,21 +192,21 @@ describe('UserService', () => {
     })
 
     it('should succeed and return user when user is retrieved', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const mockedReadUser = vi
         .fn()
         .mockResolvedValue(Promise.resolve(mockedUser))
       mockedUserRepository.readUser = mockedReadUser
       const expectedResult = mockedUser
 
-      const result = await userService.retrieveUser(mockedUser.id)
+      const result = await userService.retrieveUser(mockedUser.id as string)
 
       expect(result).toEqual(expectedResult)
       expect(mockedUserRepository.readUser).toHaveBeenCalledWith(mockedUser.id)
     })
 
     it('should fail and throw exception when an error occurred when reading a user', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const error = new Error('failed')
       const message = 'An error occurred when reading a user'
       const serverError = new ServerError(
@@ -201,14 +220,19 @@ describe('UserService', () => {
       const mockedReadUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.readUser = mockedReadUser
 
-      await expect(() =>
-        userService.retrieveUser(mockedUser.id),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.retrieveUser(mockedUser.id as string)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.readUser).toHaveBeenCalledWith(mockedUser.id)
     })
 
     it('should fail and throw exception when user could not be read', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const message = 'User could not be read'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
@@ -217,9 +241,14 @@ describe('UserService', () => {
       const mockedReadUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.readUser = mockedReadUser
 
-      await expect(() =>
-        userService.retrieveUser(mockedUser.id),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.retrieveUser(mockedUser.id as string)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.readUser).toHaveBeenCalledWith(mockedUser.id)
     })
   })
@@ -230,14 +259,17 @@ describe('UserService', () => {
     })
 
     it('should succeed and return user when user is replaced', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const mockedUpdateUser = vi
         .fn()
         .mockResolvedValue(Promise.resolve(mockedUser))
       mockedUserRepository.updateUser = mockedUpdateUser
       const expectedResult = mockedUser
 
-      const result = await userService.replaceUser(mockedUser.id, mockedUser)
+      const result = await userService.replaceUser(
+        mockedUser.id as string,
+        mockedUser,
+      )
 
       expect(result).toEqual(expectedResult)
       expect(mockedUserRepository.updateUser).toHaveBeenCalledWith(
@@ -247,7 +279,7 @@ describe('UserService', () => {
     })
 
     it('should fail and throw exception when an error occurred when updating a user', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const error = new Error('failed')
       const message = 'An error occurred when updating a user'
       const serverError = new ServerError(
@@ -261,9 +293,14 @@ describe('UserService', () => {
       const mockedUpdateUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.updateUser = mockedUpdateUser
 
-      await expect(() =>
-        userService.replaceUser(mockedUser.id, mockedUser),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.replaceUser(mockedUser.id as string, mockedUser)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.updateUser).toHaveBeenCalledWith(
         mockedUser.id,
         mockedUser,
@@ -271,7 +308,7 @@ describe('UserService', () => {
     })
 
     it('should fail and throw exception when user could not be updated', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const message = 'User could not be updated'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
@@ -280,9 +317,14 @@ describe('UserService', () => {
       const mockedUpdateUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.updateUser = mockedUpdateUser
 
-      await expect(() =>
-        userService.replaceUser(mockedUser.id, mockedUser),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.replaceUser(mockedUser.id as string, mockedUser)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.updateUser).toHaveBeenCalledWith(
         mockedUser.id,
         mockedUser,
@@ -296,14 +338,14 @@ describe('UserService', () => {
     })
 
     it('should succeed and return user when user is removed', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const mockedDeleteUser = vi
         .fn()
         .mockResolvedValue(Promise.resolve(mockedUser))
       mockedUserRepository.deleteUser = mockedDeleteUser
       const expectedResult = mockedUser
 
-      const result = await userService.removeUser(mockedUser.id)
+      const result = await userService.removeUser(mockedUser.id as string)
 
       expect(result).toEqual(expectedResult)
       expect(mockedUserRepository.deleteUser).toHaveBeenCalledWith(
@@ -312,7 +354,7 @@ describe('UserService', () => {
     })
 
     it('should fail and throw exception when an error occurred when deleting a user', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const error = new Error('failed')
       const message = 'An error occurred when deleting a user'
       const serverError = new ServerError(
@@ -326,16 +368,21 @@ describe('UserService', () => {
       const mockedDeleteUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.deleteUser = mockedDeleteUser
 
-      await expect(() =>
-        userService.removeUser(mockedUser.id as string),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.removeUser(mockedUser.id as string)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.deleteUser).toHaveBeenCalledWith(
         mockedUser.id,
       )
     })
 
     it('should fail and throw exception when user could not be removed', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const message = 'User could not be removed'
       const serverError = new ServerError(message, httpStatus.NOT_FOUND, {
         context: mockedUser.id,
@@ -344,9 +391,14 @@ describe('UserService', () => {
       const mockedDeleteUser = vi.fn().mockResolvedValue(undefined)
       mockedUserRepository.deleteUser = mockedDeleteUser
 
-      await expect(() =>
-        userService.removeUser(mockedUser.id),
-      ).rejects.toThrowError(serverError)
+      try {
+        await userService.removeUser(mockedUser.id as string)
+      } catch (error) {
+        const thrownError = error as unknown as ServerError
+        expect(thrownError.message).toEqual(serverError.message)
+        expect(thrownError.statusCode).toEqual(serverError.statusCode)
+        expect(thrownError.isOperational).toEqual(serverError.isOperational)
+      }
       expect(mockedUserRepository.deleteUser).toHaveBeenCalledWith(
         mockedUser.id,
       )

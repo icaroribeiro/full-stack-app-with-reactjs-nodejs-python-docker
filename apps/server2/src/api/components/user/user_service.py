@@ -19,15 +19,15 @@ class IUserService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def retrieve_user(self, userId: str) -> User:
+    async def retrieve_user(self, user_id: str) -> User:
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def replace_user(self, userId: str, user: User) -> User:
+    async def replace_user(self, user_id: str, user: User) -> User:
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def remove_user(self, userId: str) -> User:
+    async def remove_user(self, user_id: str) -> User:
         raise Exception("NotImplementedException")
 
 
@@ -61,39 +61,41 @@ class UserService(IUserService):
                 Detail(context={"page": page, "limit": limit}, cause=str(error)),
             )
 
-    async def retrieve_user(self, userId: str) -> User:
+    async def retrieve_user(self, user_id: str) -> User:
         retrieved_user: User
+
         try:
-            retrieved_user = await self.user_repository.read_user(userId)
+            retrieved_user = await self.user_repository.read_user(user_id)
         except Exception as error:
             message = "An error occurred when reading a user from database"
             print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=str(error)),
+                Detail(context=user_id, cause=str(error)),
             )
+
         if retrieved_user is None:
             message = "User not found"
             print(message)
             raise ServerError(
                 message,
                 status.HTTP_404_NOT_FOUND,
-                Detail(context=userId, cause=None),
+                Detail(context=user_id, cause=None),
             )
         return retrieved_user
 
-    async def replace_user(self, userId: str, user: User) -> User:
+    async def replace_user(self, user_id: str, user: User) -> User:
         replaced_user: User
         try:
-            replaced_user = await self.user_repository.update_user(userId, user)
+            replaced_user = await self.user_repository.update_user(user_id, user)
         except Exception as error:
             message = "An error occurred when updating a user in database"
             print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"userId": userId, "user": user}, cause=str(error)),
+                Detail(context={"user_id": user_id, "user": user}, cause=str(error)),
             )
         if replaced_user is None:
             message = "User not found"
@@ -101,21 +103,21 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_404_NOT_FOUND,
-                Detail(context={"userId": userId, "user": user}, cause=None),
+                Detail(context={"user_id": user_id, "user": user}, cause=None),
             )
         return replaced_user
 
-    async def remove_user(self, userId: str) -> User:
+    async def remove_user(self, user_id: str) -> User:
         removed_user: User
         try:
-            removed_user = await self.user_repository.delete_user(userId)
+            removed_user = await self.user_repository.delete_user(user_id)
         except Exception as error:
             message = "An error occurred when deleting a user from database"
             print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=userId, cause=str(error)),
+                Detail(context=user_id, cause=str(error)),
             )
         if removed_user is None:
             message = "User not found"
@@ -123,6 +125,6 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_404_NOT_FOUND,
-                Detail(context=userId, cause=None),
+                Detail(context=user_id, cause=None),
             )
         return removed_user

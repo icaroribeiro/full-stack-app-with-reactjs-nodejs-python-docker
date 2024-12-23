@@ -15,7 +15,7 @@ describe('Health Check HTTP', () => {
   const endpoint = '/health'
   const url = `http://localhost:${config.getPort()}${endpoint}`
   let container: StartedPostgreSqlContainer
-  const timeout = 100000
+  const timeout = 60000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)

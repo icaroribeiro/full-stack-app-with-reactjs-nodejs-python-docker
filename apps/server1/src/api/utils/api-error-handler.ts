@@ -33,7 +33,7 @@ class APIErrorHandler {
     if (error instanceof Error) {
       const response: APIErrorResponse = {
         message: error.message,
-        detail: { context: 'unknown', cause: error } as Detail,
+        detail: { context: undefined, cause: error } as Detail,
         isOperational: false,
       }
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json(response)

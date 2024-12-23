@@ -51,7 +51,7 @@ function validationMiddleware(
         const message = 'An error occurred when validating user inputs'
         const response: APIErrorResponse = {
           message: message,
-          detail: { context: 'unknown', cause: error },
+          detail: { context: undefined, cause: error },
           isOperational: true,
         }
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json(response)
@@ -61,4 +61,4 @@ function validationMiddleware(
   }
 }
 
-export { genOptional, genOptionalWithEmptyLiteral,validationMiddleware }
+export { genOptional, genOptionalWithEmptyLiteral, validationMiddleware }

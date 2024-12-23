@@ -38,7 +38,7 @@ describe('User HTTP', () => {
   const userFactory = new UserFactory()
   const userMapper = new UserMapper()
   let container: StartedPostgreSqlContainer
-  const timeout = 100000
+  const timeout = 60000
 
   beforeAll(async () => {
     container = await startDatabaseContainer(config)
