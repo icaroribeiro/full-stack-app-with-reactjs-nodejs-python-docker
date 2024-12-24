@@ -15,7 +15,7 @@ describe('UserMapper', () => {
     })
 
     it('should succeed and return a raw user data', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const expectedResult = { name: mockedUser.name, email: mockedUser.email }
 
       const result = userMapper.toPersistence(mockedUser)
@@ -30,7 +30,7 @@ describe('UserMapper', () => {
     })
 
     it('should succeed and return a user from domain', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = {
         id: mockedUser.id,
         name: mockedUser.name,
@@ -52,7 +52,7 @@ describe('UserMapper', () => {
     })
 
     it('should succeed and return a user response', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const userResponse: UserResponse = {
         id: mockedUser.id,
         name: mockedUser.name,

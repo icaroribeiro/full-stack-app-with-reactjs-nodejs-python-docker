@@ -86,7 +86,7 @@ class UserRepository implements IUserRepository {
         return [records, total]
       } catch (error) {
         const message =
-          'An error occurred when reading and couting users from database'
+          'An error occurred when reading and counting users from database'
         console.error(message, error)
         try {
           tx.rollback()

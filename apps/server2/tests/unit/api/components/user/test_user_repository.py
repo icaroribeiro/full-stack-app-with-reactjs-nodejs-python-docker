@@ -104,21 +104,23 @@ class TestReadAndCountUsers(TestUserRepository):
         user_repository: UserRepository,
         faker: Faker,
     ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
         page = faker.pyint(min_value=1, max_value=3)
         limit = faker.pyint(min_value=1, max_value=3)
-        expected_records_result = []
-        expected_total_result = 0
+        expected_records = []
+        expected_total = 0
 
         (
-            records_result,
-            total_result,
+            records,
+            total,
         ) = await user_repository.read_and_count_users(page, limit)
 
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
-        assert (records_result, total_result) == (
-            expected_records_result,
-            expected_total_result,
+        assert (records, total) == (
+            expected_records,
+            expected_total,
         )
 
     @pytest.mark.asyncio(loop_scope="session")
@@ -130,9 +132,11 @@ class TestReadAndCountUsers(TestUserRepository):
         delete_database_tables: None,
         user_repository: UserRepository,
     ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
         count = 3
         mocked_user_list: list[User] = [
-            UserMapper.to_domain(user) for user in UserFactory.build_batch(count)
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
         ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
@@ -145,20 +149,18 @@ class TestReadAndCountUsers(TestUserRepository):
                 domain_user_list.append(UserMapper.to_domain(obj))
         page = 1
         limit = 1
-        expected_records_result: list[User] = [
-            domain_user_list[len(domain_user_list) - 1]
-        ]
-        expected_total_result = count
+        expected_records: list[User] = [domain_user_list[len(domain_user_list) - 1]]
+        expected_total = count
 
         (
-            records_result,
-            total_result,
+            records,
+            total,
         ) = await user_repository.read_and_count_users(page, limit)
 
         row_count = count
         assert await db_service.get_database_table_row_count("users") == row_count
-        assert records_result == expected_records_result
-        assert total_result == expected_total_result
+        assert records == expected_records
+        assert total == expected_total
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
@@ -169,9 +171,11 @@ class TestReadAndCountUsers(TestUserRepository):
         delete_database_tables: None,
         user_repository: UserRepository,
     ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
         count = 3
         mocked_user_list: list[User] = [
-            UserMapper.to_domain(user) for user in UserFactory.build_batch(count)
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
         ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
@@ -184,18 +188,18 @@ class TestReadAndCountUsers(TestUserRepository):
                 domain_user_list.append(UserMapper.to_domain(obj))
         page = 2
         limit = 3
-        expected_records_result: list[User] = []
-        expected_total_result = count
+        expected_records: list[User] = []
+        expected_total = count
 
         (
-            records_result,
-            total_result,
+            records,
+            total,
         ) = await user_repository.read_and_count_users(page, limit)
 
         row_count = count
         assert await db_service.get_database_table_row_count("users") == row_count
-        assert records_result == expected_records_result
-        assert total_result == expected_total_result
+        assert records == expected_records
+        assert total == expected_total
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
@@ -206,9 +210,11 @@ class TestReadAndCountUsers(TestUserRepository):
         delete_database_tables: None,
         user_repository: UserRepository,
     ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
         count = 5
         mocked_user_list: list[User] = [
-            UserMapper.to_domain(user) for user in UserFactory.build_batch(count)
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
         ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
@@ -221,18 +227,18 @@ class TestReadAndCountUsers(TestUserRepository):
                 domain_user_list.append(UserMapper.to_domain(obj))
         page = 3
         limit = 2
-        expected_records_result: list[User] = [domain_user_list[0]]
-        expected_total_result = count
+        expected_records: list[User] = [domain_user_list[0]]
+        expected_total = count
 
         (
-            records_result,
-            total_result,
+            records,
+            total,
         ) = await user_repository.read_and_count_users(page, limit)
 
         row_count = count
         assert await db_service.get_database_table_row_count("users") == row_count
-        assert records_result == expected_records_result
-        assert total_result == expected_total_result
+        assert records == expected_records
+        assert total == expected_total
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
@@ -246,7 +252,7 @@ class TestReadAndCountUsers(TestUserRepository):
     ):
         page = faker.pyint(min_value=1, max_value=3)
         limit = faker.pyint(min_value=1, max_value=3)
-        message = "An error occurred when reading and couting users from database"
+        message = "An error occurred when reading and counting users from database"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         with pytest.raises(ServerError) as exc_info:
@@ -277,6 +283,8 @@ class TestReadUser(TestUserRepository):
         delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
         mocked_user: User = UserMapper.to_domain(UserFactory.build())
         raw_user_data = UserMapper.to_persistence(mocked_user)
         domain_user: User
@@ -294,131 +302,206 @@ class TestReadUser(TestUserRepository):
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result == expected_result
 
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ) -> None:
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
 
-#     @pytest.mark.asyncio(loop_scope="session")
-#     async def test_should_succeed_and_return_none_when_user_is_not_found(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ) -> None:
-#         mocked_user: UserModel = UserFactory.build()
+        result = await user_repository.read_user(mocked_user.id)
 
-#         result = await user_repository.read_user(mocked_user.id)
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None
 
-#         row_count = 0
-#         assert await db_service.get_database_table_row_count("users") == row_count
-#         assert result is None
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        message = "An error occurred when reading a user from database"
+        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        with pytest.raises(ServerError) as exc_info:
+            await user_repository.read_user(mocked_user.id)
 
-# class TestUpdateUser(TestUserRepository):
-#     def test_should_define_a_method(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ) -> None:
-#         assert isinstance(user_repository.update_user, types.MethodType) is True
-
-#     @pytest.mark.asyncio(loop_scope="session")
-#     async def test_should_succeed_and_return_user_when_user_is_updated(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ):
-#         mocked_user: User = UserMapper.to_domain(UserFactory.build())
-#         raw_user_data = UserMapper.to_persistence(mocked_user)
-#         domain_user: User
-#         async with db_service.async_engine.connect() as conn:
-#             query = insert(UserModel).values(raw_user_data).returning(UserModel)
-#             engine_result = await conn.execute(query)
-#             obj = DictToObj(engine_result.first()._asdict())
-#             await conn.commit()
-#             domain_user: User = UserMapper.to_domain(
-#                 UserFactory.build(id=obj.id, created_at=obj.created_at)
-#             )
-#         expected_result = domain_user
-
-#         result = await user_repository.update_user(domain_user.id, domain_user)
-
-#         row_count = 1
-#         assert await db_service.get_database_table_row_count("users") == row_count
-#         assert result.id == expected_result.id
-#         assert result.name == expected_result.name
-#         assert result.email == expected_result.email
-#         assert result.created_at == expected_result.created_at
-#         assert result.updated_at is not None
-
-#     @pytest.mark.asyncio(loop_scope="session")
-#     async def test_should_succeed_and_return_none_when_user_is_not_found(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ):
-#         mocked_user: UserModel = UserFactory.build()
-#         domain_user: User = UserMapper.to_domain(UserFactory.build())
-
-#         result = await user_repository.update_user(mocked_user.id, domain_user)
-
-#         row_count = 0
-#         assert await db_service.get_database_table_row_count("users") == row_count
-#         assert result is None
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
 
 
-# class TestDeleteUser(TestUserRepository):
-#     def test_should_define_a_method(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ) -> None:
-#         assert isinstance(user_repository.delete_user, types.MethodType) is True
+class TestUpdateUser(TestUserRepository):
+    def test_should_define_a_method(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ) -> None:
+        assert isinstance(user_repository.update_user, types.MethodType) is True
 
-#     @pytest.mark.asyncio(loop_scope="session")
-#     async def test_should_succeed_and_return_user_when_user_is_deleted(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ):
-#         mocked_user: User = UserMapper.to_domain(UserFactory.build())
-#         raw_user_data = UserMapper.to_persistence(mocked_user)
-#         domain_user: User
-#         async with db_service.async_engine.connect() as conn:
-#             query = insert(UserModel).values(raw_user_data).returning(UserModel)
-#             engine_result = await conn.execute(query)
-#             obj = DictToObj(engine_result.first()._asdict())
-#             await conn.commit()
-#             domain_user = UserMapper.to_domain(obj)
-#         mocked_user.id = domain_user.id
-#         expected_result = domain_user
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_user_when_user_is_updated(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        raw_user_data = UserMapper.to_persistence(mocked_user)
+        domain_user: User
+        async with db_service.async_engine.connect() as conn:
+            query = insert(UserModel).values(raw_user_data).returning(UserModel)
+            engine_result = await conn.execute(query)
+            obj = DictToObj(engine_result.first()._asdict())
+            await conn.commit()
+            domain_user: User = UserMapper.to_domain(
+                UserFactory.build(id=obj.id, created_at=obj.created_at)
+            )
+        expected_result = domain_user
 
-#         result = await user_repository.delete_user(mocked_user.id)
+        result = await user_repository.update_user(domain_user.id, domain_user)
 
-#         row_count = 0
-#         assert await db_service.get_database_table_row_count("users") == row_count
-#         assert result == expected_result
+        row_count = 1
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result.id == expected_result.id
+        assert result.name == expected_result.name
+        assert result.email == expected_result.email
+        assert result.created_at == expected_result.created_at
+        assert result.updated_at is not None
 
-#     @pytest.mark.asyncio(loop_scope="session")
-#     async def test_should_succeed_and_return_none_when_user_is_not_found(
-#         self,
-#         db_service: DBService,
-#         initialize_database: None,
-#         clear_database_tables: None,
-#         user_repository: UserRepository,
-#     ):
-#         mocked_user: UserModel = UserFactory.build()
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
 
-#         result = await user_repository.delete_user(mocked_user.id)
+        result = await user_repository.update_user(mocked_user.id, mocked_user)
 
-#         row_count = 0
-#         assert await db_service.get_database_table_row_count("users") == row_count
-#         assert result is None
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        message = "An error occurred when updating a user from database"
+        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        with pytest.raises(ServerError) as exc_info:
+            await user_repository.update_user(mocked_user.id, mocked_user)
+
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational
+
+
+class TestDeleteUser(TestUserRepository):
+    def test_should_define_a_method(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ) -> None:
+        assert isinstance(user_repository.delete_user, types.MethodType) is True
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_user_when_user_is_deleted(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        raw_user_data = UserMapper.to_persistence(mocked_user)
+        domain_user: User
+        async with db_service.async_engine.connect() as conn:
+            query = insert(UserModel).values(raw_user_data).returning(UserModel)
+            engine_result = await conn.execute(query)
+            obj = DictToObj(engine_result.first()._asdict())
+            await conn.commit()
+            domain_user = UserMapper.to_domain(obj)
+        mocked_user.id = domain_user.id
+        expected_result = domain_user
+
+        result = await user_repository.delete_user(mocked_user.id)
+
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result == expected_result
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_succeed_and_return_none_when_user_is_not_found(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        alembic_file_path = "alembic.ini"
+        await db_service.migrate_database(alembic_file_path)
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+
+        result = await user_repository.delete_user(mocked_user.id)
+
+        row_count = 0
+        assert await db_service.get_database_table_row_count("users") == row_count
+        assert result is None
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
+        self,
+        db_service: DBService,
+        initialize_database: None,
+        clear_database_tables: None,
+        delete_database_tables: None,
+        user_repository: UserRepository,
+    ):
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        message = "An error occurred when deleting a user from database"
+        server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        with pytest.raises(ServerError) as exc_info:
+            await user_repository.delete_user(mocked_user.id)
+
+        assert exc_info.value.message == server_error.message
+        assert exc_info.value.status_code == server_error.status_code
+        assert exc_info.value.is_operational == server_error.is_operational

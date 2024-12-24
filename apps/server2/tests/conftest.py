@@ -55,7 +55,7 @@ async def initialize_database_base(
 
     def finalize():
         async def finalize_database() -> None:
-            await db_service.deactivate_database()
+            await db_service.disconnect_database()
 
         asyncio.get_event_loop().run_until_complete(finalize_database())
 

@@ -78,7 +78,7 @@ describe('DBService', () => {
       expect(result).not.toBe(null)
       expect(typeof dbService.db).toBe('object')
 
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when database is null', () => {
@@ -103,7 +103,7 @@ describe('DBService', () => {
       const result = dbService.connectDatabase(config.getDatabaseURL())
 
       expect(result).toEqual(expectedResult)
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when database URL is invalid', () => {
@@ -142,7 +142,7 @@ describe('DBService', () => {
       const result = await dbService.checkDatabaseIsAlive()
 
       expect(result).toEqual(expectedResult)
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when transaction is not executed', async () => {
@@ -163,7 +163,7 @@ describe('DBService', () => {
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
       }
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
   })
 
@@ -185,7 +185,7 @@ describe('DBService', () => {
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
       await dbService.deleteDatabaseTables()
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when migration folder is invalid', async () => {
@@ -205,7 +205,7 @@ describe('DBService', () => {
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
       }
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
   })
 
@@ -237,7 +237,7 @@ describe('DBService', () => {
 
       expect(result).toEqual(expectedResult)
       await dbService.deleteDatabaseTables()
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when database table does not exist', async () => {
@@ -260,7 +260,7 @@ describe('DBService', () => {
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
       }
       await dbService.deleteDatabaseTables()
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
   })
 
@@ -298,7 +298,7 @@ describe('DBService', () => {
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(expectedResult)
       await dbService.deleteDatabaseTables()
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when transaction is not executed', async () => {
@@ -319,7 +319,7 @@ describe('DBService', () => {
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
       }
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
   })
 
@@ -344,7 +344,7 @@ describe('DBService', () => {
         `)
       const database_tables = await dbService.db.execute(query)
       expect(database_tables.length).toEqual(0)
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
 
     it('should fail and throw exception when transaction is not executed', async () => {
@@ -365,32 +365,32 @@ describe('DBService', () => {
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
       }
-      await dbService.deactivateDatabase()
+      await dbService.disconnectDatabase()
     })
   })
 
-  describe('.deactivateDatabase', () => {
+  describe('.disconnectDatabase', () => {
     it('should define a function', () => {
-      expect(typeof dbService.deactivateDatabase).toBe('function')
+      expect(typeof dbService.disconnectDatabase).toBe('function')
     })
 
-    it('should succeed and return undefined when database is deactivated', async () => {
+    it('should succeed and return undefined when database is disconnectd', async () => {
       dbService.connectDatabase(config.getDatabaseURL())
 
-      const result = await dbService.deactivateDatabase()
+      const result = await dbService.disconnectDatabase()
 
       expect(result).toEqual(undefined)
     })
 
     it('should fail and throw exception when database is not connected', async () => {
-      const message = 'An error occurred when deactivating the database'
+      const message = 'An error occurred when disconnecting the database'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
       )
 
       try {
-        await dbService.deactivateDatabase()
+        await dbService.disconnectDatabase()
       } catch (error) {
         const thrownError = error as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)

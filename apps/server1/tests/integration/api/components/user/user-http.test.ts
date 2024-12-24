@@ -2,8 +2,8 @@ import * as schemas from '@db/schemas'
 import httpStatus from 'http-status'
 import {
   afterAll,
-  afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
@@ -47,13 +47,13 @@ describe('User HTTP', () => {
     startHttpServer(config)
   }, timeout)
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await dbService.clearDatabaseTables()
   })
 
   afterAll(async () => {
     closeHttpServer()
-    await dbService.deactivateDatabase()
+    await dbService.disconnectDatabase()
     await stopDatabaseContainer(container)
   }, timeout)
 

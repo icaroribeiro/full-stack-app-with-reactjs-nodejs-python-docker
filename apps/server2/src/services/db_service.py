@@ -38,7 +38,7 @@ class IDBService(ABC):
         raise Exception("NotImplementedException")
 
     @abstractmethod
-    async def deactivate_database(self) -> None:
+    async def disconnect_database(self) -> None:
         raise Exception("NotImplementedException")
 
 
@@ -177,12 +177,12 @@ class DBService(IDBService):
                     Detail(context=None, cause=error),
                 )
 
-    async def deactivate_database(self) -> None:
+    async def disconnect_database(self) -> None:
         try:
             await self.__async_engine.dispose()
             self.__async_engine = None
         except Exception as error:
-            message = "An error occurred when deactivating the database"
+            message = "An error occurred when disconnecting the database"
             print(message, error)
             raise ServerError(
                 message,

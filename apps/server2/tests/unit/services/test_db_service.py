@@ -76,7 +76,7 @@ class TestConnectDatabase(TestDBService):
 
         assert result is None
         assert db_service.async_engine is not None
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
     def test_should_fail_and_raise_exception_when_database_url_is_invalid(
         self,
@@ -137,7 +137,7 @@ class TestCheckDatabaseIsAlive(TestDBService):
             assert exc_info.value.message == server_error.message
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
-            await db_service.deactivate_database()
+            await db_service.disconnect_database()
 
 
 class TestMigrateDatabase(TestDBService):
@@ -159,7 +159,7 @@ class TestMigrateDatabase(TestDBService):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         await db_service.delete_database_tables()
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_alembic_file_is_not_found(
@@ -179,7 +179,7 @@ class TestMigrateDatabase(TestDBService):
         assert exc_info.value.message == server_error.message
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
-        db_service.deactivate_database()
+        db_service.disconnect_database()
 
 
 class TestGetDatabaseTableRowCount(TestDBService):
@@ -216,7 +216,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
 
         assert result == expected_result
         await db_service.delete_database_tables()
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_database_table_does_not_exist(
@@ -239,7 +239,7 @@ class TestGetDatabaseTableRowCount(TestDBService):
         assert exc_info.value.status_code == server_error.status_code
         assert exc_info.value.is_operational == server_error.is_operational
         await db_service.delete_database_tables()
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
 
 class TestClearDatabaseTable(TestDBService):
@@ -277,7 +277,7 @@ class TestClearDatabaseTable(TestDBService):
             await db_service.get_database_table_row_count(table_name) == expected_result
         )
         await db_service.delete_database_tables()
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_transaction_is_not_executed(
@@ -298,7 +298,7 @@ class TestClearDatabaseTable(TestDBService):
             assert exc_info.value.message == server_error.message
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
-            await db_service.deactivate_database()
+            await db_service.disconnect_database()
 
 
 class TestDeleteDatabaseTables(TestDBService):
@@ -328,7 +328,7 @@ class TestDeleteDatabaseTables(TestDBService):
             result = await conn.execute(query)
             assert len(result.fetchall()) == 0
             await conn.commit()
-        await db_service.deactivate_database()
+        await db_service.disconnect_database()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_transaction_is_not_executed(
@@ -349,22 +349,22 @@ class TestDeleteDatabaseTables(TestDBService):
             assert exc_info.value.message == server_error.message
             assert exc_info.value.status_code == server_error.status_code
             assert exc_info.value.is_operational == server_error.is_operational
-            await db_service.deactivate_database()
+            await db_service.disconnect_database()
 
 
-class TestDeactivateDatabase(TestDBService):
+class TestDisconnectDatabase(TestDBService):
     def test_should_define_a_method(self, db_service: DBService) -> None:
-        assert isinstance(db_service.deactivate_database, types.MethodType) is True
+        assert isinstance(db_service.disconnect_database, types.MethodType) is True
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_should_succeed_and_return_none_when_database_is_deactivated(
+    async def test_should_succeed_and_return_none_when_database_is_disconnectd(
         self,
         config: Config,
         db_service: DBService,
     ) -> None:
         db_service.connect_database(config.get_database_url())
 
-        result = await db_service.deactivate_database()
+        result = await db_service.disconnect_database()
 
         assert result is None
         message = "Async engine is None!"
@@ -379,11 +379,11 @@ class TestDeactivateDatabase(TestDBService):
     async def test_should_fail_and_raise_exception_when_async_engine_is_none(
         self, db_service: DBService
     ) -> None:
-        message = "An error occurred when deactivating the database"
+        message = "An error occurred when disconnecting the database"
         server_error = ServerError(message, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         with pytest.raises(ServerError) as exc_info:
-            await db_service.deactivate_database()
+            await db_service.disconnect_database()
 
         assert exc_info.value.message == server_error.message
         assert exc_info.value.status_code == server_error.status_code

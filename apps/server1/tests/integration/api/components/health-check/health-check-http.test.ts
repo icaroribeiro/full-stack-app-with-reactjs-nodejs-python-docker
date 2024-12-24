@@ -25,7 +25,7 @@ describe('Health Check HTTP', () => {
 
   afterAll(async () => {
     closeHttpServer()
-    await dbService.deactivateDatabase()
+    await dbService.disconnectDatabase()
     await stopDatabaseContainer(container)
   }, timeout)
 

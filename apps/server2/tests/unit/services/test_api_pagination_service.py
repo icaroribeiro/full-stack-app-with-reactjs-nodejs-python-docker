@@ -122,10 +122,7 @@ class TestCreateResponse(TestAPIPaginationService):
         total_pages = 2
         total_records = 2
         count = 1
-        records = [
-            UserMapper.to_response(mocked_user)
-            for mocked_user in UserFactory.build_batch(count)
-        ]
+        records = [UserMapper.to_response(u) for u in UserFactory.build_batch(count)]
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )
@@ -155,10 +152,7 @@ class TestCreateResponse(TestAPIPaginationService):
         total_pages = 3
         total_records = 3
         count = 1
-        records = [
-            UserMapper.to_response(mocked_user)
-            for mocked_user in UserFactory.build_batch(count)
-        ]
+        records = [UserMapper.to_response(u) for u in UserFactory.build_batch(count)]
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )
@@ -188,10 +182,7 @@ class TestCreateResponse(TestAPIPaginationService):
         total_pages = 2
         total_records = 2
         count = 1
-        records = [
-            UserMapper.to_response(mocked_user)
-            for mocked_user in UserFactory.build_batch(count)
-        ]
+        records = [UserMapper.to_response(u) for u in UserFactory.build_batch(count)]
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )
@@ -221,10 +212,7 @@ class TestCreateResponse(TestAPIPaginationService):
         total_pages = 2
         total_records = 4
         count = 2
-        records = [
-            UserMapper.to_response(mocked_user)
-            for mocked_user in UserFactory.build_batch(count)
-        ]
+        records = [UserMapper.to_response(u) for u in UserFactory.build_batch(count)]
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )
@@ -253,10 +241,7 @@ class TestCreateResponse(TestAPIPaginationService):
         total_pages = 2
         total_records = 2
         count = 1
-        records = [
-            UserMapper.to_response(mocked_user)
-            for mocked_user in UserFactory.build_batch(count)
-        ]
+        records = [UserMapper.to_response(u) for u in UserFactory.build_batch(count)]
         api_pagination_data = APIPaginationData(
             page=page, limit=limit, total_records=total_records, records=records
         )

@@ -41,7 +41,7 @@ describe('UserRepository', async () => {
   })
 
   afterAll(async () => {
-    await dbService.deactivateDatabase()
+    await dbService.disconnectDatabase()
     await stopDatabaseContainer(container)
   }, timeout)
 
@@ -97,18 +97,20 @@ describe('UserRepository', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
-      const expectedRecordsResult: User[] = []
-      const expectedTotalResult = 0
+      const expectedRecords: User[] = []
+      const expectedTotal = 0
 
-      const [recordsResult, totalResult] =
-        await userRepository.readAndCountUsers(page, limit)
+      const [records, total] = await userRepository.readAndCountUsers(
+        page,
+        limit,
+      )
 
       const rowCount = 0
       await expect(
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
-      expect(recordsResult).toEqual(expectedRecordsResult)
-      expect(totalResult).toEqual(expectedTotalResult)
+      expect(records).toEqual(expectedRecords)
+      expect(total).toEqual(expectedTotal)
     })
 
     it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
@@ -129,20 +131,22 @@ describe('UserRepository', async () => {
       }
       const page = 1
       const limit = 1
-      const expectedRecordsResult: User[] = [
+      const expectedRecords: User[] = [
         domainUserList[domainUserList.length - 1],
       ]
-      const expectedTotalResult = count
+      const expectedTotal = count
 
-      const [recordsResult, totalResult] =
-        await userRepository.readAndCountUsers(page, limit)
+      const [records, total] = await userRepository.readAndCountUsers(
+        page,
+        limit,
+      )
 
       const rowCount = count
       await expect(
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
-      expect(recordsResult).toEqual(expectedRecordsResult)
-      expect(totalResult).toEqual(expectedTotalResult)
+      expect(records).toEqual(expectedRecords)
+      expect(total).toEqual(expectedTotal)
     })
 
     it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
@@ -163,18 +167,20 @@ describe('UserRepository', async () => {
       }
       const page = 2
       const limit = 3
-      const expectedRecordsResult: User[] = []
-      const expectedTotalResult = count
+      const expectedRecords: User[] = []
+      const expectedTotal = count
 
-      const [recordsResult, totalResult] =
-        await userRepository.readAndCountUsers(page, limit)
+      const [records, total] = await userRepository.readAndCountUsers(
+        page,
+        limit,
+      )
 
       const rowCount = count
       await expect(
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
-      expect(recordsResult).toEqual(expectedRecordsResult)
-      expect(totalResult).toEqual(expectedTotalResult)
+      expect(records).toEqual(expectedRecords)
+      expect(total).toEqual(expectedTotal)
     })
 
     it('should succeed and return a list of users with non-zero total when page is not the first and can be filled', async () => {
@@ -195,25 +201,27 @@ describe('UserRepository', async () => {
       }
       const page = 3
       const limit = 2
-      const expectedRecordsResult: User[] = [domainUserList[0]]
-      const expectedTotalResult = 5
+      const expectedRecords: User[] = [domainUserList[0]]
+      const expectedTotal = 5
 
-      const [recordsResult, totalResult] =
-        await userRepository.readAndCountUsers(page, limit)
+      const [records, total] = await userRepository.readAndCountUsers(
+        page,
+        limit,
+      )
 
       const rowCount = 5
       await expect(
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
-      expect(recordsResult).toEqual(expectedRecordsResult)
-      expect(totalResult).toEqual(expectedTotalResult)
+      expect(records).toEqual(expectedRecords)
+      expect(total).toEqual(expectedTotal)
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
       const message =
-        'An error occurred when reading and couting users from database'
+        'An error occurred when reading and counting users from database'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -235,7 +243,7 @@ describe('UserRepository', async () => {
       expect(typeof userRepository.readUser).toBe('function')
     })
 
-    it('should succeed and return a user when user is read', async () => {
+    it('should succeed and return user when user is read', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = userMapper.toPersistence(mockedUser)
@@ -258,6 +266,19 @@ describe('UserRepository', async () => {
       expect(result?.email).toEqual(expectedResult.email)
       expect(result?.createdAt).toEqual(expectedResult.createdAt)
       expect(result?.updatedAt).toEqual(expectedResult.updatedAt)
+    })
+
+    it('should succeed and return undefined when user is not found', async () => {
+      await dbService.migrateDatabase(migrationsFolder)
+      const mockedUser = userMapper.toDomain(userFactory.build())
+
+      const result = await userRepository.readUser(mockedUser.id as string)
+
+      const rowCount = 0
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(result).toBeUndefined()
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
@@ -284,7 +305,7 @@ describe('UserRepository', async () => {
       expect(typeof userRepository.updateUser).toBe('function')
     })
 
-    it('should succeed and return a user when user is updated', async () => {
+    it('should succeed and return user when user is updated', async () => {
       await dbService.migrateDatabase(migrationsFolder)
       const mockedUser = userMapper.toDomain(userFactory.build())
       const rawUserData = userMapper.toPersistence(mockedUser)
@@ -292,15 +313,16 @@ describe('UserRepository', async () => {
         .insert(schemas.userSchema)
         .values(rawUserData)
         .returning()
-      const domainUser = insertedUser.map((u) => userMapper.toDomain(u))[0]
-      const mockedUpdatedUser = userMapper.toDomain(userFactory.build())
-      mockedUpdatedUser.id = domainUser.id
-      mockedUpdatedUser.createdAt = domainUser.createdAt
-      const expectedResult = mockedUpdatedUser
+      const domainUser = userMapper.toDomain(userFactory.build())
+      domainUser.id = insertedUser.map((u) => userMapper.toDomain(u))[0].id
+      domainUser.createdAt = insertedUser.map((u) =>
+        userMapper.toDomain(u),
+      )[0].createdAt
+      const expectedResult = domainUser
 
       const result = await userRepository.updateUser(
-        mockedUpdatedUser.id as string,
-        mockedUpdatedUser,
+        domainUser.id as string,
+        domainUser,
       )
 
       const rowCount = 1
@@ -315,8 +337,24 @@ describe('UserRepository', async () => {
       expect(result?.updatedAt).not.toEqual(expectedResult.updatedAt)
     })
 
+    it('should succeed and return undefined when user is not found', async () => {
+      await dbService.migrateDatabase(migrationsFolder)
+      const mockedUser = userMapper.toDomain(userFactory.build())
+
+      const result = await userRepository.updateUser(
+        mockedUser.id as string,
+        mockedUser,
+      )
+
+      const rowCount = 0
+      await expect(
+        dbService.getDatabaseTableRowCount('users'),
+      ).resolves.toEqual(rowCount)
+      expect(result).toBeUndefined()
+    })
+
     it('should fail and throw exception when user schema does not exist into database', async () => {
-      const mockedUpdatedUser = userMapper.toDomain(userFactory.build())
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const message = 'An error occurred when updating a user from database'
       const serverError = new ServerError(
         message,
@@ -324,10 +362,7 @@ describe('UserRepository', async () => {
       )
 
       try {
-        await userRepository.updateUser(
-          mockedUpdatedUser.id as string,
-          mockedUpdatedUser,
-        )
+        await userRepository.updateUser(mockedUser.id as string, mockedUser)
       } catch (error) {
         const thrownError = error as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
@@ -366,6 +401,19 @@ describe('UserRepository', async () => {
       expect(result?.createdAt).toEqual(expectedResult.createdAt)
       expect(result?.updatedAt).toEqual(expectedResult.updatedAt)
     })
+  })
+
+  it('should succeed and return undefined when user is not found', async () => {
+    await dbService.migrateDatabase(migrationsFolder)
+    const mockedUser = userMapper.toDomain(userFactory.build())
+
+    const result = await userRepository.deleteUser(mockedUser.id as string)
+
+    const rowCount = 0
+    await expect(dbService.getDatabaseTableRowCount('users')).resolves.toEqual(
+      rowCount,
+    )
+    expect(result).toBeUndefined()
   })
 
   it('should fail and throw exception when user schema does not exist into database', async () => {

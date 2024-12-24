@@ -57,10 +57,6 @@ describe('UserService', () => {
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
-        {
-          context: mockedUser,
-          cause: error,
-        },
       )
       const mockedCreateUser = vi.fn().mockRejectedValue(error)
       mockedUserRepository.createUser = mockedCreateUser
@@ -78,15 +74,10 @@ describe('UserService', () => {
 
     it('should fail and throw exception when user could not be created', async () => {
       const mockedUser = userMapper.toDomain(userFactory.build())
-      const error = new Error('failed')
       const message = 'User could not be created'
       const serverError = new ServerError(
         message,
         httpStatus.INTERNAL_SERVER_ERROR,
-        {
-          context: mockedUser,
-          cause: undefined,
-        },
       )
       const mockedCreateUser = vi.fn().mockReturnValue(undefined)
       mockedUserRepository.createUser = mockedCreateUser
@@ -108,11 +99,13 @@ describe('UserService', () => {
       expect(typeof userService.retrieveAndCountUsers).toBe('function')
     })
 
-    it('should succeed and return a list of users with non-zero total when users exist', async () => {
+    it('should succeed and return list of users with non-zero total when users exist', async () => {
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
       const count = faker.number.int({ min: 1, max: 3 })
-      const mockedUsers = userFactory.buildBatch(count)
+      const mockedUsers = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const mockedReadAndCountUsers = vi
         .fn()
         .mockResolvedValue(Promise.resolve([mockedUsers, count]))
@@ -128,7 +121,7 @@ describe('UserService', () => {
       )
     })
 
-    it('should fail and throw exception when an error occurred when reading and couting users', async () => {
+    it('should fail and throw exception when an error occurred when reading and counting users', async () => {
       const page = faker.number.int({ min: 1, max: 3 })
       const limit = faker.number.int({ min: 1, max: 3 })
       const error = new Error('failed')

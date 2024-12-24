@@ -26,6 +26,7 @@ class UserService implements IUserService {
       newUser = await this.userRepository.createUser(user)
     } catch (error) {
       const message = 'An error occurred when creating a user'
+      console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: user,
         cause: error,
@@ -34,6 +35,7 @@ class UserService implements IUserService {
 
     if (newUser === undefined) {
       const message = 'User could not be created'
+      console.error(message)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: user,
         cause: undefined,
@@ -47,28 +49,33 @@ class UserService implements IUserService {
     page: number,
     limit: number,
   ): Promise<[User[], number]> {
-    let users: User[] | undefined
+    let records: User[] | undefined
     let total: number | undefined
 
     try {
-      ;[users, total] = await this.userRepository.readAndCountUsers(page, limit)
+      ;[records, total] = await this.userRepository.readAndCountUsers(
+        page,
+        limit,
+      )
     } catch (error) {
       const message = 'An error occurred when reading and counting users'
+      console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: { page: page, limit: limit },
         cause: error,
       })
     }
 
-    if (users === undefined || total === undefined) {
+    if (records === undefined || total === undefined) {
       const message = 'Users could not be read and counted'
+      console.error(message)
       throw new ServerError(message, httpStatus.NOT_FOUND, {
         context: { page: page, limit: limit },
         cause: undefined,
       })
     }
 
-    return [users, total]
+    return [records, total]
   }
 
   async retrieveUser(userId: string): Promise<User> {

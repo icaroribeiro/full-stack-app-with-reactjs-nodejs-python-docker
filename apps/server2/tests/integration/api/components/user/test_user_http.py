@@ -30,11 +30,12 @@ class TestAddUser(TestUserHttp):
         self,
         db_service: DBService,
         initialize_database: None,
+        migrate_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
         user_request = {"name": mocked_user.name, "email": mocked_user.email}
         expected_response_body = DictToObj(user_request)
 

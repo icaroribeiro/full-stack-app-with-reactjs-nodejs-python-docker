@@ -13,7 +13,7 @@ interface IDBService {
   getDatabaseTableRowCount(table_name: string): Promise<number | undefined>
   clearDatabaseTables(): Promise<void>
   deleteDatabaseTables(): Promise<void>
-  deactivateDatabase(): Promise<void>
+  disconnectDatabase(): Promise<void>
 }
 
 class DBService implements IDBService {
@@ -178,11 +178,11 @@ class DBService implements IDBService {
     })
   }
 
-  public async deactivateDatabase(): Promise<void> {
+  public async disconnectDatabase(): Promise<void> {
     try {
       await this._dbClient?.end()
     } catch (error) {
-      const message = 'An error occurred when deactivating the database'
+      const message = 'An error occurred when disconnecting the database'
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: undefined,
