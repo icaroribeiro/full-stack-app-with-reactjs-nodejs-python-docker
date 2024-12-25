@@ -136,12 +136,12 @@ describe('User HTTP', () => {
 
     it('should succeed and return 200 status code with list of users with non-zero total when page is the first and can be filled', async () => {
       const count = 3
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
-        const rawUserData = userMapper.toPersistence(
-          userMapper.toDomain(mockedUser),
-        )
+        const rawUserData = userMapper.toPersistence(mockedUser)
         const insertedUser = await dbService.db
           .insert(schemas.userSchema)
           .values(rawUserData)
@@ -178,12 +178,12 @@ describe('User HTTP', () => {
 
     it('should succeed and return 200 status code with list of users with non-zero total when page is not the first and cannot be filled', async () => {
       const count = 3
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
-        const rawUserData = userMapper.toPersistence(
-          userMapper.toDomain(mockedUser),
-        )
+        const rawUserData = userMapper.toPersistence(mockedUser)
         const insertedUser = await dbService.db
           .insert(schemas.userSchema)
           .values(rawUserData)
@@ -216,12 +216,12 @@ describe('User HTTP', () => {
 
     it('should succeed and return 200 status code with list of users with non-zero total when page is not the first and can be filled', async () => {
       const count = 5
-      const mockedUserList = userFactory.buildBatch(count)
+      const mockedUserList = userFactory
+        .buildBatch(count)
+        .map((u) => userMapper.toDomain(u))
       const domainUserList: User[] = []
       for (const mockedUser of mockedUserList) {
-        const rawUserData = userMapper.toPersistence(
-          userMapper.toDomain(mockedUser),
-        )
+        const rawUserData = userMapper.toPersistence(mockedUser)
         const insertedUser = await dbService.db
           .insert(schemas.userSchema)
           .values(rawUserData)
@@ -257,10 +257,8 @@ describe('User HTTP', () => {
 
   describe('GET /users/{userId}', () => {
     it('should succeed and return 200 status code when user is fetched', async () => {
-      const mockedUser = userFactory.build()
-      const rawUserData = userMapper.toPersistence(
-        userMapper.toDomain(mockedUser),
-      )
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
         .values(rawUserData)
@@ -282,7 +280,7 @@ describe('User HTTP', () => {
     })
 
     it('should fail and return response status 404 status code when user is not found', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
 
       const response = await fetch(`${url}/${mockedUser.id}`)
 
@@ -298,10 +296,8 @@ describe('User HTTP', () => {
 
   describe('PUT /users/{userId}', () => {
     it('should succeed and return 200 status code when user is renewed', async () => {
-      const mockedUser = userFactory.build()
-      const rawUserData = userMapper.toPersistence(
-        userMapper.toDomain(mockedUser),
-      )
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
         .values(rawUserData)
@@ -344,7 +340,7 @@ describe('User HTTP', () => {
     })
 
     it('should fail and return 404 status code when user is not found', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       const userRequest = {
         name: mockedUser.name,
         email: mockedUser.email,
@@ -369,7 +365,7 @@ describe('User HTTP', () => {
     })
 
     it('should fail and return 422 status code when user request email is invalid', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
       mockedUser.email = faker.word.sample()
       const userRequest = { name: mockedUser.name, email: mockedUser.email }
 
@@ -394,10 +390,8 @@ describe('User HTTP', () => {
 
   describe('DELETE  /users/{userId}', () => {
     it('should succeed and return 200 status code when user is deleted', async () => {
-      const mockedUser = userFactory.build()
-      const rawUserData = userMapper.toPersistence(
-        userMapper.toDomain(mockedUser),
-      )
+      const mockedUser = userMapper.toDomain(userFactory.build())
+      const rawUserData = userMapper.toPersistence(mockedUser)
       const insertedUser = await dbService.db
         .insert(schemas.userSchema)
         .values(rawUserData)
@@ -421,7 +415,7 @@ describe('User HTTP', () => {
     })
 
     it('should fail and return response status 404 status code when user is not found', async () => {
-      const mockedUser = userFactory.build()
+      const mockedUser = userMapper.toDomain(userFactory.build())
 
       const response = await fetch(`${url}/${mockedUser.id}`, {
         method: 'DELETE',

@@ -16,14 +16,14 @@ from services.db_service import DBService
 
 
 class TestUserService:
-    @pytest.fixture
+    @pytest.fixture(scope="module")
     def user_repository(
         self,
         db_service: DBService,
     ) -> UserRepository:
         return UserRepository(db_service)
 
-    @pytest.fixture
+    @pytest.fixture(scope="module")
     def user_service(
         self,
         user_repository: UserRepository,

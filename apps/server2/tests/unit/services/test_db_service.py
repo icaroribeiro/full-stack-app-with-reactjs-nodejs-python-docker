@@ -21,10 +21,6 @@ from services.db_service import DBService
 
 class TestDBService:
     @pytest.fixture
-    def db_service(self) -> DBService:
-        return DBService()
-
-    @pytest.fixture
     async def initialize_database(
         self, request, config: Config, db_service: DBService
     ) -> None:

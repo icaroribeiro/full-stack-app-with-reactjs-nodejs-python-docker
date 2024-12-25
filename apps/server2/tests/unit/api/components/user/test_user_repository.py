@@ -22,7 +22,7 @@ class TestUserRepository:
     def user_repository(self, db_service: DBService) -> UserRepository:
         return UserRepository(db_service)
 
-    @pytest.fixture
+    @pytest.fixture(scope="module", autouse=True)
     async def initialize_database(
         self, request, config: Config, db_service: DBService
     ) -> None:
@@ -40,7 +40,6 @@ class TestCreateUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_created(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -63,8 +62,6 @@ class TestCreateUser(TestUserRepository):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -84,8 +81,6 @@ class TestCreateUser(TestUserRepository):
 class TestReadAndCountUsers(TestUserRepository):
     def test_should_define_a_method(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -98,7 +93,6 @@ class TestReadAndCountUsers(TestUserRepository):
     async def test_should_succeed_and_return_empty_list_of_users_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -127,7 +121,6 @@ class TestReadAndCountUsers(TestUserRepository):
     async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -166,7 +159,6 @@ class TestReadAndCountUsers(TestUserRepository):
     async def test_should_succeed_and_return_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -205,7 +197,6 @@ class TestReadAndCountUsers(TestUserRepository):
     async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -243,8 +234,6 @@ class TestReadAndCountUsers(TestUserRepository):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -266,8 +255,6 @@ class TestReadAndCountUsers(TestUserRepository):
 class TestReadUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -278,7 +265,6 @@ class TestReadUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_read(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -306,7 +292,6 @@ class TestReadUser(TestUserRepository):
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -324,8 +309,6 @@ class TestReadUser(TestUserRepository):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -345,8 +328,6 @@ class TestReadUser(TestUserRepository):
 class TestUpdateUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -357,7 +338,6 @@ class TestUpdateUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_updated(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -391,7 +371,6 @@ class TestUpdateUser(TestUserRepository):
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -409,8 +388,6 @@ class TestUpdateUser(TestUserRepository):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -430,8 +407,6 @@ class TestUpdateUser(TestUserRepository):
 class TestDeleteUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -442,7 +417,6 @@ class TestDeleteUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_deleted(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -471,7 +445,6 @@ class TestDeleteUser(TestUserRepository):
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,
@@ -489,8 +462,6 @@ class TestDeleteUser(TestUserRepository):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         delete_database_tables: None,
         user_repository: UserRepository,

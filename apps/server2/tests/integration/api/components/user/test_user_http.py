@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 import pytest
@@ -6,6 +7,11 @@ from faker import Faker
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy import insert
+from tests.conftest import (
+    delete_database_tables_base,
+    initialize_database_base,
+    migrate_database_base,
+)
 from tests.factories.user_factory import UserFactory
 
 from api.components.user.user_mapper import UserMapper
@@ -23,14 +29,27 @@ class TestUserHttp:
         endpoint = "/users"
         return f"http://localhost:{config.get_port()}{endpoint}"
 
+    @pytest.fixture(scope="class", autouse=True)
+    async def setup_and_teardown(
+        self, request, config: Config, db_service: DBService
+    ) -> None:
+        await initialize_database_base(request, config, db_service)
+        await migrate_database_base(db_service)
+
+        def finalize():
+            async def finalize_database() -> None:
+                await delete_database_tables_base(db_service)
+
+            asyncio.get_event_loop().run_until_complete(finalize_database())
+
+        request.addfinalizer(finalize)
+
 
 class TestAddUser(TestUserHttp):
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_201_status_code_when_user_is_added(
         self,
         db_service: DBService,
-        initialize_database: None,
-        migrate_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
@@ -52,13 +71,12 @@ class TestAddUser(TestUserHttp):
     async def test_should_fail_and_return_422_status_code_when_user_request_email_is_invalid(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
         faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build(email=faker.word())
+        mocked_user: User = UserMapper.to_domain(UserFactory.build(email=faker.word()))
         user_request = {"name": mocked_user.name, "email": mocked_user.email}
 
         response = await async_client.post(url, json=user_request)
@@ -75,7 +93,6 @@ class TestFetchPaginatedUsers(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_with_empty_list_of_users_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
@@ -96,13 +113,14 @@ class TestFetchPaginatedUsers(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
         count = 3
-        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
+        mocked_user_list: list[User] = [
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
+        ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -136,13 +154,14 @@ class TestFetchPaginatedUsers(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
         count = 3
-        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
+        mocked_user_list: list[User] = [
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
+        ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -174,13 +193,14 @@ class TestFetchPaginatedUsers(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
         count = 5
-        mocked_user_list: list[UserModel] = UserFactory.build_batch(count)
+        mocked_user_list: list[User] = [
+            UserMapper.to_domain(u) for u in UserFactory.build_batch(count)
+        ]
         domain_user_list: list[User] = []
         for mocked_user in mocked_user_list:
             raw_user_data = UserMapper.to_persistence(mocked_user)
@@ -216,13 +236,12 @@ class TestFetchUser(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_when_user_is_fetched(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
-        raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        raw_user_data = UserMapper.to_persistence((mocked_user))
         domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
@@ -237,19 +256,16 @@ class TestFetchUser(TestUserHttp):
         row_count = 1
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response_body)
+        assert response.json() == expected_response_body.model_dump()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(
         self,
-        db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
 
         response = await async_client.get(f"{url}/{mocked_user.id}")
 
@@ -263,13 +279,12 @@ class TestRenewUser(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_when_user_is_renewed(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user = UserFactory.build()
-        raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        mocked_user = UserMapper.to_domain(UserFactory.build())
+        raw_user_data = UserMapper.to_persistence(mocked_user)
         domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
@@ -302,13 +317,11 @@ class TestRenewUser(TestUserHttp):
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
-        faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
         user_request = {
             "name": mocked_user.name,
             "email": mocked_user.email,
@@ -326,13 +339,12 @@ class TestRenewUser(TestUserHttp):
     async def test_should_fail_and_return_422_status_code_when_user_request_email_is_invalid(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
         faker: Faker,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build(email=faker.word())
+        mocked_user: User = UserMapper.to_domain(UserFactory.build(email=faker.word()))
         user_request = {
             "name": mocked_user.name,
             "email": mocked_user.email,
@@ -352,13 +364,12 @@ class TestDestroyUser(TestUserHttp):
     async def test_should_succeed_and_return_200_status_code_when_user_is_destroyed(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,
     ) -> None:
-        mocked_user: UserModel = UserFactory.build()
-        raw_user_data = UserMapper.to_persistence(UserMapper.to_domain(mocked_user))
+        mocked_user: User = UserMapper.to_domain(UserFactory.build())
+        raw_user_data = UserMapper.to_persistence(mocked_user)
         domain_user: User
         async with db_service.async_engine.connect() as conn:
             query = insert(UserModel).values(raw_user_data).returning(UserModel)
@@ -366,20 +377,19 @@ class TestDestroyUser(TestUserHttp):
             obj = DictToObj(engine_result.first()._asdict())
             await conn.commit()
             domain_user = UserMapper.to_domain(obj)
-        expected_response = UserMapper.to_response(domain_user)
+        expected_response_body = UserMapper.to_response(domain_user)
 
         response = await async_client.delete(f"{url}/{domain_user.id}")
 
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == jsonable_encoder(expected_response)
+        assert response.json() == expected_response_body.model_dump()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(
         self,
         db_service: DBService,
-        initialize_database: None,
         clear_database_tables: None,
         async_client: AsyncClient,
         url: str,

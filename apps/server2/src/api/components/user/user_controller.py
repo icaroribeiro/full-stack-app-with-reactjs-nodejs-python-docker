@@ -139,11 +139,11 @@ class UserController(APIRouter):
         ) -> APIPaginationResponse:
             base_url = str(request.url)
             (
-                retrieved_users,
-                total_records,
+                records,
+                total,
             ) = await user_service.retrieve_and_count_users(page, limit)
             api_pagination_data = APIPaginationData(
-                page, limit, total_records, retrieved_users
+                page=page, limit=limit, records=records, total_records=total
             )
             api_pagination_response = api_pagination_service.create_response(
                 base_url, api_pagination_data

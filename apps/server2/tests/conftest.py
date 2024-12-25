@@ -11,7 +11,7 @@ from server import Server
 from services.db_service import DBService
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def faker() -> Faker:
     return Faker()
 
@@ -62,8 +62,7 @@ async def initialize_database_base(
     request.addfinalizer(finalize)
 
 
-@pytest.fixture
-async def migrate_database(db_service: DBService):
+async def migrate_database_base(db_service: DBService) -> None:
     alembic_file_path = "alembic.ini"
     await db_service.migrate_database(alembic_file_path)
 
@@ -73,8 +72,7 @@ async def clear_database_tables(db_service: DBService) -> None:
     await db_service.clear_database_tables()
 
 
-@pytest.fixture
-async def delete_database_tables(db_service: DBService) -> None:
+async def delete_database_tables_base(db_service: DBService) -> None:
     await db_service.delete_database_tables()
 
 
