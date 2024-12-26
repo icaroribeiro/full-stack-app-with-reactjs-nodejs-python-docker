@@ -5,9 +5,11 @@ import pytest
 from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
+from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 from sqlalchemy import insert
 from tests.conftest import (
+    db_service_base,
     delete_database_tables_base,
     initialize_database_base,
     migrate_database_base,
@@ -24,6 +26,10 @@ from services.db_service import DBService
 
 
 class TestUserHttp:
+    @pytest.fixture(scope="class")
+    def db_service(self) -> DBService:
+        return db_service_base()
+
     @pytest.fixture
     def url(self, config: Config) -> str:
         endpoint = "/users"
@@ -107,7 +113,7 @@ class TestFetchPaginatedUsers(TestUserHttp):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
@@ -148,7 +154,7 @@ class TestFetchPaginatedUsers(TestUserHttp):
         row_count = 3
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
@@ -187,7 +193,7 @@ class TestFetchPaginatedUsers(TestUserHttp):
         row_count = 3
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_200_status_code_with_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
@@ -228,7 +234,7 @@ class TestFetchPaginatedUsers(TestUserHttp):
         row_count = 5
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
 
 class TestFetchUser(TestUserHttp):
@@ -256,7 +262,7 @@ class TestFetchUser(TestUserHttp):
         row_count = 1
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(
@@ -384,7 +390,7 @@ class TestDestroyUser(TestUserHttp):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_return_404_status_code_when_user_is_not_found(

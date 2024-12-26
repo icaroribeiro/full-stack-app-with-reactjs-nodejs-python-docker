@@ -40,13 +40,13 @@ class UserService(IUserService):
 
         try:
             new_user = await self.user_repository.create_user(user)
-        except Exception as error:
+        except Exception:
             message = "An error occurred when creating a user"
-            print(message, error)
+            # print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user, cause=error),
+                # Detail(context=user, cause="aaa"),
             )
 
         if new_user is None:
@@ -101,7 +101,7 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user_id, cause=str(error)),
+                Detail(context=user_id, cause=error),
             )
 
         if user is None:
@@ -116,20 +116,20 @@ class UserService(IUserService):
         return user
 
     async def replace_user(self, user_id: str, user: User) -> User:
-        user: User | None
+        updated_user: User | None
 
         try:
-            user = await self.user_repository.update_user(user_id, user)
+            updated_user = await self.user_repository.update_user(user_id, user)
         except Exception as error:
             message = "An error occurred when updating a user"
             print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"user_id": user_id, "user": user}, cause=str(error)),
+                Detail(context={"user_id": user_id, "user": user}, cause=error),
             )
 
-        if user is None:
+        if updated_user is None:
             message = "User could not be updated"
             print(message)
             raise ServerError(
@@ -138,7 +138,7 @@ class UserService(IUserService):
                 Detail(context={"user_id": user_id, "user": user}, cause=None),
             )
 
-        return user
+        return updated_user
 
     async def remove_user(self, user_id: str) -> User:
         user: User | None

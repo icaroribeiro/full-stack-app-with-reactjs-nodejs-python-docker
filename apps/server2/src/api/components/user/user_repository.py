@@ -49,14 +49,14 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception as error:
+            except Exception:
                 message = "An error occurred when creating a user into database"
-                print(message, error)
+                # print(message, error)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user, cause=error),
+                    # Detail(context=user, cause="bbb"),
                 )
 
     async def read_and_count_users(

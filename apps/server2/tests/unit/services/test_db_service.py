@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from sqlalchemy import insert, text
 from sqlalchemy.exc import NoSuchModuleError
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
-from tests.conftest import initialize_database_base
+from tests.conftest import db_service_base, initialize_database_base
 from tests.factories.user_factory import UserFactory
 
 from api.components.user.user_mapper import UserMapper
@@ -20,6 +20,10 @@ from services.db_service import DBService
 
 
 class TestDBService:
+    @pytest.fixture(scope="class")
+    def db_service(self) -> DBService:
+        return db_service_base()
+
     @pytest.fixture
     async def initialize_database(
         self, request, config: Config, db_service: DBService

@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
-from api.shared import unknown_type
+from server_error import Detail
 
 
 class APIErrorResponse(BaseModel):
     message: str
-    detail: unknown_type.UnknownType | None = None
+    detail: Detail | None = None
     is_operational: bool

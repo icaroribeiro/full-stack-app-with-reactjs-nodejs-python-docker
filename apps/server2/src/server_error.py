@@ -12,14 +12,19 @@ class Detail(BaseModel):
 
 
 class ServerError(HTTPException):
+    new_detail: Detail | None
+    status_code: int
+    is_operational: bool
+
     def __init__(
         self,
         message: str,
         status_code: Optional[int] = None,
         detail: Optional[Detail] = None,
     ):
-        super().__init__(status_code, detail)
+        super().__init__(status_code)
         self.message = message
+        self.new_detail = detail
         if status_code:
             self.status_code = status_code
         else:

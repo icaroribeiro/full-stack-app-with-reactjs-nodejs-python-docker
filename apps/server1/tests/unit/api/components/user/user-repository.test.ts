@@ -15,7 +15,7 @@ import {
 import { UserFactory } from '../../../../factories/user-factory'
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { ServerError } from '../../../../../src/server-error'
@@ -34,11 +34,6 @@ describe('UserRepository', async () => {
     container = await startDatabaseContainer(config)
     dbService.connectDatabase(config.getDatabaseURL())
   }, timeout)
-
-  beforeEach(async () => {
-    await dbService.clearDatabaseTables()
-    await dbService.deleteDatabaseTables()
-  })
 
   afterAll(async () => {
     await dbService.disconnectDatabase()
@@ -67,6 +62,7 @@ describe('UserRepository', async () => {
       expect(result?.email).toEqual(expectedResult.email)
       expect(result?.createdAt).not.toBeNull()
       expect(result?.updatedAt).not.toBeNull()
+      await dbService.deleteDatabaseTables()
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
@@ -111,6 +107,7 @@ describe('UserRepository', async () => {
       ).resolves.toEqual(rowCount)
       expect(records).toEqual(expectedRecords)
       expect(total).toEqual(expectedTotal)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should succeed and return a list of users with non-zero total when page is the first one and can be filled', async () => {
@@ -147,6 +144,7 @@ describe('UserRepository', async () => {
       ).resolves.toEqual(rowCount)
       expect(records).toEqual(expectedRecords)
       expect(total).toEqual(expectedTotal)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should succeed and return an empty list of users with non-zero total when page is not the first one and cannot be filled', async () => {
@@ -181,6 +179,7 @@ describe('UserRepository', async () => {
       ).resolves.toEqual(rowCount)
       expect(records).toEqual(expectedRecords)
       expect(total).toEqual(expectedTotal)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should succeed and return a list of users with non-zero total when page is not the first and can be filled', async () => {
@@ -215,6 +214,7 @@ describe('UserRepository', async () => {
       ).resolves.toEqual(rowCount)
       expect(records).toEqual(expectedRecords)
       expect(total).toEqual(expectedTotal)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
@@ -266,6 +266,7 @@ describe('UserRepository', async () => {
       expect(result?.email).toEqual(expectedResult.email)
       expect(result?.createdAt).toEqual(expectedResult.createdAt)
       expect(result?.updatedAt).toEqual(expectedResult.updatedAt)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should succeed and return undefined when user is not found', async () => {
@@ -279,6 +280,7 @@ describe('UserRepository', async () => {
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
       expect(result).toBeUndefined()
+      await dbService.deleteDatabaseTables()
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
@@ -335,6 +337,7 @@ describe('UserRepository', async () => {
       expect(result?.email).toEqual(expectedResult.email)
       expect(result?.createdAt).toEqual(expectedResult.createdAt)
       expect(result?.updatedAt).not.toEqual(expectedResult.updatedAt)
+      await dbService.deleteDatabaseTables()
     })
 
     it('should succeed and return undefined when user is not found', async () => {
@@ -351,6 +354,7 @@ describe('UserRepository', async () => {
         dbService.getDatabaseTableRowCount('users'),
       ).resolves.toEqual(rowCount)
       expect(result).toBeUndefined()
+      await dbService.deleteDatabaseTables()
     })
 
     it('should fail and throw exception when user schema does not exist into database', async () => {
@@ -400,6 +404,7 @@ describe('UserRepository', async () => {
       expect(result?.email).toEqual(expectedResult.email)
       expect(result?.createdAt).toEqual(expectedResult.createdAt)
       expect(result?.updatedAt).toEqual(expectedResult.updatedAt)
+      await dbService.deleteDatabaseTables()
     })
   })
 
@@ -414,6 +419,7 @@ describe('UserRepository', async () => {
       rowCount,
     )
     expect(result).toBeUndefined()
+    await dbService.deleteDatabaseTables()
   })
 
   it('should fail and throw exception when user schema does not exist into database', async () => {

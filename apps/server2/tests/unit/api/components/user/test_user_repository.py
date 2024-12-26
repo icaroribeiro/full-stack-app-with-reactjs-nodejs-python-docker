@@ -5,7 +5,7 @@ from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
 from sqlalchemy import insert
-from tests.conftest import initialize_database_base
+from tests.conftest import db_service_base, initialize_database_base
 from tests.factories.user_factory import UserFactory
 
 from api.components.user.user_mapper import UserMapper
@@ -18,11 +18,15 @@ from services.db_service import DBService
 
 
 class TestUserRepository:
+    @pytest.fixture(scope="class")
+    def db_service(self) -> DBService:
+        return db_service_base()
+
     @pytest.fixture
     def user_repository(self, db_service: DBService) -> UserRepository:
         return UserRepository(db_service)
 
-    @pytest.fixture(scope="module", autouse=True)
+    @pytest.fixture(scope="class", autouse=True)
     async def initialize_database(
         self, request, config: Config, db_service: DBService
     ) -> None:
@@ -40,8 +44,6 @@ class TestCreateUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_created(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -58,12 +60,11 @@ class TestCreateUser(TestUserRepository):
         assert result.email == expected_result.email
         assert result.created_at is not None
         assert result.updated_at is None
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         mocked_user = UserMapper.to_domain(UserFactory.build())
@@ -81,8 +82,6 @@ class TestCreateUser(TestUserRepository):
 class TestReadAndCountUsers(TestUserRepository):
     def test_should_define_a_method(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         assert (
@@ -93,8 +92,6 @@ class TestReadAndCountUsers(TestUserRepository):
     async def test_should_succeed_and_return_empty_list_of_users_with_zero_total_when_users_do_not_exist(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
         faker: Faker,
     ):
@@ -116,13 +113,12 @@ class TestReadAndCountUsers(TestUserRepository):
             expected_records,
             expected_total,
         )
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -154,13 +150,12 @@ class TestReadAndCountUsers(TestUserRepository):
         assert await db_service.get_database_table_row_count("users") == row_count
         assert records == expected_records
         assert total == expected_total
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_empty_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_cannot_be_filled(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -192,13 +187,12 @@ class TestReadAndCountUsers(TestUserRepository):
         assert await db_service.get_database_table_row_count("users") == row_count
         assert records == expected_records
         assert total == expected_total
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_list_of_users_with_non_zero_total_when_page_is_not_the_first_and_can_be_filled(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -230,12 +224,11 @@ class TestReadAndCountUsers(TestUserRepository):
         assert await db_service.get_database_table_row_count("users") == row_count
         assert records == expected_records
         assert total == expected_total
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
         faker: Faker,
     ):
@@ -255,8 +248,6 @@ class TestReadAndCountUsers(TestUserRepository):
 class TestReadUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         assert isinstance(user_repository.read_user, types.MethodType) is True
@@ -265,8 +256,6 @@ class TestReadUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_read(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         alembic_file_path = "alembic.ini"
@@ -287,13 +276,12 @@ class TestReadUser(TestUserRepository):
         row_count = 1
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result == expected_result
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         alembic_file_path = "alembic.ini"
@@ -305,12 +293,11 @@ class TestReadUser(TestUserRepository):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result is None
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         mocked_user: User = UserMapper.to_domain(UserFactory.build())
@@ -328,8 +315,6 @@ class TestReadUser(TestUserRepository):
 class TestUpdateUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         assert isinstance(user_repository.update_user, types.MethodType) is True
@@ -338,8 +323,6 @@ class TestUpdateUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_updated(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -366,13 +349,12 @@ class TestUpdateUser(TestUserRepository):
         assert result.email == expected_result.email
         assert result.created_at == expected_result.created_at
         assert result.updated_at is not None
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -384,12 +366,11 @@ class TestUpdateUser(TestUserRepository):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result is None
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         mocked_user: User = UserMapper.to_domain(UserFactory.build())
@@ -407,8 +388,6 @@ class TestUpdateUser(TestUserRepository):
 class TestDeleteUser(TestUserRepository):
     def test_should_define_a_method(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ) -> None:
         assert isinstance(user_repository.delete_user, types.MethodType) is True
@@ -417,8 +396,6 @@ class TestDeleteUser(TestUserRepository):
     async def test_should_succeed_and_return_user_when_user_is_deleted(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -440,13 +417,12 @@ class TestDeleteUser(TestUserRepository):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result == expected_result
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_succeed_and_return_none_when_user_is_not_found(
         self,
         db_service: DBService,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         alembic_file_path = "alembic.ini"
@@ -458,12 +434,11 @@ class TestDeleteUser(TestUserRepository):
         row_count = 0
         assert await db_service.get_database_table_row_count("users") == row_count
         assert result is None
+        await db_service.delete_database_tables()
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_should_fail_and_raise_exception_when_user_model_does_not_exist_into_database(
         self,
-        clear_database_tables: None,
-        delete_database_tables: None,
         user_repository: UserRepository,
     ):
         mocked_user: User = UserMapper.to_domain(UserFactory.build())

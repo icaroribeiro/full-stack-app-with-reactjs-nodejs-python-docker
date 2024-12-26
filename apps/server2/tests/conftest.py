@@ -21,8 +21,7 @@ def config() -> Config:
     return Config()
 
 
-@pytest.fixture(scope="session")
-def db_service() -> DBService:
+def db_service_base() -> DBService:
     return DBService()
 
 

@@ -5,6 +5,7 @@ from db.models.user import UserModel
 from faker import Faker
 from fastapi import status
 from pytest_mock import MockerFixture
+from tests.conftest import db_service_base
 from tests.factories.user_factory import UserFactory
 
 from api.components.user.user_mapper import UserMapper
@@ -16,14 +17,18 @@ from services.db_service import DBService
 
 
 class TestUserService:
-    @pytest.fixture(scope="module")
+    @pytest.fixture(scope="class")
+    def db_service(self) -> DBService:
+        return db_service_base()
+
+    @pytest.fixture(scope="class")
     def user_repository(
         self,
         db_service: DBService,
     ) -> UserRepository:
         return UserRepository(db_service)
 
-    @pytest.fixture(scope="module")
+    @pytest.fixture
     def user_service(
         self,
         user_repository: UserRepository,

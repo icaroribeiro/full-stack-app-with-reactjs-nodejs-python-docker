@@ -11,5 +11,5 @@ config-pypath-dev = "dotenv -f .env.development set PYTHONPATH $PWD"
 _start-dev = "dotenv -f .env.development run -- poetry run python src/main.py"
 start-dev = ["config-pypath-dev", "_start-dev"]
 pre-build = "rm -rf dist build"
-make-bundle = "pyinstaller -F src/main.py --clean"
+make-bundle = "pyinstaller --onefile src/main.py --clean"
 build = ["pre-build", "make-bundle"]

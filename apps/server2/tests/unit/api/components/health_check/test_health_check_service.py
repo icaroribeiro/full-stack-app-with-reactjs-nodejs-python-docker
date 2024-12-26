@@ -3,19 +3,31 @@ import types
 import pytest
 from fastapi import status
 from pytest_mock import MockerFixture
+from tests.conftest import db_service_base, initialize_database_base
 
 from api.components.health_check.health_check_service import HealthCheckService
+from config.config import Config
 from server_error import Detail, ServerError
 from services.db_service import DBService
 
 
 class TestHealthCheckService:
+    @pytest.fixture(scope="class")
+    def db_service(self) -> DBService:
+        return db_service_base()
+
     @pytest.fixture
     def health_check_service(
         self,
         db_service: DBService,
     ) -> HealthCheckService:
         return HealthCheckService(db_service)
+
+    @pytest.fixture(scope="class", autouse=True)
+    async def initialize_database(
+        self, request, config: Config, db_service: DBService
+    ) -> None:
+        await initialize_database_base(request, config, db_service)
 
 
 class TestCheckHealth(TestHealthCheckService):

@@ -1,5 +1,6 @@
 import pytest
 from fastapi import status
+from fastapi.encoders import jsonable_encoder
 from httpx import AsyncClient
 
 from api.components.health_check.health_check_models import HealthCheckResponse
@@ -23,4 +24,4 @@ class TestGetHealth(TestHealthCheckHttp):
         response = await async_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == expected_response_body.model_dump()
+        assert response.json() == jsonable_encoder(expected_response_body)
