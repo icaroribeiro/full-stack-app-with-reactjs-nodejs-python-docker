@@ -43,7 +43,7 @@ class UserRepository implements IUserRepository {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: user,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -93,7 +93,7 @@ class UserRepository implements IUserRepository {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: { page: page, limit: limit },
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -117,7 +117,7 @@ class UserRepository implements IUserRepository {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: userId,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -142,7 +142,7 @@ class UserRepository implements IUserRepository {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: { userId: userId, user: user },
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -166,7 +166,7 @@ class UserRepository implements IUserRepository {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: userId,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }

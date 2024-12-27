@@ -49,14 +49,13 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception:
+            except Exception as error:
                 message = "An error occurred when creating a user into database"
-                # print(message, error)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    # Detail(context=user, cause="bbb"),
+                    Detail(context=user, cause=str(error.__cause__)),
                 )
 
     async def read_and_count_users(
@@ -102,7 +101,10 @@ class UserRepository(IUserRepository):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context={"page": page, "limit": limit}, cause=error),
+                    Detail(
+                        context={"page": page, "limit": limit},
+                        cause=str(error.__cause__),
+                    ),
                 )
 
     async def read_user(self, user_id: str) -> User | None:
@@ -122,7 +124,7 @@ class UserRepository(IUserRepository):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user_id, cause=error),
+                    Detail(context=user_id, cause=str(error.__cause__)),
                 )
 
     async def update_user(self, user_id: str, user: User) -> User | None:
@@ -147,7 +149,10 @@ class UserRepository(IUserRepository):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context={"user_id": user_id, "user": user}, cause=error),
+                    Detail(
+                        context={"user_id": user_id, "user": user},
+                        cause=str(error.__cause__),
+                    ),
                 )
 
     async def delete_user(self, user_id: str) -> User | None:
@@ -171,5 +176,5 @@ class UserRepository(IUserRepository):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user_id, cause=error),
+                    Detail(context=user_id, cause=str(error.__cause__)),
                 )

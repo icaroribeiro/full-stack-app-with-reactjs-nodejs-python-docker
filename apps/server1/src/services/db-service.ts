@@ -43,7 +43,7 @@ class DBService implements IDBService {
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: databaseURL,
-        cause: error,
+        cause: error instanceof Error ? error.message : String(error),
       })
     }
   }
@@ -64,7 +64,7 @@ class DBService implements IDBService {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -81,7 +81,7 @@ class DBService implements IDBService {
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: migrationsFolder,
-        cause: error,
+        cause: error instanceof Error ? error.message : String(error),
       })
     }
   }
@@ -105,7 +105,7 @@ class DBService implements IDBService {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: tableName,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -136,7 +136,7 @@ class DBService implements IDBService {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -171,7 +171,7 @@ class DBService implements IDBService {
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error,
+            cause: error instanceof Error ? error.message : String(error),
           })
         }
       }
@@ -186,7 +186,7 @@ class DBService implements IDBService {
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: undefined,
-        cause: error,
+        cause: error instanceof Error ? error.message : String(error),
       })
     }
   }

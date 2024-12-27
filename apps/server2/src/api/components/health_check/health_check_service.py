@@ -25,5 +25,10 @@ class HealthCheckService(IHealthCheckService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=None, cause=error),
+                Detail(
+                    context=None,
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )

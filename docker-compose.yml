@@ -35,7 +35,7 @@ services:
     container_name: server2-container
     build:
       context: .
-      dockerfile: ./apps/server2/Dockerfile.multi-stage2
+      dockerfile: ./apps/server2/Dockerfile.multi-stage
     environment:
       - ENV=production
       - PORT=5000

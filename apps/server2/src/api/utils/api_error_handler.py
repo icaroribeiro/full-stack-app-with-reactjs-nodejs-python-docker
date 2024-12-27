@@ -23,7 +23,7 @@ class APIErrorHandler:
         return JSONResponse(
             content=APIErrorResponse(
                 message=error.message,
-                detail=error.new_detail,
+                detail=error.detail,
                 is_operational=error.is_operational,
             ).model_dump(),
             status_code=error.status_code,

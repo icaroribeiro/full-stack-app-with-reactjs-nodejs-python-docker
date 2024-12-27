@@ -18,7 +18,8 @@ class HealthCheckService implements IHealthCheckService {
         'An error occurred when checking if application is healthy'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: undefined,
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
   }

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 alembic upgrade head
-./dist/main
+python src/main.py

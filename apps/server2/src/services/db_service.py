@@ -67,7 +67,7 @@ class DBService(IDBService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=database_url, cause=error),
+                Detail(context=database_url, cause=str(error.__cause__)),
             )
 
     async def check_database_is_alive(self) -> bool:
@@ -86,7 +86,7 @@ class DBService(IDBService):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=error),
+                    Detail(context=None, cause=str(error.__cause__)),
                 )
 
     async def migrate_database(self, alembic_file_path: str) -> None:
@@ -100,7 +100,7 @@ class DBService(IDBService):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=alembic_file_path, cause=error),
+                    Detail(context=alembic_file_path, cause=str(error.__cause__)),
                 )
 
     async def get_database_table_row_count(self, table_name: str) -> int:
@@ -124,7 +124,7 @@ class DBService(IDBService):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=table_name, cause=error),
+                    Detail(context=table_name, cause=str(error.__cause__)),
                 )
 
     async def clear_database_tables(self) -> None:
@@ -149,7 +149,7 @@ class DBService(IDBService):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=error),
+                    Detail(context=None, cause=str(error.__cause__)),
                 )
 
     async def delete_database_tables(self) -> None:
@@ -174,7 +174,7 @@ class DBService(IDBService):
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=error),
+                    Detail(context=None, cause=str(error.__cause__)),
                 )
 
     async def disconnect_database(self) -> None:
@@ -187,7 +187,7 @@ class DBService(IDBService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=None, cause=error),
+                Detail(context=None, cause=str(error.__cause__)),
             )
 
     @staticmethod

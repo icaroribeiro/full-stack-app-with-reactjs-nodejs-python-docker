@@ -29,7 +29,8 @@ class UserService implements IUserService {
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: user,
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
 
@@ -62,7 +63,8 @@ class UserService implements IUserService {
       console.error(message, error)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: { page: page, limit: limit },
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
 
@@ -87,7 +89,8 @@ class UserService implements IUserService {
       const message = 'An error occurred when reading a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: userId,
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
 
@@ -111,7 +114,8 @@ class UserService implements IUserService {
       const message = 'An error occurred when updating a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: { userId: userId, user: user },
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
 
@@ -135,7 +139,8 @@ class UserService implements IUserService {
       const message = 'An error occurred when deleting a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: userId,
-        cause: error,
+        cause:
+          error instanceof ServerError ? error.newDetail?.cause : String(error),
       })
     }
 

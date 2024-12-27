@@ -40,13 +40,18 @@ class UserService(IUserService):
 
         try:
             new_user = await self.user_repository.create_user(user)
-        except Exception:
+        except Exception as error:
             message = "An error occurred when creating a user"
-            # print(message, error)
+            print(message, error)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                # Detail(context=user, cause="aaa"),
+                Detail(
+                    context=user,
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )
 
         if new_user is None:
@@ -76,7 +81,12 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"page": page, "limit": limit}, cause=str(error)),
+                Detail(
+                    context={"page": page, "limit": limit},
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )
 
         if records is None or total is None:
@@ -101,7 +111,12 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user_id, cause=error),
+                Detail(
+                    context=user_id,
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )
 
         if user is None:
@@ -126,7 +141,12 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context={"user_id": user_id, "user": user}, cause=error),
+                Detail(
+                    context={"user_id": user_id, "user": user},
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )
 
         if updated_user is None:
@@ -151,7 +171,12 @@ class UserService(IUserService):
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=user_id, cause=str(error)),
+                Detail(
+                    context=user_id,
+                    cause=str(error.detail.cause)
+                    if isinstance(error, ServerError)
+                    else str(error),
+                ),
             )
 
         if user is None:
