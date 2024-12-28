@@ -23,8 +23,13 @@ class HealthCheckController(APIRouter):
             path="",
             methods=["GET"],
             tags=["health-check"],
-            description="API endpoint used to verify if "
-            + "the service has started up correctly and is ready to accept requests",
+            summary="""
+             Get health
+            """,
+            description="""
+             API endpoint used to verify if the service has started up correctly
+             and is ready to accept requests.
+            """,
             responses={
                 status.HTTP_200_OK: {
                     "model": HealthCheckResponse,

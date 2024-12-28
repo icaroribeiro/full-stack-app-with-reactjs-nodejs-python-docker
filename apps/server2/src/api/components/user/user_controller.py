@@ -30,7 +30,12 @@ class UserController(APIRouter):
             path="",
             methods=["POST"],
             tags=["users"],
-            description="API endpoint used to create a new user",
+            summary="""
+             Add user
+            """,
+            description="""
+             API endpoint used to create a new user.
+            """,
             responses={
                 status.HTTP_201_CREATED: {
                     "model": UserResponse,
@@ -92,10 +97,11 @@ class UserController(APIRouter):
             path="",
             methods=["GET"],
             tags=["users"],
+            summary="""
+             Fetch paginated users
+            """,
             description="""
-            API endpoint used to get users through page-based pagination schema.
-            * @param page The number of the page. If isn't provided, it will be set to 1.
-            * @param limit The number of records per page. If isn't provided, it will be set to 1.
+             API endpoint used to get users through page-based pagination schema.
             """,
             responses={
                 status.HTTP_200_OK: {
@@ -132,8 +138,18 @@ class UserController(APIRouter):
         async def fetch_paginated_users(
             request: Request,
             response: Response,
-            page: Annotated[int | None, Query()] = 1,
-            limit: Annotated[int | None, Query()] = 1,
+            page: Annotated[
+                int | None,
+                Query(
+                    description="The number of the page. If isn't provided, it will be set to 1."
+                ),
+            ] = 1,
+            limit: Annotated[
+                int | None,
+                Query(
+                    description="The number of records per page. If isn't provided, it will be set to 1."
+                ),
+            ] = 1,
             user_service: UserService = self.dependencies[0],
             api_pagination_service: APIPaginationService = self.dependencies[1],
         ) -> APIPaginationResponse:
@@ -156,7 +172,12 @@ class UserController(APIRouter):
             path="/{user_id}",
             methods=["GET"],
             tags=["users"],
-            description="API endpoint used to get a user by its ID",
+            summary="""
+             Fetch user
+            """,
+            description="""
+             API endpoint used to get a user by its ID.
+            """,
             responses={
                 status.HTTP_200_OK: {
                     "model": UserResponse,
@@ -217,7 +238,12 @@ class UserController(APIRouter):
             path="/{user_id}",
             methods=["PUT"],
             tags=["users"],
-            description="API endpoint used to update a user by its ID",
+            summary="""
+             Renew user
+            """,
+            description="""
+             API endpoint used to update a user by its ID.
+            """,
             responses={
                 status.HTTP_200_OK: {
                     "model": UserResponse,
@@ -293,7 +319,12 @@ class UserController(APIRouter):
             path="/{user_id}",
             methods=["DELETE"],
             tags=["users"],
-            description="API endpoint used to delete a user by its ID",
+            summary="""
+             Destroy user
+            """,
+            description="""
+             API endpoint used to delete a user by its ID.
+            """,
             responses={
                 status.HTTP_200_OK: {
                     "model": UserResponse,

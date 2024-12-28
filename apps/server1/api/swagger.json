@@ -164,7 +164,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-27T14:45:08.635Z",
+											"createdAt": "2024-12-28T20:52:52.690Z",
 											"updatedAt": null
 										}
 									}
@@ -218,6 +218,7 @@
 					}
 				},
 				"description": "API endpoint used to create a new user.",
+				"summary": "Add user",
 				"tags": [
 					"users"
 				],
@@ -256,7 +257,7 @@
 													"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 													"name": "name",
 													"email": "email@email.com",
-													"createdAt": "2024-12-27T14:45:08.641Z",
+													"createdAt": "2024-12-28T20:52:52.696Z",
 													"updatedAt": null
 												}
 											],
@@ -292,6 +293,7 @@
 					}
 				},
 				"description": "API endpoint used to get users through page-based pagination schema.",
+				"summary": "Fetch paginated users",
 				"tags": [
 					"users"
 				],
@@ -337,7 +339,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-27T14:45:08.644Z",
+											"createdAt": "2024-12-28T20:52:52.698Z",
 											"updatedAt": null
 										}
 									}
@@ -391,6 +393,7 @@
 					}
 				},
 				"description": "API endpoint used to get a user by its ID.",
+				"summary": "Fetch user",
 				"tags": [
 					"users"
 				],
@@ -422,8 +425,8 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-27T14:45:08.645Z",
-											"updatedAt": "2024-12-27T14:45:08.645Z"
+											"createdAt": "2024-12-28T20:52:52.699Z",
+											"updatedAt": "2024-12-28T20:52:52.699Z"
 										}
 									}
 								}
@@ -498,6 +501,7 @@
 					}
 				},
 				"description": "API endpoint used to update a user by its ID.",
+				"summary": "Renew user",
 				"tags": [
 					"users"
 				],
@@ -539,7 +543,7 @@
 											"id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 											"name": "name",
 											"email": "email@email.com",
-											"createdAt": "2024-12-27T14:45:08.646Z",
+											"createdAt": "2024-12-28T20:52:52.700Z",
 											"updatedAt": null
 										}
 									}
@@ -593,6 +597,7 @@
 					}
 				},
 				"description": "API endpoint used to delete a user by its ID.",
+				"summary": "Destroy user",
 				"tags": [
 					"users"
 				],
@@ -653,7 +658,8 @@
 						}
 					}
 				},
-				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests",
+				"description": "API endpoint used to verify if the service has started up correctly and is ready to accept requests.",
+				"summary": "Get health",
 				"tags": [
 					"health-check"
 				],

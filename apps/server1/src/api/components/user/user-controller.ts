@@ -44,6 +44,7 @@ class UserController extends Controller {
 
   /**
    * API endpoint used to create a new user.
+   * @summary Add user
    */
   @Post('/')
   @SuccessResponse('201', 'Created')
@@ -76,6 +77,7 @@ class UserController extends Controller {
 
   /**
    * API endpoint used to get users through page-based pagination schema.
+   * @summary Fetch paginated users
    * @param page The number of the page. If isn't provided, it will be set to 1.
    * @param limit The number of records per page. If isn't provided, it will be set to 1.
    */
@@ -127,6 +129,7 @@ class UserController extends Controller {
 
   /**
    * API endpoint used to get a user by its ID.
+   * @summary Fetch user
    */
   @Get('{userId}')
   @SuccessResponse('200', 'OK')
@@ -157,6 +160,7 @@ class UserController extends Controller {
 
   /**
    * API endpoint used to update a user by its ID.
+   * @summary Renew user
    */
   @Put('{userId}')
   @SuccessResponse('200', 'OK')
@@ -197,6 +201,7 @@ class UserController extends Controller {
 
   /**
    * API endpoint used to delete a user by its ID.
+   * @summary Destroy user
    */
   @Delete('{userId}')
   @SuccessResponse('200', 'OK')

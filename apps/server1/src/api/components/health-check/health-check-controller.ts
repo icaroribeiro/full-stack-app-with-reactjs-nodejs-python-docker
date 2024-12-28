@@ -27,7 +27,8 @@ class HealthCheckController extends Controller {
   }
 
   /**
-   * API endpoint used to verify if the service has started up correctly and is ready to accept requests
+   * API endpoint used to verify if the service has started up correctly and is ready to accept requests.
+   * @summary Get health
    */
   @Get('/')
   @SuccessResponse('200', 'OK')
