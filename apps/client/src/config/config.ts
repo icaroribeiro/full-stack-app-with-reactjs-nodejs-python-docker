@@ -10,6 +10,7 @@ class Config {
   }
 
   private getEnvVar(name: string): string {
+    console.log(import.meta.env[name])
     if (!import.meta.env[name]) {
       const message = `${name} environment variable isn't set`
       throw new ClientError(message)

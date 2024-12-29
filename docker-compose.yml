@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/client/Dockerfile.multi-stage
+      args:
+        - VITE_API_URL=http://localhost:5000
+        - VITE_GET_METHOD_REQUEST_TIMEOUT=15000
     environment:
       - NODE_ENV=production
       - PORT=3000

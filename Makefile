@@ -18,7 +18,7 @@ startup-server1:
 	docker-compose up --build -d server1
 
 startup-server2:
-	docker-compose up --build -d server2 &> logs.txt
+	docker-compose up --build -d server2
 
 # Shutdown all applications
 shutdown-client:

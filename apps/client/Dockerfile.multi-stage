@@ -18,6 +18,8 @@ RUN turbo prune client --docker
 # --------------------------------------------------
 FROM base AS builder
 WORKDIR /app
+ARG VITE_API_URL
+ARG VITE_GET_METHOD_REQUEST_TIMEOUT
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=pruner /app/out/full/ .
