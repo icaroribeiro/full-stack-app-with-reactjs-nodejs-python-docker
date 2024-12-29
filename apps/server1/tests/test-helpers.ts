@@ -41,8 +41,8 @@ function startHttpServer(config: Config): void {
     httpServer.listen(port, () => {
       console.log('Server started successfully!')
     })
-  } catch (error) {
-    console.error('Server starting failed!', error)
+  } catch (err) {
+    console.error('Server starting failed!', err)
   }
 }
 
@@ -51,8 +51,8 @@ function closeHttpServer(): void {
     httpServer.close(() => {
       console.log('Server closed successfully!')
     })
-  } catch (error) {
-    console.error('Server closing failed!', error)
+  } catch (err) {
+    console.error('Server closing failed!', err)
   }
 }
 

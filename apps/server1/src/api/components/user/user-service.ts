@@ -24,13 +24,12 @@ class UserService implements IUserService {
 
     try {
       newUser = await this.userRepository.createUser(user)
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when creating a user'
-      console.error(message, error)
+      console.error(message, err)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: user,
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
 
@@ -58,13 +57,12 @@ class UserService implements IUserService {
         page,
         limit,
       )
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when reading and counting users'
-      console.error(message, error)
+      console.error(message, err)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: { page: page, limit: limit },
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
 
@@ -85,12 +83,11 @@ class UserService implements IUserService {
 
     try {
       user = await this.userRepository.readUser(userId)
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when reading a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: userId,
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
 
@@ -110,12 +107,11 @@ class UserService implements IUserService {
 
     try {
       updatedUser = await this.userRepository.updateUser(userId, user)
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when updating a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: { userId: userId, user: user },
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
 
@@ -135,12 +131,11 @@ class UserService implements IUserService {
 
     try {
       user = await this.userRepository.deleteUser(userId)
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when deleting a user'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: userId,
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
 

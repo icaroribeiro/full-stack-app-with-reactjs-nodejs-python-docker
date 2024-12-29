@@ -2,9 +2,6 @@ import { useEffect, useState } from 'react'
 import { healthCheckAPI } from '../apis/health-check-api'
 
 const Home = () => {
-  // const healthCheckResponse = healthCheckAPI.get()
-  // console.log(healthCheckResponse)
-
   const [loading, setLoading] = useState(true)
   const [healthy, setHealthy] = useState()
 

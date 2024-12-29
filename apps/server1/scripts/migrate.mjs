@@ -13,8 +13,8 @@ const migrateDatabase = async () => {
       : ''
     migrationClient = postgres(databaseURL, { max: 1 })
     console.log('Migration client created successfully!')
-  } catch (error) {
-    console.error('Migration client creation failed!', error)
+  } catch (err) {
+    console.error('Migration client creation failed!', err)
     process.exit(1)
   }
   try {
@@ -25,8 +25,8 @@ const migrateDatabase = async () => {
     console.log('Migrations completed successfully!')
     await migrationClient.end()
     process.exit(0)
-  } catch (error) {
-    console.error('Migrations failed!', error)
+  } catch (err) {
+    console.error('Migrations failed!', err)
     process.exit(1)
   }
 }

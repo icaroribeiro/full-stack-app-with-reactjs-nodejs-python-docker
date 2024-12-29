@@ -49,13 +49,13 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when creating a user into database"
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user, cause=str(error.__cause__)),
+                    Detail(context=user, cause=str(err.__cause__)),
                 )
 
     async def read_and_count_users(
@@ -92,18 +92,18 @@ class UserRepository(IUserRepository):
                 await conn.commit()
 
                 return records, total
-            except Exception as error:
+            except Exception as err:
                 message = (
                     "An error occurred when reading and counting users from database"
                 )
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
                     Detail(
                         context={"page": page, "limit": limit},
-                        cause=str(error.__cause__),
+                        cause=str(err.__cause__),
                     ),
                 )
 
@@ -117,14 +117,14 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when reading a user from database"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user_id, cause=str(error.__cause__)),
+                    Detail(context=user_id, cause=str(err.__cause__)),
                 )
 
     async def update_user(self, user_id: str, user: User) -> User | None:
@@ -142,16 +142,16 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when updating a user from database"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
                     Detail(
                         context={"user_id": user_id, "user": user},
-                        cause=str(error.__cause__),
+                        cause=str(err.__cause__),
                     ),
                 )
 
@@ -169,12 +169,12 @@ class UserRepository(IUserRepository):
                 obj = DictToObj(result.first()._asdict())
                 await conn.commit()
                 return UserMapper.to_domain(obj)
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when deleting a user from database"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=user_id, cause=str(error.__cause__)),
+                    Detail(context=user_id, cause=str(err.__cause__)),
                 )

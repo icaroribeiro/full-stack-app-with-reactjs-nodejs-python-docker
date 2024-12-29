@@ -13,13 +13,12 @@ class HealthCheckService implements IHealthCheckService {
   async checkHealth(): Promise<boolean | void> {
     try {
       return await this.dbService.checkDatabaseIsAlive()
-    } catch (error) {
+    } catch (err) {
       const message =
         'An error occurred when checking if application is healthy'
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: undefined,
-        cause:
-          error instanceof ServerError ? error.newDetail?.cause : String(error),
+        cause: err instanceof ServerError ? err.newDetail?.cause : String(err),
       })
     }
   }

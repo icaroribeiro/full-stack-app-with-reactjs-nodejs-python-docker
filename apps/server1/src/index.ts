@@ -16,6 +16,6 @@ try {
   httpServer.on('close', () => {
     console.log('Server closed successfully!')
   })
-} catch (error) {
-  console.error('Server starting failed!', error)
+} catch (err) {
+  console.error('Server starting failed!', err)
 }

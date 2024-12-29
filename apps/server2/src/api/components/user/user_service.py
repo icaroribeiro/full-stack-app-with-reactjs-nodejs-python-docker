@@ -40,17 +40,17 @@ class UserService(IUserService):
 
         try:
             new_user = await self.user_repository.create_user(user)
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when creating a user"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context=user,
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )
 
@@ -75,17 +75,17 @@ class UserService(IUserService):
             records, total = await self.user_repository.read_and_count_users(
                 page, limit
             )
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when reading and counting users"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context={"page": page, "limit": limit},
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )
 
@@ -105,17 +105,17 @@ class UserService(IUserService):
 
         try:
             user = await self.user_repository.read_user(user_id)
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when reading a user"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context=user_id,
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )
 
@@ -135,17 +135,17 @@ class UserService(IUserService):
 
         try:
             updated_user = await self.user_repository.update_user(user_id, user)
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when updating a user"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context={"user_id": user_id, "user": user},
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )
 
@@ -165,17 +165,17 @@ class UserService(IUserService):
 
         try:
             user = await self.user_repository.delete_user(user_id)
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when deleting a user"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context=user_id,
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )
 

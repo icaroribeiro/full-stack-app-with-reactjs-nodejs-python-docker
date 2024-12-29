@@ -35,15 +35,15 @@ class UserRepository implements IUserRepository {
           .values(rawUserData)
           .returning()
         return result.map((u) => userMapper.toDomain(u))[0]
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when creating a user into database'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: user,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -84,16 +84,16 @@ class UserRepository implements IUserRepository {
         const total = result2[0].count
 
         return [records, total]
-      } catch (error) {
+      } catch (err) {
         const message =
           'An error occurred when reading and counting users from database'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: { page: page, limit: limit },
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -109,15 +109,15 @@ class UserRepository implements IUserRepository {
           .from(schemas.userSchema)
           .where(eq(schemas.userSchema.id, userId))
         return result.map((u) => userMapper.toDomain(u))[0]
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when reading a user from database'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: userId,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -134,15 +134,15 @@ class UserRepository implements IUserRepository {
           .returning()
         const userMapper = new UserMapper()
         return result.map((u) => userMapper.toDomain(u))[0]
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when updating a user from database'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: { userId: userId, user: user },
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -158,15 +158,15 @@ class UserRepository implements IUserRepository {
           .returning()
         const userMapper = new UserMapper()
         return result.map((u) => userMapper.toDomain(u))[0]
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when deleting a user from database'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: userId,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }

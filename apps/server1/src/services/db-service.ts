@@ -38,12 +38,12 @@ class DBService implements IDBService {
     try {
       this._dbClient = postgres(databaseURL, { max: 1 })
       this._db = drizzle(this._dbClient)
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when connecting database'
-      console.error(message, error)
+      console.error(message, err)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: databaseURL,
-        cause: error instanceof Error ? error.message : String(error),
+        cause: err instanceof Error ? err.message : String(err),
       })
     }
   }
@@ -56,15 +56,15 @@ class DBService implements IDBService {
         `)
         await tx.execute(query)
         return true
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when checking database is alive'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -76,12 +76,12 @@ class DBService implements IDBService {
       await migrate(this._db!, {
         migrationsFolder: migrationsFolder,
       })
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when migrating the database'
-      console.error(message, error)
+      console.error(message, err)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: migrationsFolder,
-        cause: error instanceof Error ? error.message : String(error),
+        cause: err instanceof Error ? err.message : String(err),
       })
     }
   }
@@ -97,15 +97,15 @@ class DBService implements IDBService {
           `)
         const result = await tx.execute(query)
         return result.length ? parseInt(result[0].count as string) : 0
-      } catch (error) {
+      } catch (err) {
         const message = `An error occurred when counting rows of database table ${tableName}`
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: tableName,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -128,15 +128,15 @@ class DBService implements IDBService {
             `)
           await tx.execute(query)
         }
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when cleaning the database tables'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -163,15 +163,15 @@ class DBService implements IDBService {
               `)
           await tx.execute(query)
         }
-      } catch (error) {
+      } catch (err) {
         const message = 'An error occurred when deleting the database tables'
-        console.error(message, error)
+        console.error(message, err)
         try {
           tx.rollback()
         } finally {
           throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
             context: undefined,
-            cause: error instanceof Error ? error.message : String(error),
+            cause: err instanceof Error ? err.message : String(err),
           })
         }
       }
@@ -181,12 +181,12 @@ class DBService implements IDBService {
   public async disconnectDatabase(): Promise<void> {
     try {
       await this._dbClient?.end()
-    } catch (error) {
+    } catch (err) {
       const message = 'An error occurred when disconnecting the database'
-      console.error(message, error)
+      console.error(message, err)
       throw new ServerError(message, httpStatus.INTERNAL_SERVER_ERROR, {
         context: undefined,
-        cause: error instanceof Error ? error.message : String(error),
+        cause: err instanceof Error ? err.message : String(err),
       })
     }
   }

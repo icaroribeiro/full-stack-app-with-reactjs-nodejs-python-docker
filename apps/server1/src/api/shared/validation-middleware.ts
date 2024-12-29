@@ -32,15 +32,15 @@ function validationMiddleware(
         params: req.params,
       })
       next()
-    } catch (error) {
-      if (error instanceof ZodError) {
+    } catch (err) {
+      if (err instanceof ZodError) {
         const message = 'An error occurred when validating user input schemas'
-        const context = error.errors.map((issue) => ({
+        const context = err.errors.map((issue) => ({
           message: `${issue.path.join('.')} is ${issue.message}`,
         }))
         const response: APIErrorResponse = {
           message: message,
-          detail: { context: context, cause: error },
+          detail: { context: context, cause: err },
           isOperational: true,
         }
         res.status(httpStatus.UNPROCESSABLE_ENTITY).json(response)

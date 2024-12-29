@@ -19,7 +19,7 @@ class HealthCheckService(IHealthCheckService):
     async def check_health(self) -> bool:
         try:
             return await self.db_service.check_database_is_alive()
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when checking if application is healthy"
             print(message)
             raise ServerError(
@@ -27,8 +27,8 @@ class HealthCheckService(IHealthCheckService):
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 Detail(
                     context=None,
-                    cause=str(error.detail.cause)
-                    if isinstance(error, ServerError)
-                    else str(error),
+                    cause=str(err.detail.cause)
+                    if isinstance(err, ServerError)
+                    else str(err),
                 ),
             )

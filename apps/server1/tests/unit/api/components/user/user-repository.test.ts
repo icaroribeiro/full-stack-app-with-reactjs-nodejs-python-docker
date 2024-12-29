@@ -75,8 +75,8 @@ describe('UserRepository', async () => {
 
       try {
         await userRepository.createUser(mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -229,8 +229,8 @@ describe('UserRepository', async () => {
 
       try {
         await userRepository.readAndCountUsers(page, limit)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -293,8 +293,8 @@ describe('UserRepository', async () => {
 
       try {
         await userRepository.readUser(mockedUser.id as string)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -367,8 +367,8 @@ describe('UserRepository', async () => {
 
       try {
         await userRepository.updateUser(mockedUser.id as string, mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -432,8 +432,8 @@ describe('UserRepository', async () => {
 
     try {
       await userRepository.deleteUser(mockedUser.id as string)
-    } catch (error) {
-      const thrownError = error as unknown as ServerError
+    } catch (err) {
+      const thrownError = err as unknown as ServerError
       expect(thrownError.message).toEqual(serverError.message)
       expect(thrownError.statusCode).toEqual(serverError.statusCode)
       expect(thrownError.isOperational).toEqual(serverError.isOperational)

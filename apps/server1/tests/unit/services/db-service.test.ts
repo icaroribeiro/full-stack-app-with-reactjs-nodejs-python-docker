@@ -121,8 +121,8 @@ describe('DBService', () => {
 
       try {
         dbService.connectDatabase(databaseURL)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -157,8 +157,8 @@ describe('DBService', () => {
 
       try {
         await dbService.checkDatabaseIsAlive()
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -199,8 +199,8 @@ describe('DBService', () => {
 
       try {
         await dbService.migrateDatabase(migrationsFolder)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -253,8 +253,8 @@ describe('DBService', () => {
 
       try {
         await dbService.getDatabaseTableRowCount(tableName)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -313,8 +313,8 @@ describe('DBService', () => {
 
       try {
         await dbService.clearDatabaseTables()
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -359,8 +359,8 @@ describe('DBService', () => {
 
       try {
         await dbService.deleteDatabaseTables()
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -391,8 +391,8 @@ describe('DBService', () => {
 
       try {
         await dbService.disconnectDatabase()
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)

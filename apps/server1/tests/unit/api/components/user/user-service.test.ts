@@ -63,8 +63,8 @@ describe('UserService', () => {
 
       try {
         await userService.registerUser(mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -84,8 +84,8 @@ describe('UserService', () => {
 
       try {
         await userService.registerUser(mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -139,8 +139,8 @@ describe('UserService', () => {
 
       try {
         await userService.retrieveAndCountUsers(page, limit)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -166,8 +166,8 @@ describe('UserService', () => {
 
       try {
         await userService.retrieveAndCountUsers(page, limit)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -215,8 +215,8 @@ describe('UserService', () => {
 
       try {
         await userService.retrieveUser(mockedUser.id as string)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -236,8 +236,8 @@ describe('UserService', () => {
 
       try {
         await userService.retrieveUser(mockedUser.id as string)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -288,8 +288,8 @@ describe('UserService', () => {
 
       try {
         await userService.replaceUser(mockedUser.id as string, mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -312,8 +312,8 @@ describe('UserService', () => {
 
       try {
         await userService.replaceUser(mockedUser.id as string, mockedUser)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -363,8 +363,8 @@ describe('UserService', () => {
 
       try {
         await userService.removeUser(mockedUser.id as string)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)
@@ -386,8 +386,8 @@ describe('UserService', () => {
 
       try {
         await userService.removeUser(mockedUser.id as string)
-      } catch (error) {
-        const thrownError = error as unknown as ServerError
+      } catch (err) {
+        const thrownError = err as unknown as ServerError
         expect(thrownError.message).toEqual(serverError.message)
         expect(thrownError.statusCode).toEqual(serverError.statusCode)
         expect(thrownError.isOperational).toEqual(serverError.isOperational)

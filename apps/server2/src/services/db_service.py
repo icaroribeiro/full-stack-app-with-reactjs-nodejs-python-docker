@@ -61,13 +61,13 @@ class DBService(IDBService):
             self.__async_engine = create_async_engine(
                 url=database_url,
             )
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when connecting to database"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=database_url, cause=str(error.__cause__)),
+                Detail(context=database_url, cause=str(err.__cause__)),
             )
 
     async def check_database_is_alive(self) -> bool:
@@ -79,28 +79,28 @@ class DBService(IDBService):
                 await conn.execute(query)
                 await conn.commit()
                 return True
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when checking database is alive"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=str(error.__cause__)),
+                    Detail(context=None, cause=str(err.__cause__)),
                 )
 
     async def migrate_database(self, alembic_file_path: str) -> None:
         async with self.__async_engine.connect() as conn:
             try:
                 await conn.run_sync(self.__run_upgrade, alembic_file_path)
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when migrating the database"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=alembic_file_path, cause=str(error.__cause__)),
+                    Detail(context=alembic_file_path, cause=str(err.__cause__)),
                 )
 
     async def get_database_table_row_count(self, table_name: str) -> int:
@@ -114,17 +114,17 @@ class DBService(IDBService):
                 _tuple = result.first()
                 await conn.commit()
                 return _tuple[0]
-            except Exception as error:
+            except Exception as err:
                 message = (
                     "An error occurred when counting rows of "
                     f"database table {table_name}"
                 )
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=table_name, cause=str(error.__cause__)),
+                    Detail(context=table_name, cause=str(err.__cause__)),
                 )
 
     async def clear_database_tables(self) -> None:
@@ -142,14 +142,14 @@ class DBService(IDBService):
                     query = text(f"TRUNCATE TABLE {table} CASCADE;")
                     await conn.execute(query)
                 await conn.commit()
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when cleaning the database tables"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=str(error.__cause__)),
+                    Detail(context=None, cause=str(err.__cause__)),
                 )
 
     async def delete_database_tables(self) -> None:
@@ -167,27 +167,27 @@ class DBService(IDBService):
                     query = text(f"DROP TABLE {table} CASCADE;")
                     await conn.execute(query)
                 await conn.commit()
-            except Exception as error:
+            except Exception as err:
                 message = "An error occurred when deleting the database tables"
-                print(message, error)
+                print(message, err)
                 await conn.rollback()
                 raise ServerError(
                     message,
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    Detail(context=None, cause=str(error.__cause__)),
+                    Detail(context=None, cause=str(err.__cause__)),
                 )
 
     async def disconnect_database(self) -> None:
         try:
             await self.__async_engine.dispose()
             self.__async_engine = None
-        except Exception as error:
+        except Exception as err:
             message = "An error occurred when disconnecting the database"
-            print(message, error)
+            print(message, err)
             raise ServerError(
                 message,
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-                Detail(context=None, cause=str(error.__cause__)),
+                Detail(context=None, cause=str(err.__cause__)),
             )
 
     @staticmethod
